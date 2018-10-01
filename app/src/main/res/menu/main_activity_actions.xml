@@ -1,0 +1,35 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" >
+    <item android:id="@+id/user_saved_command"
+        android:title="Add"
+        android:visible="false"
+        app:showAsAction="always" />
+    <item android:id="@+id/user_remove_command"
+        android:title="Remove"
+        android:visible="false"
+        app:showAsAction="always" />
+    <item android:id="@+id/user_variables"
+        android:title="Vars"
+        android:visible="true"
+        app:showAsAction="always" />
+    <item android:id="@+id/action_login"
+        android:title="Login"
+        android:visible="false"
+        app:showAsAction="always" />
+    <item android:id="@+id/action_share"
+        android:icon="@drawable/ic_action_sharing"
+        android:title="Share"
+        app:showAsAction="ifRoom" />
+    <item android:id="@+id/action_logs"
+        android:icon="@drawable/ic_action_log_bug"
+        android:title="@string/action_logs"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_setting"
+        android:icon="@drawable/ic_action_settings"
+        android:title="@string/action_setting"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_logout"
+        android:title="Logout"
+        android:visible="false"
+        app:showAsAction="never" />
+</menu>
+    <!-- android:icon="@drawable/ic_action_add_command" -->

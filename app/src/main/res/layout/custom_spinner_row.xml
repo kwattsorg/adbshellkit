@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvIsPublic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-condensed"
+        android:text="private"
+        android:layout_marginLeft="1dp"
+        android:textColor="@color/colorAccent"
+        android:paddingTop="3dp"
+        android:paddingRight="5dp"
+        android:textSize="10dp"
+        android:textStyle="bold" />
+
+
+    <TextView
+        android:id="@+id/tvCommandTags"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvIsPublic"
+        android:layout_toLeftOf="@+id/tvCommandDescription"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="1dp"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/colorAccent"
+        android:textSize="8dp"
+        android:text="tags, moretags"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textStyle="normal" />
+
+    <TextView
+        android:id="@+id/tvCommandDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/tvIsPublic"
+        android:fontFamily="sans-serif-condensed"
+        android:text="Command Description"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark"
+        android:textStyle="normal|italic" />
+    <TextView
+        android:id="@+id/tvUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/tvCommandTags"
+        android:layout_below="@+id/tvCommandDescription"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/colorAccent"
+        android:textSize="10dp"
+        android:text="user@gmail.com"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textStyle="normal|italic" />
+
+    <TextView
+        android:id="@+id/tvCommand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/tvCommandTags"
+        android:layout_below="@+id/tvUser"
+        android:fontFamily="sans-serif-condensed"
+        android:text="Command"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textStyle="bold" />
+    <!--
+    <TextView
+        android:id="@+id/tvCommandTagsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvCommandDescription"
+        android:fontFamily="sans-serif-condensed"
+        android:text="tags: "
+        android:textColor="@color/colorAccent"
+        android:textSize="10dp"
+        android:textStyle="bold" /> -->
+
+
+
+
+
+
+</RelativeLayout>

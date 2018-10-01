@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="general_settings"
+        android:title="General Settings">
+        <ListPreference
+            android:defaultValue="22"
+            android:dialogTitle="Select Text Size"
+            android:entries="@array/outTextSize_array"
+            android:entryValues="@array/outTextSize_array"
+            android:key="textSize"
+            android:summary="Set the size of the text"
+            android:title="Text Size" />
+        <EditTextPreference
+            android:key="variablesEditText"
+            android:title="Global Command Variables"
+            android:summary="Global user variables passed to all commands. Format is VAR1=x,VAR2=y, etc..."
+            android:dialogTitle="Variables"
+            />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="showNotifications"
+            android:summary="This option will show the current command status and last line of results in the notification panel."
+            android:title="Enable Notificaitons" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="disableAds"
+            android:summary="This option removes the only payment I got for working on this app :)."
+            android:title="Disable Ads" />
+
+
+        <!--
+        <CheckBoxPreference android:title="Run as SuperUser"
+            android:defaultValue="false"
+            android:summary="This option if selected will run everything through SuperUser."
+            android:key="runAsSuperUser" /> -->
+    </PreferenceCategory>
+</PreferenceScreen>

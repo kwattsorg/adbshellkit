@@ -1,0 +1,94 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
+
+    defaultConfig {
+        applicationId "net.kwatts.android.droidcommandpro"
+        minSdkVersion 21
+        targetSdkVersion 27 //26
+        versionCode 53
+        versionName "5.3"
+        multiDexEnabled true
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath = true
+            }
+        }
+    }
+    lintOptions {
+        checkReleaseBuilds false
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+    packagingOptions {
+        exclude 'project.properties'
+        exclude 'META-INF/io.netty.versions.properties'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/DEPENDENCIES'
+    }
+
+    dependencies {
+        ext.googleSupportVersion = "27.1.1"
+        ext.gmsFirebaseVersion = "16.0.1"
+        ext.gmsGoogleVersion = "15.0.1"
+        //implementation 'commons-io:commons-io:2.4'
+        implementation "com.android.support:appcompat-v7:$googleSupportVersion"
+        implementation "com.android.support:preference-v7:$googleSupportVersion"
+        implementation "com.android.support:support-compat:$googleSupportVersion"
+        implementation "com.android.support:design:$googleSupportVersion"
+        implementation "com.android.support:customtabs:$googleSupportVersion"
+
+
+        implementation "com.google.firebase:firebase-core:$gmsFirebaseVersion"
+        implementation "com.google.firebase:firebase-ads:15.0.1"
+        implementation "com.google.firebase:firebase-auth:16.0.2"
+        implementation "com.google.firebase:firebase-database:$gmsFirebaseVersion"
+        implementation "com.google.android.gms:play-services-auth:$gmsGoogleVersion"
+        implementation "com.google.android.gms:play-services-location:$gmsGoogleVersion"
+
+        implementation 'com.firebaseui:firebase-ui-database:3.3.1'
+        implementation 'com.google.code.gson:gson:2.8.1'
+        implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
+        implementation 'com.afollestad.material-dialogs:commons:0.9.6.0'
+        implementation 'com.jayway.jsonpath:json-path:2.4.0'
+        implementation ('com.google.cloud:google-cloud:0.32.0-alpha') {
+            exclude module: 'guava-jdk5'
+        }
+        implementation 'org.smali:dexlib2:2.2.4'
+        implementation project(":lynx") //compile 'com.github.pedrovgs:lynx:1.1.0'
+        implementation 'com.jakewharton.timber:timber:4.6.1'
+        implementation 'com.github.flipagram:android-assetcopier:0.1.1'
+        implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+        implementation 'com.github.bumptech.glide:glide:4.7.1'
+        annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
+        implementation 'com.github.topjohnwu:libsu:1.1.1'
+        implementation 'com.obsez.android.lib.filechooser:filechooser:1.1.10'
+        //implementation 'com.google.cloud:google-cloud-dlp:0.32.0-beta'
+        //implementation 'io.grpc:grpc-okhttp:1.9.0'
+        //implementation 'io.grpc:grpc-protobuf-lite:1.9.0'
+        //implementation 'io.grpc:grpc-stub:1.9.0'
+        //implementation 'fr.smarquis.usi:usi:1.0.0'
+        // https://github.com/markushi/android-circlebutton
+        //implementation 'com.github.markushi:circlebutton:1.1'
+        //compile 'io.nlopez.smartlocation:library:3.3.3'
+        //implementation "com.google.apis:google-api-services-people:v1-rev337-1.25.0"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    //configurations {
+    //    all*.exclude group: 'com.google.common.annotations'
+    //}
+}
+apply plugin: 'com.google.gms.google-services'
+
+dependencies {
+
+}

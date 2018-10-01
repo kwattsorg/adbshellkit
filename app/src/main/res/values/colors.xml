@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_primary">#2196F3</color>
+    <color name="color_primary_dark">#1976D2</color>
+    <color name="accent_color">#536DFE</color>
+    <color name="divider_bg_dark">#ff616161</color>
+    <color name="divider_bg_light">#ff212121</color>
+    <color name="bg_output">#ff424242</color>
+    <color name="bg_output_dark">#ff212121</color>
+    <color name="colorAccent">#ff4081</color>
+    <color name="colorAccentDark">#c51162</color>
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_300">#e0e0e0</color>
+</resources>

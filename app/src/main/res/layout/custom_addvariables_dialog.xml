@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingLeft="5dp"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add variables to commands, use with '$' prefix, e.g., $APP_PACKAGE. Note that global environmental variables may overwrite these."
+        android:textSize="10dp"
+        android:textColor="@color/colorAccentDark"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:textAllCaps="true"
+        android:text="APP_PACKAGE"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/colorAccentDark"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+    <Spinner
+        android:id="@+id/spinnerAppPackageVar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        android:textAllCaps="true"
+        android:text="NETWORK_INTERFACE"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/colorAccentDark"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+    <TextView
+        android:id="@+id/tvNetworkInterfaceVarDetails"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text=""
+        android:textSize="10dp"
+        android:textColor="@color/colorAccentDark"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textStyle="normal|italic" />
+    <Spinner
+        android:id="@+id/spinnerNetworkInterfaceVar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        android:textAllCaps="true"
+        android:text="FILE_CHOOSER"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/colorAccentDark"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+    <Button
+        android:id="@+id/buttonFileSelectedVariables"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="100dp"
+        android:layout_height="20dp"
+        android:background="@color/colorAccentDark"
+        android:textColor="@color/white"
+        android:text="BROWSE" />
+
+    <EditText
+        android:id="@+id/dialogFileSelectedVars"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textNoSuggestions"
+        android:hint="Edit directly or browse for selected file..."
+        android:textSize="@dimen/text_size_small" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAllCaps="true"
+        android:paddingTop="15dp"
+        android:text="OTHER VARIABLES..."
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/colorAccentDark"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <EditText
+        android:id="@+id/dialogEditUserVars"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textNoSuggestions"
+        android:hint="VAR1=x,VAR2=y, etc..."
+        android:textSize="@dimen/text_size_small" />
+
+    <ToggleButton
+        android:id="@+id/toggleButtonVariables"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:textOff="Disabled"
+        android:textOn="Enabled"
+        android:visibility="invisible" />
+</LinearLayout>

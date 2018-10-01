@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ADB Shellkit</string>
+    <string name="action_send">Send</string>
+    <string name="action_save">Save</string>
+    <string name="action_setting">Setting</string>
+    <string name="action_logs">Logs</string>
+    <string name="command_prompt">Choose a command</string>
+    <string name="indeterminate">Indeterminate</string>
+    
+    <string-array name='outTextSize_array'>
+      <item name='8'>8</item>
+      <item name='11'>11</item>
+      <item name='14'>14</item>
+      <item name='17'>17</item>
+      <item name='20'>20</item>
+      <item name='23'>23</item>
+        <item name='25'>25</item>
+        <item name='27'>27</item>
+        <item name='30'>30</item>
+        <item name='30'>40</item>
+        <item name='30'>50</item>
+	</string-array>
+
+
+
+    <!-- firebase -->
+    <string name="label_google_sign_in">Google Sign In</string>
+    <string name="firebase_status_fmt">Firebase User: %s</string>
+    <string name="firebase_user_management">Firebase User Management</string>
+    <string name="google_status_fmt">Google User: %s</string>
+    <string name="google_title_text">ADB Toolkit User</string>
+    <string name="desc_firebase_lockup">Firebase logo and name</string>
+    <string name="sign_in">Sign In</string>
+    <string name="create_account">Create Account</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="signed_out">Signed Out</string>
+    <string name="verify_email">Verify Email</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="loading">Loading…</string>
+    <!-- end firebase -->
+
+</resources>

@@ -1,0 +1,64 @@
+#!/system/bin/sh
+
+read_dom () {
+    local IFS=\<
+    read -d \> CONTENT ENTITY
+    local RET=$?
+    TAG_NAME=${ENTITY%% *}
+    ATTRIBUTES=${ENTITY#* }
+    return $RET
+}
+
+if [ "$#" -eq 1 ]; then
+    sharedpref_dir="/data/data/$1/shared_prefs/*.xml"
+else
+    sharedpref_dir="/data/data/**/shared_prefs/*.xml"
+fi
+
+for f in $sharedpref_dir; do
+    sed 's/&nbsp;/ /g; s/&amp;/\&/g; s/&lt;/\</g; s/&gt;/\>/g; s/&quot;/\"/g; s/#&#39;/\'"'"'/g; s/&ldquo;/\"/g; s/&rdquo;/\"/g;' $f | while read_dom;
+    do
+        echo "$f:[$ENTITY][$CONTENT]"
+    done
+done
+
+
+#parse() {
+#    while read_dom; do
+#        if [[ $ENTITY = "/string" ]]; then
+#            if [[ $CONTENT = *quot* ]]; then
+#                content_value="$(echo $CONTENT | sed 's/&nbsp;/ /g; s/&amp;/\&/g; s/&lt;/\</g; s/&gt;/\>/g; s/&quot;/\"/g; s/#&#39;/\'"'"'/g; s/&ldquo;/\"/g; s/&rdquo;/\"/g;')"
+#            else
+#                content_value=$CONTENT
+#            fi
+#        fi
+#        echo "$1:[$ENTITY][$content_value]"
+#    done < $1
+#}
+
+#LineOut=""      # Make global
+#HTMLtoText () {
+#    sed 's/&nbsp;/ /g; s/&amp;/\&/g; s/&lt;/\</g; s/&gt;/\>/g; s/&quot;/\"/g; s/#&#39;/\'"'"'/g; s/&ldquo;/\"/g; s/&rdquo;/\"/g;' $1
+    #LineOut=$1  # Parm 1= Input line
+    # Replace external command: Line=$(sed 's/&amp;/\&/g; s/&lt;/\</g; 
+    # s/&gt;/\>/g; s/&quot;/\"/g; s/&#39;/\'"'"'/g; s/&ldquo;/\"/g; 
+    # s/&rdquo;/\"/g;' <<< "$Line") -- With faster builtin commands.
+    #LineOut="${LineOut//&nbsp;/ }"
+    #LineOut="${LineOut//&amp;/&}"
+    #LineOut="${LineOut//&lt;/<}"
+    #LineOut="${LineOut//&gt;/>}"
+    #LineOut="${LineOut//&quot;/'"'}"
+    #LineOut="${LineOut//&#39;/"'"}"
+    #LineOut="${LineOut//&ldquo;/'"'}" # TODO: ASCII/ISO for opening quote
+    #LineOut="${LineOut//&rdquo;/'"'}" # TODO: ASCII/ISO for closing quote
+#} # HTMLtoText ()
+
+#shared_pref_parser () {
+#    filename=$(grep -oH '\<.*name=.*\>.*\<\/.*\>' $1 | cut -d: -f1)
+#    prefname=$(grep -oH 'name=.*\>.*\<\/.*\>' $1 | cut -d\" -f2)
+#    prefvalue=$(grep -oH '\<.*name=.*\>.*\<\/.*\>' $1 | cut -d\" -f3)
+#    prefvaluehtml2text=$(grep -oH '\<string\>.*\<\/string\>' $1 | cut -d\< -f2 | cut -d\> -f2 | sed 's/&nbsp;/ /g; s/&amp;/\&/g; s/&lt;/\</g; s/&gt;/\>/g; s/&quot;/\"/g; s/#&#39;/\'"'"'/g; s/&ldquo;/\"/g; s/&rdquo;/\"/g;' )
+#    echo "---\n"
+#    echo -n "${filename}:{$prefname}"
+#    echo "${prefvaluehtml2text}"
+#}

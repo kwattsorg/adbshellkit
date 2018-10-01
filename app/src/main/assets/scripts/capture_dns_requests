@@ -1,0 +1,46 @@
+#!/system/bin/sh
+
+# need to clear app data first : adb shell pm clear package.name.of.app
+# tcpdump -vvv
+# nohup /data/local/tmp/tcpdump -vvv -ln -s 0 -i wlan0 udp port 53 >> /data/local/tmp/dnsout.txt &
+# -n skip dns redundant ip to names
+# -s snarf/truncate capture bytes to 0
+# -l make stdout line buffered e.g., tcpdump (| tee data) or (> data & tail -f data )
+../bin/tcpdump -ln -s 0 -Q out -i wlan0 udp port 53
+TCPDUMP_PID=$!
+# wait
+# kill %1
+kill -9 $TCPDUMP_PID
+# https://developer.android.com/work/dpc/logging
+./tcpdump -l -s 0 -i wlan0 udp port 53|while read b; do echo $b;PORT=`echo $b | cut -d' ' -f3 | cut -d. -f5`;N=`netstat -pueW| grep udp`;echo $N;echo "PORT: $PORT";done
+
+# ( echo "Hello, world"; echo "FLIP"; sleep 2; echo "QUIT" ) |  /h/bin/directfbtext --dfb:fbdev=/dev/graphics/fb0  --dfb:no-vt  /system/fonts/DroidSans-Bold.ttf 30 120 200 255
+# https://github.com/halnovemila/Notify4Scripts
+# Todo: create a service that takes AM commands and displays UI components and notifications
+# https://github.com/halnovemila/Notify4Scripts/wiki
+# https://android.googlesource.com/platform/system/extras/+/3f91534edf98d2a385c8fa29839cdd15a69f21d3/atrace/atrace.c
+# atrace -z -t 10 -b 4096 sched freq gfx view dalvik webview input am wm rs binder_driver --stream
+# ndc, tc
+# https://android.googlesource.com/platform/system/netd/+/android-8.0.0_r4/netutils_wrappers/NetUtilsWrapper-1.0.cpp
+# tc -p -s -d  qdisc show dev wlan0
+
+# strace
+# $ sudo apt-get install gcc make gcc-arm-linux-gnueabi binutils-arm-linux-gnueab
+# $ git clone -b binder https://github.com/xdbob/strace.git && cd strace
+# $ ./bootstrap
+# $  ./configure --build x86_64-pc-linux-gnu --host arm-linux-gnueabi LDFLAGS="-static -pthread"
+# I had to grab https://github.com/torvalds/linux/blob/master/include/uapi/linux/android/binder.h and modify binder.c with 'include "binder.h"'
+# Using (from https://source.android.com/devices/tech/debug/strace):
+#
+# adb shell setprop wrap.com.google.android.browser "logwrapper strace -f -o /data/local/tmp/strace/strace.com.google.android.browser.txt"
+
+# jtrace
+# http://newandroidbook.com/tools/jtrace.html
+# JCOLOR=1 /data/local/tmp/jtrace64 --thread InputReader
+# JCOLOR=1 /data/local/tmp/jtrace64 -p 8000 -f | grep Method
+while [ 1 ]
+do
+    gmspid=$(pidof -s com.google.android.gms)
+    /data/local/tmp/jtrace64 -q -f -p $gmspid >> /data/local/tmp/com.google.android.gms.jtrace
+    sleep 2
+done

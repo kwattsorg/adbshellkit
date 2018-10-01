@@ -1,0 +1,25 @@
+#!/system/bin/sh
+
+parse() {
+    #strings $1 | head -1
+    cache_uri="$(strings $1 | head -1)"
+    cache_tail="$(strings $1 | tail -1)"
+    echo "$1:[$cache_uri][$cache_tail]"
+    #while read_dom; do
+    #    if [[ ! -z "$CONTENT" ]]; then
+    #        content_value="$(echo $CONTENT | sed 's/&nbsp;/ /g; s/&amp;/\&/g; s/&lt;/\</g; s/&gt;/\>/g; s/&quot;/\"/g; s/#&#39;/\'"'"'/g; s/&ldquo;/\"/g; s/&rdquo;/\"/g;')"
+    #    fi
+    #    echo "$1:[${ENTITY}][$content_value]"
+    #done < $1
+}
+
+if [ "$#" -eq 1 ]; then
+    for f in "/data/data/$1/cache/org.chromium.android_webview"/*; do
+        parse $f
+    done
+else
+    for f in /data/data/**/cache/org.chromium.android_webview/*; do
+        parse $f
+    done
+fi
+
