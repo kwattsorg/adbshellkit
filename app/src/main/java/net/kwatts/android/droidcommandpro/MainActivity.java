@@ -983,7 +983,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
     public void addDynamicShortcut(String cmd_key, String cmd, String label) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             ShortcutManager smgr = (ShortcutManager) getSystemService(SHORTCUT_SERVICE);
             Intent di = new Intent(App.INSTANCE.getApplicationContext(), MainActivity.class);
             di.setAction(Intent.ACTION_MAIN);
@@ -1004,7 +1004,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     }
 
     public void removeDynamicShortcuts() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             ShortcutManager smgr = (ShortcutManager) getSystemService(SHORTCUT_SERVICE);
             smgr.removeAllDynamicShortcuts();
         }
