@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import net.kwatts.android.droidcommandpro.model.Command;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,58 +30,15 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
     }
 
 
-    public List<String> spinnerKeys = new ArrayList<>();
-    public List<String> spinnerCommandTags = new ArrayList<>();
-    public List<String> spinnerCommandDescriptions = new ArrayList<>();
-    public List<String> spinnerEmails = new ArrayList<>();
-    public List<String> spinnerIsPublics = new ArrayList<>();
-    public List<String> spinnerCommands = new ArrayList<>();
+    public List<Command> spinnerCmds;
 
-    public List<Command> spinnerCmds = new ArrayList<>();
     Context mContext;
 
     public CustomAdapterCommands(@NonNull Context context, List<Command> cmds) {
         super(context, R.layout.custom_spinner_row);
+
         this.mContext = context;
         this.spinnerCmds = cmds;
-
-        for(Command cmd : cmds) {
-         if (cmd.key != null) {
-                this.spinnerKeys.add(cmd.key);
-            } else {
-                this.spinnerKeys.add("");
-            }
-
-            if (cmd.getEmail() == null) {
-                this.spinnerEmails.add("anonymous");
-            } else {
-                this.spinnerEmails.add(cmd.getEmail());
-            }
-
-
-
-            if (cmd.isPublic) {
-                this.spinnerIsPublics.add("public");
-            } else {
-                this.spinnerIsPublics.add("private");
-            }
-
-            if (cmd.getTagList() == null) {
-                this.spinnerCommandTags.add("no_tags");
-            } else { this.spinnerCommandTags.add(TextUtils.join(",",cmd.getTagList())); }
-
-            if (cmd.getDescription() == null) {
-                this.spinnerCommandDescriptions.add("No Description");
-            } else {
-                this.spinnerCommandDescriptions.add(cmd.getDescription());
-            }
-
-            if (cmd.getCommand() == null) {
-                this.spinnerCommands.add("");
-            } else {
-                this.spinnerCommands.add(cmd.getCommand());
-            }
-        }
     }
 
 
@@ -90,20 +46,6 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
     @Override
     public int getCount() {
         return spinnerCmds.size();
-    }
-
-    public int getPositionByCommand(String c) {
-        for (int x=0; x < spinnerCommands.size(); x++) {
-            if (c.equals(spinnerCommands.get(x))) return x;
-        }
-        return 0;
-    }
-
-    public int getPositionByKey(String key) {
-        for (int x=0; x < spinnerKeys.size(); x++) {
-            if (key.equals(spinnerKeys.get(x))) return x;
-        }
-        return 0;
     }
 
     @Override
@@ -124,11 +66,11 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
             LayoutInflater mInflater = (LayoutInflater) mContext.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = mInflater.inflate(R.layout.custom_spinner_row, parent, false);
-            mViewHolder.mEmail = (TextView) convertView.findViewById(R.id.tvUser);
-            mViewHolder.mIsPublic = (TextView) convertView.findViewById(R.id.tvIsPublic);
-            mViewHolder.mCommandTags = (TextView) convertView.findViewById(R.id.tvCommandTags);
-            mViewHolder.mCommandDescription = (TextView) convertView.findViewById(R.id.tvCommandDescription);
-            mViewHolder.mCommand = (TextView) convertView.findViewById(R.id.tvCommand);
+            mViewHolder.mEmail = convertView.findViewById(R.id.tvUser);
+            mViewHolder.mIsPublic = convertView.findViewById(R.id.tvIsPublic);
+            mViewHolder.mCommandTags = convertView.findViewById(R.id.tvCommandTags);
+            mViewHolder.mCommandDescription = convertView.findViewById(R.id.tvCommandDescription);
+            mViewHolder.mCommand = convertView.findViewById(R.id.tvCommand);
 
 
             convertView.setTag(mViewHolder);
@@ -136,11 +78,36 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
             mViewHolder = (ViewHolder) convertView.getTag();
         }
 
-        mViewHolder.mEmail.setText("by " + spinnerEmails.get(position));
-        mViewHolder.mIsPublic.setText(spinnerIsPublics.get(position));
-        mViewHolder.mCommandTags.setText(spinnerCommandTags.get(position));
-        mViewHolder.mCommandDescription.setText(spinnerCommandDescriptions.get(position));
-        mViewHolder.mCommand.setText(spinnerCommands.get(position));
+
+        Command c = spinnerCmds.get(position);
+
+        if (c.getEmail() != null) {
+            mViewHolder.mEmail.setText("by " + c.getEmail());
+        }
+
+        if (c.isPublic) {
+            mViewHolder.mIsPublic.setText("public");
+        } else {
+            mViewHolder.mIsPublic.setText("private");
+        }
+
+
+        if (c.getTagList() != null) {
+            mViewHolder.mCommandTags.setText(
+                    TextUtils.join(",",c.getTagList())
+            );
+        } else {
+            mViewHolder.mCommandTags.setText("no_tags");
+        }
+
+        if (c.getDescription() != null) {
+            mViewHolder.mCommandDescription.setText(c.getDescription());
+        }
+
+
+        if (c.getCommand() != null) {
+            mViewHolder.mCommand.setText(c.getCommand());
+        }
 
         return convertView;
 
