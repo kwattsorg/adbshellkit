@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public static final int RC_SIGN_IN = 10;
 
 
-    public static List<String> mCommandQueue = new LinkedList<String>();
+    public static List<Command> mCommandQueue = new LinkedList<Command>();
     TextView mTextStatus;
     public static TextView mTextViewState;
     Spinner mSpinnerCommands;
@@ -291,11 +291,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         // am start -n "net.kwatts.android.droidcommandpro/net.kwatts.android.droidcommandpro.MainActivity"
         //          -a "android.intent.action.MAIN" --es net.kwatts.android.droidcommandpro.EXTRA_COMMAND id
 
-        //String extra_cmd = getIntent().getStringExtra(EXTRA_COMMAND);
         String extra_cmd_key = getIntent().getStringExtra(EXTRA_COMMAND_KEY);
         if (extra_cmd_key != null) {
-            mCommandQueue.add(extra_cmd_key);
             Timber.d("Intent.getStringExtra(" + EXTRA_COMMAND_KEY + "):" + extra_cmd_key);
+            Command c = getUserCommandByKey(extra_cmd_key);
+            mCommandQueue.add(c);
+            Timber.d("Added command " + c.key + " to queue!");
         }
 
 
@@ -486,10 +487,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         // Just support one for now
         if (mCommandQueue.size() > 0) {
-            String cmdkey = (String) mCommandQueue.get(0);
-            Command c = getUserCommandByKey(cmdkey);
+            Command c = mCommandQueue.get(0);
             if (c != null) {
-                runCommand(c.getCommand());
+                runCommand(c);
             }
             mCommandQueue.clear();
         }
@@ -534,10 +534,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mTopOutStringError.setLength(0);
             mLines.removeAllViews();
 
-
-            addToCommandRuncounts(mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition()));
-            runCommand(mTopCommandView.getText().toString());
-
+            Command c = mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
+            runCommand(c);
     }
 
 
@@ -601,12 +599,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     static long startTime;
     static int mExecState = 0;
-    public static void runCommand(String coreCommand) {
+    public static void runCommand(Command c) {
+        lastCommandUsed = c;
+        addToCommandRuncounts(c);
 
-        Command c = getCommandIfExists(coreCommand);
-        if (c != null) {
-           lastCommandUsed = c;
+        // Drrty, setting this here in case command is changed.
+        String currentInputCommand = mTopCommandView.getText().toString();
+        String coreCommand;
+
+        if (!currentInputCommand.equals(c.getCommand())) {
+            coreCommand = currentInputCommand;
+        } else {
+            coreCommand = c.getCommand();
         }
+
 
         String html_output = Engine.processCommand(coreCommand);
         if (html_output != null) {
@@ -968,7 +974,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
     }
 
-    private static void addToCommandRuncounts(Command c) {
+    public static void addToCommandRuncounts(Command c) {
         DatabaseReference db = FirebaseDatabase.getInstance().getReference();
 
         if ((!c.isPublic) && (c.key != null)) {
