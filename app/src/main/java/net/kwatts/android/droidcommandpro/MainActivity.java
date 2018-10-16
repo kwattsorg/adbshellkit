@@ -318,10 +318,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         //TODO if debug
         isDebuggable =  ( 0 != ( getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
-        if (isDebuggable) {
-            //LynxShakeDetector lynxShakeDetector = new LynxShakeDetector(this);
-            //lynxShakeDetector.init();
-        }
 
 
         Configuration.setDefaults(new Configuration.Defaults() {
@@ -397,7 +393,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                             Command c =  mCustomCmdsAdapter.getItem(position);
                             if (c != null) {
                                 mTopCommandView.setText(c.getCommand());
-                                mTopCommandView.setSelection(c.getCommand().length());
+                                //hide keyboard
+                                InputMethodManager imm = (InputMethodManager) App.INSTANCE.getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(mTopCommandView.getWindowToken(), 0);
+                                //mTopCommandView.setSelection(c.getCommand().length());
                             }
                             break;
                         default:
@@ -527,15 +526,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 Timber.e("exception killing shell");
             }
 
-            // hide keyboard & clear window
-            InputMethodManager imm = (InputMethodManager) App.INSTANCE.getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mTopCommandView.getWindowToken(), 0);
-            mTopOutString.setLength(0);
-            mTopOutStringError.setLength(0);
-            mLines.removeAllViews();
 
             Command c = mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
-            runCommand(c);
+
+            // Drrty, setting this here in case command is changed.
+            String ic = mTopCommandView.getText().toString();
+            if (!ic.equals(c.getCommand())) {
+                Command tc = new Command();
+                tc.setCommand(ic);
+                runCommand(tc);
+            } else {
+                runCommand(c);
+            }
     }
 
 
@@ -600,18 +602,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     static long startTime;
     static int mExecState = 0;
     public static void runCommand(Command c) {
+        //clear window
+        mTopOutString.setLength(0);
+        mTopOutStringError.setLength(0);
+        mLines.removeAllViews();
+
         lastCommandUsed = c;
         addToCommandRuncounts(c);
 
-        // Drrty, setting this here in case command is changed.
-        String currentInputCommand = mTopCommandView.getText().toString();
-        String coreCommand;
+        String coreCommand = c.getCommand();
 
-        if (!currentInputCommand.equals(c.getCommand())) {
-            coreCommand = currentInputCommand;
-        } else {
-            coreCommand = c.getCommand();
-        }
+
 
 
         String html_output = Engine.processCommand(coreCommand);
