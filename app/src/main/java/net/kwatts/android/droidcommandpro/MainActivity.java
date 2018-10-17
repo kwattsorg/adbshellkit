@@ -91,7 +91,7 @@ import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 import com.topjohnwu.superuser.CallbackList;
-
+import com.topjohnwu.superuser.Shell;
 import net.kwatts.android.droidcommandpro.commands.Engine;
 import net.kwatts.android.droidcommandpro.model.Command;
 import net.kwatts.android.droidcommandpro.model.GoogleUser;
@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public WebView mWebView;
     public String mWebViewData;
 
-    public android.content.Context mAppContext;
+    //public android.content.Context mAppContext;
     public FirebaseDatabase mFirebaseDB;
     public FirebaseUser mFirebaseUser;
 
@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     private FirebaseAuth mAuth;
 
     public static FirebaseAnalytics mFirebaseAnalytics;
-    com.topjohnwu.superuser.Shell mShell;
+    //com.topjohnwu.superuser.Shell mShell;
 
 
     public static Map<String, String> mUserMapVars = new HashMap<String, String>();
@@ -285,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAppContext = getApplicationContext();
+        //mAppContext = getApplicationContext();
         Timber.plant(new DebugTree());
 
         // am start -n "net.kwatts.android.droidcommandpro/net.kwatts.android.droidcommandpro.MainActivity"
@@ -366,16 +366,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
             new AsyncTask<Void, Void, Integer>() {
                 protected Integer doInBackground(Void... params) {
-                    int c1 = Util.copyAssetsToCacheDirectory(mAppContext,true,"bin");
-                    int c2 = Util.copyAssetsToCacheDirectory(mAppContext,true,"scripts");
-                    int c3 = Util.copyAssetsToCacheDirectory(mAppContext,true,"share");
+                    int c1 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
+                    int c2 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
+                    int c3 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"share");
                     int c = c1 + c2 + c3;
 
-                    if (c > 0) {
-                        com.topjohnwu.superuser.Shell.Sync.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/bin");
-                        com.topjohnwu.superuser.Shell.Sync.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/scripts");
-                        com.topjohnwu.superuser.Shell.Sync.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/share");
-                    }
+                    //if (c > 0) {
+                        Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/bin").submit();
+                        Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/scripts").submit();
+                        Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/share").submit();
+                    //}
 
                     return c;
                 }
@@ -519,12 +519,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
     public void onClick(View v) {
-            mShell = com.topjohnwu.superuser.Shell.getShell();
+
+        /*
+            Shell tShell = com.topjohnwu.superuser.Shell.getShell();
             try {
-                mShell.close();
+                tShell.close();
             } catch (IOException e) {
                 Timber.e("exception killing shell");
-            }
+            } */
 
 
             Command c = mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
@@ -624,6 +626,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mTextSize = Integer.parseInt(mSharedPref.getString("textSize","22"));
 
         StringBuffer vars = new StringBuffer();
+
+        if (mSharedPref.getBoolean("includeToolsPath", true)) {
+            vars.append("PATH=$PATH:" + App.INSTANCE.getCacheDir().getAbsolutePath() + "/scripts:" +
+                                        App.INSTANCE.getCacheDir().getAbsolutePath() + "/bin" + ";");
+        }
+
         for (Map.Entry<String, String> entry : mUserMapVars.entrySet()) {
             vars.append(entry.getKey() + "=" + entry.getValue() + ";");
         }
@@ -644,8 +652,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         // NOW WE RUN!!!
         Timber.d( "Running:" + runCommand);
-        setTextState("Running Command..." + "root_available=" + com.topjohnwu.superuser.Shell.getShell().getStatus(),"","");
-        logEvent("command_run", runCommand, "root_available=" + com.topjohnwu.superuser.Shell.getShell().getStatus());
+        int shell_status = Shell.getShell().getStatus();
+        setTextState("Command running as " + ((shell_status > 0) ? "root" : "user") +
+                           "... shell_status=" + shell_status +
+                           ",is_root=" + Shell.getShell().isRoot(),
+                      "","");
+        logEvent("command_run", runCommand, "root_available=" + shell_status);
 
 
         List<String> consoleList;
@@ -660,8 +672,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 mExecState = 0;
             }
         };
-
-
         consoleListError = new CallbackList<String>() {
             @Override
             public void onAddElement(String s) {
@@ -674,18 +684,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         };
 
         startTime = SystemClock.elapsedRealtime();
-        com.topjohnwu.superuser.Shell.Async.sh(consoleList, consoleListError,
-                (out, err) -> {
-                    CharSequence l = "";
-                    if (mLines.getChildCount() > 0) {
-                        l =  ((TextView) mLines.getChildAt(mLines.getChildCount() -1 )).getText();
+        Shell.sh(runCommand)
+                .to(consoleList,consoleListError)
+                .submit(new Shell.ResultCallback() {
+                    @Override
+                    public void onResult(Shell.Result out) {
+                        CharSequence l = "";
+                        if (mLines.getChildCount() > 0) {
+                            l =  ((TextView) mLines.getChildAt(mLines.getChildCount() -1 )).getText();
+                        }
+                        long ms = SystemClock.elapsedRealtime() - startTime;
+                        double s = ms / 1000.0;
+                        logEvent("command_end", coreCommand, "complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"));
+                        setTextState("Command finished after " + s + "secs... lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success") +
+                                    ",shell_code=" + out.getCode(),"",l.toString());
                     }
-                    long ms = SystemClock.elapsedRealtime() - startTime;
-                    double s = ms / 1000.0;
-                    logEvent("command_end", coreCommand, "complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"));
-                    setTextState("complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"),"",l.toString());
-                    }, runCommand);
-
+                });
     }
 
     @Override
@@ -1045,7 +1059,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     private void openLynxActivity() {
         LynxConfig lynxConfig = new LynxConfig();
-        if (com.topjohnwu.superuser.Shell.getShell().getStatus() > 0) {
+        if (Shell.getShell().getStatus() > 0) {
             lynxConfig.setRunAsSuperUser(true);
         } else { lynxConfig.setRunAsSuperUser(false); }
         lynxConfig.setTextSizeInPx(9);
@@ -1079,7 +1093,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mNotificationBuilder.setContentTitle(mTopCommandView.getText().toString());
             mNotificationManager.notify(1, mNotificationBuilder.build());
         }
-        SpannableString spanString = new SpannableString("Command " + title + status);
+        SpannableString spanString = new SpannableString(title + status);
         spanString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spanString.length(), 0);
         mTextViewState.setText(spanString);
 
@@ -1201,10 +1215,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
 
         //Defaults
-        mUserMapVars.put("DIR_SCRIPTS",mAppContext.getCacheDir().getAbsolutePath() + "/scripts");
-        mUserMapVars.put("DIR_TOOLS",mAppContext.getCacheDir().getAbsolutePath() + "/bin");
+        mUserMapVars.put("DIR_SCRIPTS",App.INSTANCE.getApplicationContext().getCacheDir().getAbsolutePath() + "/scripts");
+        mUserMapVars.put("DIR_TOOLS",App.INSTANCE.getApplicationContext().getCacheDir().getAbsolutePath() + "/bin");
         mUserMapVars.put("NETWORK_INTERFACE","wlan0");
-        mUserMapVars.put("APP_PACKAGE",mAppContext.getPackageName());
+        mUserMapVars.put("APP_PACKAGE",App.INSTANCE.getApplicationContext().getPackageName());
 
         String v = mSharedPref.getString("variablesEditText", "");
         Map<String, String> m = splitVariables(v);

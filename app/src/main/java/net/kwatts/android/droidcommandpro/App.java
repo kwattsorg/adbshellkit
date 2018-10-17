@@ -10,10 +10,11 @@ import android.util.Log;
 import com.google.firebase.database.FirebaseDatabase;
 import com.topjohnwu.superuser.BusyBox;
 import com.topjohnwu.superuser.Shell;
+import com.topjohnwu.superuser.ContainerApp;
 /**
  * This is a subclass of {@link Application} used to provide shared objects for this app.
  */
-public class App extends Shell.ContainerApp  {
+public class App extends ContainerApp  {
     private static final String TAG = "Application";
     public static App INSTANCE = null;
 

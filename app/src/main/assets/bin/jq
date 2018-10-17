@@ -1,0 +1,2 @@
+#!/system/bin/sh
+LD_PRELOAD=$PWD/libjq.so.1 $PWD/jq.arm "$@"
