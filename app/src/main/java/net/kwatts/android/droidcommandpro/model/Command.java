@@ -24,8 +24,6 @@ public class Command {
     private String mDescription;
     @SerializedName("command")
     public String mCommand;
-    //@SerializedName("runcount")
-    //public Long mRuncount;
     @SerializedName("runcounts")
     public Long mRuncounts;
 
@@ -107,5 +105,17 @@ public class Command {
         if (!(obj instanceof Command)) return false;
         Command o = (Command) obj;
         return o.key == this.key;
+    }
+
+    public String toString() {
+        return  "key: " + this.key +
+                "\nuid: " + this.mUid +
+                "\nuser: " + this.mEmail +
+                "\nisPublic: " + this.isPublic +
+                "\nisPinned: " + isPinned() +
+                "\nruncounts: " + this.mRuncounts +
+                "\ndescription: " + this.mDescription +
+                "\ncommand: " + this.mCommand;
+
     }
 }

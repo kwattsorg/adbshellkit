@@ -1,9 +1,7 @@
 apply plugin: 'com.android.library'
-//apply plugin: 'checkstyle'
 
 android {
   compileSdkVersion 27
-//  buildToolsVersion "25.0.3"
 
   defaultConfig {
     minSdkVersion 10
@@ -26,32 +24,8 @@ android {
 
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
-  //implementation 'com.android.support:support-annotations:27.1.1'
   implementation 'com.github.pedrovgs:renderers:3.3.0'
   implementation 'com.squareup:seismic:1.0.2'
-  //testImplementation 'org.robolectric:robolectric:3.3.2'
-  //testCompile 'junit:junit:4.12'
-  //testCompile ('org.mockito:mockito-core:1.10.19') {
-  //  exclude group: "org.hamcrest"
-  //}
 }
 
 
-//task checkstyle(type: Checkstyle) {
-//  configFile file('../config/checkstyle/checkstyle.xml')
-//  source 'src'
-//  include '**/*.java'
-//  exclude '**/gen/**'
-
-//  classpath = files()
-//}
-
-//apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
-
-//afterEvaluate { project ->
-//  android.libraryVariants.all { variant ->
-//    tasks.androidJavadocs.doFirst {
-//      classpath += files(variant.javaCompile.classpath.files)
-//    }
-//  }
-//}

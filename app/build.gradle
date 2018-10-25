@@ -7,8 +7,8 @@ android {
         applicationId "net.kwatts.android.droidcommandpro"
         minSdkVersion 21
         targetSdkVersion 27 //26
-        versionCode 56
-        versionName "5.6"
+        versionCode 57
+        versionName "5.7"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
@@ -42,6 +42,7 @@ android {
         implementation "com.android.support:support-compat:$googleSupportVersion"
         implementation "com.android.support:design:$googleSupportVersion"
         implementation "com.android.support:customtabs:$googleSupportVersion"
+
 
 
         implementation "com.google.firebase:firebase-core:$gmsFirebaseVersion"

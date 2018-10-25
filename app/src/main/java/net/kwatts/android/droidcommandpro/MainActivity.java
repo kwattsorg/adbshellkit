@@ -92,6 +92,8 @@ import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 import com.topjohnwu.superuser.CallbackList;
 import com.topjohnwu.superuser.Shell;
+
+import net.kwatts.android.droidcommandpro.commands.CommandGetContacts;
 import net.kwatts.android.droidcommandpro.commands.Engine;
 import net.kwatts.android.droidcommandpro.model.Command;
 import net.kwatts.android.droidcommandpro.model.GoogleUser;
@@ -200,7 +202,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public static Command lastCommandUsed;
 
     public String[] permissionsList = new String[]{
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+            //,Manifest.permission.READ_CONTACTS
     };
 
 
@@ -337,6 +340,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
         });
 
+        // EXPERIMENTAL: Contacts
+        //org.json.JSONObject c = CommandGetContacts.getAllContacts(App.INSTANCE.getContentResolver());
 
 
         try {
@@ -442,7 +447,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
 
 
-
             // Notifications
             createNotificationChannel();
             Intent intent = new Intent(this, MainActivity.class);
@@ -470,6 +474,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             //i.putExtra("cmd_request", "id");
             //startService(i);
             // END
+
+
+
 
 
         } catch (Exception e) { 
@@ -514,6 +521,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     .apply(new RequestOptions().circleCrop()).into(mGoogleUserSignedInImageButton);
             initFirebase();
         }
+
+        setTextState("Command ready" +
+                "... is_superuser=" + Shell.getShell().isRoot(), "","");
     }
 
 
@@ -655,7 +665,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         int shell_status = Shell.getShell().getStatus();
         setTextState("Command running as " + ((shell_status > 0) ? "root" : "user") +
                            "... shell_status=" + shell_status +
-                           ",is_root=" + Shell.getShell().isRoot(),
+                           ",is_superuser=" + Shell.getShell().isRoot(),
                       "","");
         logEvent("command_run", runCommand, "root_available=" + shell_status);
 
@@ -684,22 +694,31 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         };
 
         startTime = SystemClock.elapsedRealtime();
-        Shell.sh(runCommand)
-                .to(consoleList,consoleListError)
-                .submit(new Shell.ResultCallback() {
-                    @Override
-                    public void onResult(Shell.Result out) {
-                        CharSequence l = "";
-                        if (mLines.getChildCount() > 0) {
-                            l =  ((TextView) mLines.getChildAt(mLines.getChildCount() -1 )).getText();
-                        }
-                        long ms = SystemClock.elapsedRealtime() - startTime;
-                        double s = ms / 1000.0;
-                        logEvent("command_end", coreCommand, "complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"));
-                        setTextState("Command finished after " + s + "secs... lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success") +
-                                    ",shell_code=" + out.getCode(),"",l.toString());
-                    }
-                });
+
+
+        //https://github.com/topjohnwu/libsu/blob/master/superuser/src/main/java/com/topjohnwu/superuser/internal/PendingJob.java
+        Shell.ResultCallback runResultCallback = new Shell.ResultCallback() {
+            @Override
+            public void onResult(Shell.Result out) {
+                CharSequence l = "";
+                if (mLines.getChildCount() > 0) {
+                    l =  ((TextView) mLines.getChildAt(mLines.getChildCount() -1 )).getText();
+                }
+                long ms = SystemClock.elapsedRealtime() - startTime;
+                double s = ms / 1000.0;
+                logEvent("command_end", coreCommand, "complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"));
+                setTextState("Command finished after " + s + "secs... lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success") +
+                        ",shell_code=" + out.getCode(),"",l.toString());
+            }
+        };
+
+        if (Shell.getShell().isRoot()) {
+            Shell.su(runCommand).to(consoleList, consoleListError).submit(runResultCallback);
+        }
+        else {
+            Shell.sh(runCommand).to(consoleList, consoleListError).submit(runResultCallback);
+        }
+
     }
 
     @Override
