@@ -783,6 +783,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         case R.id.action_logs:
             openLynxActivity();
             return true;
+        case R.id.action_about:
+            com.eggheadgames.aboutbox.activity.AboutActivity.launch(this);
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -850,17 +853,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     public void onSuccess(GetTokenResult result) {
                         //Map<String, Object> res_claims = result.getClaims();
                         Boolean isAdmin = Boolean.FALSE;
+                        try {
 
-                        Object obj = result.getClaims().getOrDefault("admin",Boolean.FALSE);
-                        if (obj instanceof Boolean) {
-                            isAdmin = (Boolean) obj;
-                        }
-                        if (isAdmin) {
-                            isAdminUserClaim = true;
-                            setTextUserStatus(mFirebaseUser.getEmail() + " as admin");
-                        } else {
+                            Object obj = result.getClaims().getOrDefault("admin", Boolean.FALSE);
+                            if (obj instanceof Boolean) {
+                                isAdmin = (Boolean) obj;
+                            }
+                            if (isAdmin) {
+                                isAdminUserClaim = true;
+                                setTextUserStatus(mFirebaseUser.getEmail() + " as admin");
+                            } else {
+                                isAdminUserClaim = false;
+                                setTextUserStatus(mFirebaseUser.getEmail() + " as user");
+                            }
+                        } catch (Exception e) {
                             isAdminUserClaim = false;
-                            setTextUserStatus(mFirebaseUser.getEmail() + " as user");
+                            setTextUserStatus("Logged in not as user or admin?");
                         }
                     }
                 });
@@ -905,7 +913,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
             }
         } else {
-            //
+            // setTextUserStatus("Logged in as anonymous");
         }
 
         /* global commands */
@@ -937,18 +945,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     }
 
-
-
-    private static Command getCommandIfExists(String cmd) {
-        for(Command c : mUserCommands){
-            if(c.getCommand() != null && c.getCommand().equalsIgnoreCase(cmd)) {
-                return c;
-            }
-        }
-
-        return null;
-
-    }
     
     private static Command getUserCommandByKey(String key) {
         for(Command c : mUserCommands){
@@ -1023,30 +1019,40 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
     public void addDynamicShortcut(String cmd_key, String cmd, String label) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            ShortcutManager smgr = (ShortcutManager) getSystemService(SHORTCUT_SERVICE);
-            Intent di = new Intent(App.INSTANCE.getApplicationContext(), MainActivity.class);
-            di.setAction(Intent.ACTION_MAIN);
-            di.putExtra(EXTRA_COMMAND, cmd);
-            if (cmd_key != null) {
-                di.putExtra(EXTRA_COMMAND_KEY, cmd_key);
-                ShortcutInfo dynamicShortcut = new ShortcutInfo.Builder(App.INSTANCE.getApplicationContext(), cmd_key)
-                        .setShortLabel(label)
-                        .setLongLabel(label)
-                        .setIcon(Icon.createWithResource(App.INSTANCE.getApplicationContext(), R.mipmap.ic_launcher))
-                        .setIntent(di)
-                        .build();
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                ShortcutManager smgr = (ShortcutManager) getSystemService(SHORTCUT_SERVICE);
+                Intent di = new Intent(App.INSTANCE.getApplicationContext(), MainActivity.class);
+                di.setAction(Intent.ACTION_MAIN);
+                di.putExtra(EXTRA_COMMAND, cmd);
+                if (cmd_key != null) {
+                    di.putExtra(EXTRA_COMMAND_KEY, cmd_key);
+                    ShortcutInfo dynamicShortcut = new ShortcutInfo.Builder(App.INSTANCE.getApplicationContext(), cmd_key)
+                            .setShortLabel(label)
+                            .setLongLabel(label)
+                            .setIcon(Icon.createWithResource(App.INSTANCE.getApplicationContext(), R.mipmap.ic_launcher))
+                            .setIntent(di)
+                            .build();
 
 
-                smgr.addDynamicShortcuts(Collections.singletonList(dynamicShortcut));
+                    smgr.addDynamicShortcuts(Collections.singletonList(dynamicShortcut));
+                }
             }
+        } catch (Exception e) {
+            Timber.e("Unable to add dynamic shortcut!");
+            e.printStackTrace();
         }
     }
 
     public void removeDynamicShortcuts() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            ShortcutManager smgr = (ShortcutManager) getSystemService(SHORTCUT_SERVICE);
-            smgr.removeAllDynamicShortcuts();
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                ShortcutManager smgr = (ShortcutManager) getSystemService(SHORTCUT_SERVICE);
+                smgr.removeAllDynamicShortcuts();
+            }
+        } catch (Exception e) {
+            Timber.e("Unable to remove dynamic shortcut!");
+            e.printStackTrace();
         }
     }
 
@@ -1106,15 +1112,21 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mFirebaseAnalytics.logEvent(id, params);
     }
     private static void setTextState(String title, String status, String output) {
-        if (mSharedPref.getBoolean("showNotifications", false)) {
-            mNotificationBuilder.setSubText(title);
-            mNotificationBuilder.setContentText(status + output);
-            mNotificationBuilder.setContentTitle(mTopCommandView.getText().toString());
-            mNotificationManager.notify(1, mNotificationBuilder.build());
+        try {
+            if (mSharedPref.getBoolean("showNotifications", false)) {
+                mNotificationBuilder.setSubText(title);
+                mNotificationBuilder.setContentText(status + output);
+                mNotificationBuilder.setContentTitle(mTopCommandView.getText().toString());
+                mNotificationManager.notify(1, mNotificationBuilder.build());
+            }
+            SpannableString spanString = new SpannableString(title + status);
+            spanString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spanString.length(), 0);
+            mTextViewState.setText(spanString);
+        } catch (Exception e) {
+            Timber.e("Unable to set status with setTextState!");
+            e.printStackTrace();
+
         }
-        SpannableString spanString = new SpannableString(title + status);
-        spanString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spanString.length(), 0);
-        mTextViewState.setText(spanString);
 
         // send analytics
     }
@@ -1586,6 +1598,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
 
     }
+
+
 
 
 }

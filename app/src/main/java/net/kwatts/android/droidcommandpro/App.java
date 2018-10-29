@@ -11,6 +11,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.topjohnwu.superuser.BusyBox;
 import com.topjohnwu.superuser.Shell;
 import com.topjohnwu.superuser.ContainerApp;
+import com.eggheadgames.aboutbox.AboutConfig;
+
 /**
  * This is a subclass of {@link Application} used to provide shared objects for this app.
  */
@@ -36,6 +38,18 @@ public class App extends ContainerApp  {
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         Log.d(TAG, "onCreate");
         this.isopen = true;
+
+        AboutConfig aboutConfig = AboutConfig.getInstance();
+        aboutConfig.appName = getString(R.string.app_name);
+        aboutConfig.appIcon = R.mipmap.ic_launcher;
+        aboutConfig.version = "5.8";
+        aboutConfig.author = "Kevin W";
+        aboutConfig.aboutLabelTitle = "About App";
+        aboutConfig.packageName = getApplicationContext().getPackageName();
+        aboutConfig.buildType = AboutConfig.BuildType.GOOGLE;
+        aboutConfig.emailAddress = "kwatkins@gmail.com";
+        aboutConfig.emailSubject = "Feedback for " + aboutConfig.packageName;
+        //aboutConfig.emailBody = "Hello...";
 
     }
 
