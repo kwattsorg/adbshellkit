@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public String[] permissionsList = new String[]{
             Manifest.permission.WRITE_EXTERNAL_STORAGE
-            //,Manifest.permission.READ_CONTACTS
+            ,Manifest.permission.READ_CONTACTS
     };
 
 
@@ -340,8 +340,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
         });
 
-        // EXPERIMENTAL: Contacts
-        //org.json.JSONObject c = CommandGetContacts.getAllContacts(App.INSTANCE.getContentResolver());
+
+        try {
+            // EXPERIMENTAL: Contacts
+            //org.json.JSONObject c = CommandGetContacts.getAllContacts(App.INSTANCE.getContentResolver());
+            // EXPERIMENTAL: SMali
+            //Engine.processCommand(null, "cmd_smali net.kwatts.android.droidcommandpro");
+        } catch (Exception e) {
+                Timber.d("Exception with experimental calls:" + e.getMessage());
+        }
 
 
         try {
@@ -627,12 +634,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
 
-        String html_output = Engine.processCommand(coreCommand);
-        if (html_output != null) {
-            Toast.makeText(App.INSTANCE.getApplicationContext(), "Code commands are not supported yet.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         mTextSize = Integer.parseInt(mSharedPref.getString("textSize","22"));
 
         StringBuffer vars = new StringBuffer();
@@ -659,6 +660,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         } else {
             runCommand = vars.toString() + coreCommand;
         }
+
+/* Experimental...
+        String res_command = Engine.processCommand(mUserMapVars, coreCommand);
+        if (res_command != null) {
+            Toast.makeText(App.INSTANCE.getApplicationContext(), "Code commands are not supported yet.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+*/
+
 
         // NOW WE RUN!!!
         Timber.d( "Running:" + runCommand);

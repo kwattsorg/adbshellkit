@@ -17,6 +17,7 @@ import org.jf.dexlib2.iface.instruction.ReferenceInstruction;
 import org.jf.dexlib2.iface.reference.MethodReference;
 import org.jf.dexlib2.iface.value.EncodedValue;
 import org.jf.dexlib2.util.EncodedValueUtils;
+import org.jf.dexlib2.analysis.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,10 +34,10 @@ import timber.log.Timber;
 //TODO: make command to parse PM and manifest https://developer.android.com/reference/android/content/pm/PackageManager#setApplicationEnabledSetting%28java.lang.String,%20int,%20int%29
 public class CommandSmali {
 
-    public static String cmd = "%CMD_SMALI%";
+    public static String cmd = "CMD_SMALI";
 
-    public static JSONObject execute(android.content.Context ctx, String packageName) {
-        String packageApkFileName = getApkFileName(ctx,packageName);
+    public static JSONObject execute(android.content.Context ctx, List<String> args) {
+        String packageApkFileName = getApkFileName(ctx,args.get(0));
 
 
         JSONObject res = new JSONObject();
@@ -46,16 +47,33 @@ public class CommandSmali {
         }
 
 
-        DexFile dexFile = null ;
+        org.jf.dexlib2.dexbacked.DexBackedDexFile dexFile = null ;
         try {
+
             dexFile = DexFileFactory.loadDexFile(packageApkFileName, Opcodes.getDefault());
+            //TODO: process multiple dex files, see: https://github.com/Sable/soot/blob/develop/src/main/java/soot/dexpler/DexFileProvider.java
 
         } catch (IOException ioe) {
             Timber.e(ioe,"Unable to load APK");
             return res;
         }
         if (dexFile != null) {
-            res = getAppSmali(dexFile);
+            try {
+                res.put("dex_class_count", dexFile.getClassCount());
+                res.put("dex_field_count", dexFile.getFieldCount());
+                res.put("dex_method_count", dexFile.getMethodCount());
+                res.put("dex_string_count", dexFile.getStringCount());
+                res.put("dex_type_count", dexFile.getTypeCount());
+
+                JSONObject dex_types = new JSONObject();
+                for (int i = 0; i < dexFile.getTypeCount(); i++) {
+                    dex_types.put("dex_type_" + i, dexFile.getType(i));
+                }
+                res.put("dex_types", dex_types);
+
+            } catch (Exception e) { }
+
+            //res = getAppSmali(dexFile);
         } else
         {
             Timber.d("dex file is null");
@@ -122,7 +140,6 @@ public class CommandSmali {
                 } catch (Exception e) { }
             }
 
-
             res.put(appName, resval);
         } catch (Exception e) {
             e.printStackTrace();
@@ -156,16 +173,34 @@ public class CommandSmali {
     public static JSONObject getAppSmali(DexFile dexFile) {
 
         JSONObject classStaticFields = new JSONObject();
+        JSONObject classFields = new JSONObject();
+
 
 
         //SKIP_CLASS:
         for (ClassDef classDef: dexFile.getClasses()) {
 
             try {
+                classFields.put(classDef.getSourceFile(),classDef.getType());
+             /*
+                for (Field f : classDef.getFields()) {
+                    String containingClass1 = f.getDefiningClass();
+                    if (!containingClass1.startsWith("Landroid") || containingClass1.startsWith("Lgoogle")) {
+                        classFields.put(containingClass1, f.getName() );
+                        EncodedValue initialValue = f.getInitialValue();
+                        if (initialValue != null) {
+                            if (!EncodedValueUtils.isDefaultValue(initialValue)) {
+                                classFields.put(containingClass1 + "." + f.getType() + "." + f.getName(), initialValue.getValueType() + "." + initialValue);
+                            }
+                        }
+
+                    }
+                }
+            /*
+
+/*
                 for (Field field : classDef.getStaticFields()) {
-
                     String containingClass = field.getDefiningClass();
-
                     if (!containingClass.startsWith("Landroid") || containingClass.startsWith("Lgoogle")) {
                         EncodedValue initialValue = field.getInitialValue();
                         if (!EncodedValueUtils.isDefaultValue(initialValue)) {
@@ -183,18 +218,19 @@ public class CommandSmali {
 
                     }
 
-                }
+                } */
 
             } catch (Exception e) {
-                Timber.e(e,"Unable to get static fields ");
-
+                Timber.e(e,"Unable to get fields " + e.getMessage());
+                try {
+                    classFields.put("exception", e.getMessage());
+                } catch (Exception e2) { }
             }
 
 
-
+/*
             for (Method methodDef: classDef.getMethods()) {
                 MethodImplementation methodImpl = methodDef.getImplementation();
-
                 if (methodImpl != null) {
                     for (Instruction instruction: methodImpl.getInstructions()) {
                         if (instruction instanceof ReferenceInstruction) {
@@ -206,10 +242,10 @@ public class CommandSmali {
                         }
                     }
                 }
-            }
+            } */
         }
 
-        return classStaticFields;
+        return classFields;
     }
 
 }
