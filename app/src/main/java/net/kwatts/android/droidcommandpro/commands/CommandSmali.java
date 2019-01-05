@@ -32,11 +32,15 @@ import timber.log.Timber;
 
 // deeper dive with https://github.com/dorneanu/smalisca
 //TODO: make command to parse PM and manifest https://developer.android.com/reference/android/content/pm/PackageManager#setApplicationEnabledSetting%28java.lang.String,%20int,%20int%29
-public class CommandSmali {
+public class CommandSmali implements Command {
 
-    public static String cmd = "CMD_SMALI";
+    public static String cmd = "cmd_smali";
 
-    public static JSONObject execute(android.content.Context ctx, List<String> args) {
+    public String getCommandName() {
+        return cmd;
+    }
+
+    public JSONObject execute(android.content.Context ctx, List<String> args) {
         String packageApkFileName = getApkFileName(ctx,args.get(0));
 
 

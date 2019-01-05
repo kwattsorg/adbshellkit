@@ -662,13 +662,26 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             runCommand = vars.toString() + coreCommand;
         }
 
-/* Experimental...
-        String res_command = Engine.processCommand(mUserMapVars, coreCommand);
-        if (res_command != null) {
-            Toast.makeText(App.INSTANCE.getApplicationContext(), "Code commands are not supported yet.", Toast.LENGTH_SHORT).show();
+//Experimental
+        long engine_start = SystemClock.elapsedRealtime();
+        Engine cmd_engine = new Engine();
+        String res_cmd = cmd_engine.process(mUserMapVars, coreCommand);
+        if (res_cmd != null) {
+            //TODO: send results to the output handler
+            Message msg = mHandler.obtainMessage(MSG_NEWLINE);
+            msg.arg1 = 0;
+            msg.obj = res_cmd;
+            mHandler.sendMessage(msg);
+
+            long engine_ms = SystemClock.elapsedRealtime() - engine_start;
+            double engine_s = engine_ms / 1000.0;
+            logEvent("command_end", coreCommand, "complete in " + engine_s + "s length=" + res_cmd.length());
+            setTextState("Command finished after " + engine_s + "secs... length=" + res_cmd.length(),"","");
+
+            //Toast.makeText(App.INSTANCE.getApplicationContext(), "Code commands are not supported yet.", Toast.LENGTH_SHORT).show();
             return;
-        }
-*/
+        } else { /* run below */ }
+
 
 
         // NOW WE RUN!!!

