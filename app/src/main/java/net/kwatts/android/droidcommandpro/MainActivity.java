@@ -22,6 +22,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.MainThread;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
@@ -216,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     private static final int MSG_NEWLINE = 1;
     private static final int MSG_CMD_TERMINATED = 2;
     private static final int MSG_CMD_COMPLETE = 3;
-    public static Handler mHandler = new Handler()
+    public  Handler mHandler = new Handler()
     {
             public void handleMessage(Message msg)
             {
@@ -241,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     };
 
 
-    private static void handleMessageNewline(Message msg)
+    private void handleMessageNewline(Message msg)
     {
         int cmd_state = msg.arg1;
         String line = (String) msg.obj;
@@ -620,7 +621,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     static long startTime;
     static int mExecState = 0;
-    public static void runCommand(Command c) {
+    public void runCommand(Command c) {
         //clear window
         mTopOutString.setLength(0);
         mTopOutStringError.setLength(0);
@@ -708,6 +709,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         //https://github.com/topjohnwu/libsu/blob/master/superuser/src/main/java/com/topjohnwu/superuser/internal/PendingJob.java
         Shell.ResultCallback runResultCallback = new Shell.ResultCallback() {
+            @MainThread
             @Override
             public void onResult(Shell.Result out) {
                 CharSequence l = "";
@@ -722,11 +724,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
         };
 
+
         if (Shell.getShell().isRoot()) {
-            Shell.su(runCommand).to(consoleList, consoleListError).submit(runResultCallback);
+            com.topjohnwu.superuser.Shell.Job j = Shell.su(runCommand).to(consoleList, consoleListError);
+            j.submit(runResultCallback);
         }
         else {
-            Shell.sh(runCommand).to(consoleList, consoleListError).submit(runResultCallback);
+            com.topjohnwu.superuser.Shell.Job j2 = Shell.sh(runCommand).to(consoleList, consoleListError);
+            j2.submit(runResultCallback);
         }
 
     }
