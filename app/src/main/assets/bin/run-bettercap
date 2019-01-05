@@ -1,5 +1,0 @@
-LD_LIBRARY_PATH=/data/data/com.termux/files/usr/lib ./bettercap
-
-echo "Not supported yet. TODO: Steps to grab and install on tmux..."
-
-

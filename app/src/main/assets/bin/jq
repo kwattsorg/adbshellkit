@@ -1,2 +1,0 @@
-#!/system/bin/sh
-LD_PRELOAD=/data/user/0/net.kwatts.android.droidcommanderpro/cache/bin/libjq.so.1 /data/user/0/net.kwatts.android.droidcommanderpro/cache/bin/jq.arm "$@"
