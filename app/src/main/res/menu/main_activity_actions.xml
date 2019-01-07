@@ -27,13 +27,13 @@
         android:icon="@drawable/ic_action_settings"
         android:title="@string/action_setting"
         app:showAsAction="never" />
-    <item android:id="@+id/action_about"
-        android:title="About"
-        android:visible="false"
-        app:showAsAction="never" />
     <item android:id="@+id/action_logout"
         android:title="Logout"
         android:visible="false"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_about"
+        android:title="About"
+        android:visible="true"
         app:showAsAction="never" />
 </menu>
     <!-- android:icon="@drawable/ic_action_add_command" -->

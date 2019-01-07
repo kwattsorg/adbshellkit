@@ -1,0 +1,53 @@
+apply plugin: 'com.android.library'
+
+
+android {
+    //compileSdkVersion 22
+    //buildToolsVersion "23.0.0 rc2"
+    compileSdkVersion 27
+    //buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    resourcePrefix "obsez_fc__"
+
+    defaultConfig {
+        //minSdkVersion 8
+        //targetSdkVersion 22
+        minSdkVersion 21
+        targetSdkVersion 27 //26
+        versionCode 101011
+        versionName "1.1.11"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+//        debug {
+//            buildConfig "public final static boolean HAS_PROTOTYPE_FEATURE = true;"
+//        }
+//        release {
+//            buildConfig "public final static boolean HAS_PROTOTYPE_FEATURE = false;"
+//        }
+    }
+
+    lintOptions {
+        lintConfig rootProject.file('lint.xml')
+        quiet true
+        abortOnError false
+        ignoreWarnings true
+        disable 'InvalidPackage'  // Some libraries have issues with this.
+        disable 'OldTargetApi'    // Lint gives this warning but SDK 20 would be Android L Beta.
+        disable 'IconDensities'   // For testing purpose. This is safe to remove.
+        disable 'deprecation'
+        checkReleaseBuilds false
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.60"
+}
+
+
+

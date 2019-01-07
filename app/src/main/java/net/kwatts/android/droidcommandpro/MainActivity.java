@@ -485,7 +485,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
 
-
+            checkIfFirstTime();
 
         } catch (Exception e) { 
          	Timber.e( "MainActivity onCreate() failed:" + e.getMessage());
@@ -667,7 +667,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         Engine cmd_engine = new Engine();
         String res_cmd = cmd_engine.process(mUserMapVars, coreCommand);
         if (res_cmd != null) {
-            //TODO: send results to the output handler
             Message msg = mHandler.obtainMessage(MSG_NEWLINE);
             msg.arg1 = 0;
             msg.obj = res_cmd;
@@ -677,8 +676,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             double engine_s = engine_ms / 1000.0;
             logEvent("command_end", coreCommand, "complete in " + engine_s + "s length=" + res_cmd.length());
             setTextState("Command finished after " + engine_s + "secs... length=" + res_cmd.length(),"","");
-
-            //Toast.makeText(App.INSTANCE.getApplicationContext(), "Code commands are not supported yet.", Toast.LENGTH_SHORT).show();
             return;
         } else { /* run below */ }
 
@@ -778,6 +775,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 menu.findItem(R.id.user_saved_command).setVisible(false);
                 menu.findItem(R.id.user_remove_command).setVisible(false);
                 menu.findItem(R.id.action_logout).setVisible(false);
+                menu.findItem(R.id.action_about).setVisible(true);
             }
         }
         return super.onPrepareOptionsMenu(menu);
@@ -883,10 +881,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         Boolean isAdmin = Boolean.FALSE;
                         try {
 
-                            Object obj = result.getClaims().getOrDefault("admin", Boolean.FALSE);
-                            if (obj instanceof Boolean) {
-                                isAdmin = (Boolean) obj;
+                            //Object obj = result.getClaims().getOrDefault("admin", Boolean.FALSE);
+                            Map<String, Object> res = result.getClaims();
+                            for (Map.Entry<String,Object> entry : res.entrySet()) {
+                                String k = entry.getKey();
+                                Object v = entry.getValue();
+
+                                if (k.equals("admin")) {
+                                    if (v instanceof Boolean) {
+                                        isAdmin = (Boolean) v;
+                                    }
+                                }
                             }
+
                             if (isAdmin) {
                                 isAdminUserClaim = true;
                                 setTextUserStatus(mFirebaseUser.getEmail() + " as admin");
@@ -894,6 +901,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                 isAdminUserClaim = false;
                                 setTextUserStatus(mFirebaseUser.getEmail() + " as user");
                             }
+
+
                         } catch (Exception e) {
                             isAdminUserClaim = false;
                             setTextUserStatus("Logged in not as user or admin?");
@@ -1349,7 +1358,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 new ChooserDialog().with(MainActivity.this)
                         .withStartFile("/sdcard")
                         .withChosenListener(new ChooserDialog.Result() {
-                            @Override
+                            //@Override
                             public void onChoosePath(String path, File pathFile) {
                                 mDialogFileSelectedVars.setText(path);
                                 //Toast.makeText(MainActivity.this, "FILE: " + path, Toast.LENGTH_SHORT).show();
@@ -1627,7 +1636,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     }
 
+    public void checkIfFirstTime() {
+        boolean displayWelcome = mSharedPref.getBoolean("displayWelcomeScreen", true);
+        if (displayWelcome) {
+            com.eggheadgames.aboutbox.activity.AboutActivity.launch(this);
+        }
+        SharedPreferences.Editor editor = mSharedPref.edit().putBoolean("displayWelcomeScreen", false);
+        editor.commit();
 
+    }
 
 
 }

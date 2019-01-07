@@ -7,8 +7,8 @@ android {
         applicationId "net.kwatts.android.droidcommandpro"
         minSdkVersion 21
         targetSdkVersion 27 //26
-        versionCode 61
-        versionName "6.1"
+        versionCode 62
+        versionName "6.2"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
@@ -68,8 +68,9 @@ android {
         implementation 'com.github.bumptech.glide:glide:4.7.1'
         annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
         //implementation 'com.github.topjohnwu:libsu:1.1.1'
-        implementation 'com.github.topjohnwu:libsu:2.0.2'
-        implementation 'com.obsez.android.lib.filechooser:filechooser:1.1.10'
+        implementation 'com.github.topjohnwu:libsu:2.2.0'
+        implementation project(":android-file-chooser")
+        //implementation 'com.obsez.android.lib.filechooser:filechooser:1.1.10'
         implementation 'com.github.eggheadgames:android-about-box:1.3.2'
         //implementation 'com.google.cloud:google-cloud-dlp:0.32.0-beta'
         //implementation 'io.grpc:grpc-okhttp:1.9.0'
