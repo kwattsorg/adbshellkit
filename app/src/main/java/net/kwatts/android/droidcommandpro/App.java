@@ -14,7 +14,7 @@ import com.topjohnwu.superuser.ContainerApp;
 import com.eggheadgames.aboutbox.AboutConfig;
 
 /**
- * This is a subclass of {@link Application} used to provide shared objects for this app.
+ * This is a subclass of {@link Application} used to provide shared objects and superuser functionality across the full app
  */
 public class App extends ContainerApp  {
     private static final String TAG = "Application";

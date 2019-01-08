@@ -93,6 +93,7 @@ import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 import com.topjohnwu.superuser.CallbackList;
 import com.topjohnwu.superuser.Shell;
+import com.topjohnwu.superuser.io.*;
 
 import net.kwatts.android.droidcommandpro.commands.CommandGetContacts;
 import net.kwatts.android.droidcommandpro.commands.Engine;
@@ -1356,12 +1357,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mButtonFileSelectedVariables.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 new ChooserDialog().with(MainActivity.this)
-                        .withStartFile("/sdcard")
+                        .withStartFile("/")
                         .withChosenListener(new ChooserDialog.Result() {
                             //@Override
-                            public void onChoosePath(String path, File pathFile) {
+                            public void onChoosePath(String path, SuFile pathFile) {
                                 mDialogFileSelectedVars.setText(path);
-                                //Toast.makeText(MainActivity.this, "FILE: " + path, Toast.LENGTH_SHORT).show();
                             }
                         })
                         .build()

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.regex.Pattern;
 
+import com.topjohnwu.superuser.io.*;
 /**
  * Created by coco on 6/7/15.
  */
@@ -40,14 +41,15 @@ public class RegexFileFilter implements FileFilter {
 
     @Override
     public boolean accept(File pathname) {
+        SuFile suPathName = new SuFile(pathname);
         if (!m_allowHidden) {
-            if (pathname.isHidden()) {
+            if (suPathName.isHidden()) {
                 return false;
             }
         }
 
         if (m_onlyDirectory) {
-            if (!pathname.isDirectory()) {
+            if (!suPathName.isDirectory()) {
                 return false;
             }
         }
@@ -56,11 +58,11 @@ public class RegexFileFilter implements FileFilter {
             return true;
         }
 
-        if (pathname.isDirectory()) {
+        if (suPathName.isDirectory()) {
             return true;
         }
 
-        String name = pathname.getName();
+        String name = suPathName.getName();
         if (m_pattern.matcher(name).matches()) {
             return true;
         }

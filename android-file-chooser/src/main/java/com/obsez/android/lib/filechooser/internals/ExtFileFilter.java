@@ -2,6 +2,7 @@ package com.obsez.android.lib.filechooser.internals;
 
 import java.io.File;
 import java.io.FileFilter;
+import com.topjohnwu.superuser.io.*;
 
 /**
  * Created by coco on 6/7/15.
@@ -27,14 +28,15 @@ public class ExtFileFilter implements FileFilter {
 
     @Override
     public boolean accept(File pathname) {
+        SuFile suPathName = new SuFile(pathname);
         if (!m_allowHidden) {
-            if (pathname.isHidden()) {
+            if (suPathName.isHidden()) {
                 return false;
             }
         }
 
         if (m_onlyDirectory) {
-            if (!pathname.isDirectory()) {
+            if (!suPathName.isDirectory()) {
                 return false;
             }
         }
@@ -43,11 +45,11 @@ public class ExtFileFilter implements FileFilter {
             return true;
         }
 
-        if (pathname.isDirectory()) {
+        if (suPathName.isDirectory()) {
             return true;
         }
 
-        String ext = FileUtil.getExtensionWithoutDot(pathname);
+        String ext = FileUtil.getExtensionWithoutDot(suPathName);
         for (String e : m_ext) {
             if (ext.equalsIgnoreCase(e)) {
                 return true;

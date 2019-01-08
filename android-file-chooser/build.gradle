@@ -47,6 +47,13 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.60"
+    def libsuVersion = '2.2.0'
+    implementation "com.github.topjohnwu.libsu:core:${libsuVersion}"
+    /* Optional: For using com.topjohnwu.superuser.io classes */
+    implementation "com.github.topjohnwu.libsu:io:${libsuVersion}"
+    /* Optional: For including a prebuild busybox */
+    implementation "com.github.topjohnwu.libsu:busybox:${libsuVersion}"
+
 }
 
 

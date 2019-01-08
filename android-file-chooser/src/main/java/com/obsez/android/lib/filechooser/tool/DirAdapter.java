@@ -27,22 +27,22 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.topjohnwu.superuser.io.*;
 /**
  * Created by coco on 6/7/15.
  */
-public class DirAdapter extends ArrayAdapter<File> {
-
-    public DirAdapter(Context cxt, List<File> entries, int resId) {
+public class DirAdapter extends ArrayAdapter<SuFile> {
+    public DirAdapter(Context cxt, List<SuFile> entries, int resId) {
         super(cxt, resId, R.id.text, entries);
         this.init(null);
     }
 
-    public DirAdapter(Context cxt, List<File> entries, int resId, String dateFormat) {
+    public DirAdapter(Context cxt, List<SuFile> entries, int resId, String dateFormat) {
         super(cxt, resId, R.id.text, entries);
         this.init(dateFormat);
     }
 
-    public DirAdapter(Context cxt, List<File> entries, int resource, int textViewResourceId) {
+    public DirAdapter(Context cxt, List<SuFile> entries, int resource, int textViewResourceId) {
         super(cxt, resource, textViewResourceId, entries);
         this.init(null);
     }
@@ -82,7 +82,7 @@ public class DirAdapter extends ArrayAdapter<File> {
 
         tvDate.setVisibility(View.VISIBLE);
 
-        File file = super.getItem(position);
+        SuFile file = super.getItem(position);
         if (file == null) return rl;
         tvName.setText(file.getName());
         Drawable icon;
@@ -152,7 +152,7 @@ public class DirAdapter extends ArrayAdapter<File> {
         this._resolveFileType = resolveFileType;
     }
 
-    public void setEntries(List<File> entries) {
+    public void setEntries(List<SuFile> entries) {
         setNotifyOnChange(false);
         super.clear();
         setNotifyOnChange(true);
@@ -192,8 +192,8 @@ public class DirAdapter extends ArrayAdapter<File> {
         return _selected.size() == 1;
     }
 
-    public List<File> getSelected() {
-        ArrayList<File> list = new ArrayList<File>();
+    public List<SuFile> getSelected() {
+        ArrayList<SuFile> list = new ArrayList<SuFile>();
         for (int i = 0; i < _selected.size(); i++) {
             list.add(_selected.valueAt(i));
         }
@@ -256,7 +256,7 @@ public class DirAdapter extends ArrayAdapter<File> {
     private Drawable _defaultFileIcon = null;
     private boolean _resolveFileType = false;
     private PorterDuffColorFilter _colorFilter;
-    private SparseArray<File> _selected = new SparseArray<File>();
+    private SparseArray<SuFile> _selected = new SparseArray<SuFile>();
     private int _hoveredIndex;
     private List<Integer> _indexStack = new LinkedList<>();
 }

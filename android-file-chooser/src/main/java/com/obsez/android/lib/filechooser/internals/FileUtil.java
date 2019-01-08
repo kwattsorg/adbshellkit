@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.topjohnwu.superuser.io.*;
 
 /**
  * Created by coco on 6/7/15.
@@ -24,7 +25,7 @@ import java.util.regex.Pattern;
 public class FileUtil {
 
 
-    public static String getExtension(File file) {
+    public static String getExtension(SuFile file) {
         if (file == null) {
             return null;
         }
@@ -38,7 +39,7 @@ public class FileUtil {
         }
     }
 
-    public static String getExtensionWithoutDot(File file) {
+    public static String getExtensionWithoutDot(SuFile file) {
         String ext = getExtension(file);
         if (ext.length() == 0) {
             return ext;
