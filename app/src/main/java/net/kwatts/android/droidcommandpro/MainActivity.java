@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,6 +18,7 @@ import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -32,6 +34,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -60,6 +63,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.crashlytics.android.Crashlytics;
 import com.github.pedrovgs.lynx.LynxActivity;
 import com.github.pedrovgs.lynx.LynxConfig;
 import com.google.android.gms.ads.AdRequest;
@@ -119,6 +123,12 @@ import timber.log.Timber;
 
 
 
+
+
+//TODO:
+// Package support - https://github.com/termux/termux-packages
+
+
 public class MainActivity extends AppCompatActivity implements OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
     public static SharedPreferences mSharedPref;
     private ShareActionProvider shareActionProvider;
@@ -128,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public static final String CHANNEL_ID = "main";
     public static final int RC_SIGN_IN = 10;
-
 
     public static List<Command> mCommandQueue = new LinkedList<Command>();
     TextView mTextStatus;
@@ -141,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     List<String> mAppPackagesList;
     List<NetworkInterface> mNetworkInterfaceList;
 
+    public ProgressDialog mProgressDialog;
 
 	public static EditText mTopCommandView;
     View mAdmobAds;
@@ -193,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     // app id: ca-app-pub-2189980367471582~1443964910
     // ad banner unit id: ca-app-pub-2189980367471582/2916172142
     public static final int MULTIPLE_PERMISSIONS = 10; // code you want.
+    public static final int COMMAND_PERMISSION = 20; // code you want.
 
     public static NotificationCompat.Builder mNotificationBuilder;
     public static NotificationManagerCompat mNotificationManager;
@@ -242,21 +253,43 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
     };
 
-
+    //TODO: Custom span to handle ANSI color codes
+    // convert to TerminalRow's - https://github.com/termux/termux-app/blob/c80e126b8fc07e8c322bba4c1f277086a962f81f/terminal-emulator/src/main/java/com/termux/terminal/TerminalRow.java
     private void handleMessageNewline(Message msg)
     {
         int cmd_state = msg.arg1;
         String line = (String) msg.obj;
 
+
         final boolean autoscroll = mScrollView.getScrollY() + mScrollView.getHeight() >= mLines.getBottom();
         TextView lineView = new TextView(App.INSTANCE.getApplicationContext());
+
+
+
         lineView.setTypeface(Typeface.MONOSPACE);
         lineView.setTextIsSelectable(true);
+
+        int defaultTextColor = Color.GREEN;
         if (cmd_state < 0) {
-            lineView.setText(new FormattedString(line, mTextSize, Color.RED));
-        } else {
-            lineView.setText(new FormattedString(line, mTextSize, Color.GREEN));
+            defaultTextColor = Color.RED;
         }
+
+        SpannableString spanString = new SpannableString(line);
+        spanString.setSpan(new TextAppearanceSpan("monospace", 0, mTextSize, null, null), 0, spanString.length(), 0);
+        spanString.setSpan(new ForegroundColorSpan(defaultTextColor), 0, spanString.length(), 0);
+/*
+        if (line.indexOf(Ansi.RED) != -1 ) {
+            int idx = line.indexOf(Ansi.RED);
+            spanString.setSpan(new ForegroundColorSpan(Color.RED), idx, spanString.length(), 0);
+        } else if(line.indexOf(Ansi.YELLOW) != -1 ) {
+            int idx = line.indexOf(Ansi.YELLOW);
+            spanString.setSpan(new ForegroundColorSpan(Color.YELLOW), idx, spanString.length(), 0);
+        } */
+
+
+        lineView.setText(spanString);
+
+
 
         mLines.addView(lineView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 
@@ -276,6 +309,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         });                            
     }
 
+    // https://stackoverflow.com/questions/10828182/spannablestringbuilder-to-create-string-with-multiple-fonts-text-sizes-etc-exampe
     private static class FormattedString extends SpannableString
     {
         public FormattedString(String line, int size, int color)
@@ -292,6 +326,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         //mAppContext = getApplicationContext();
         Timber.plant(new DebugTree());
+
+        // adb shell setprop log.tag.droidcommander VERBOSE
+
+
+
+        android.util.TimingLogger timingLogger = new android.util.TimingLogger("droidcommander","onCreate");
 
         // am start -n "net.kwatts.android.droidcommandpro/net.kwatts.android.droidcommandpro.MainActivity"
         //          -a "android.intent.action.MAIN" --es net.kwatts.android.droidcommandpro.EXTRA_COMMAND id
@@ -343,6 +383,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         });
 
 
+        /*
         try {
             // EXPERIMENTAL: Contacts
             //org.json.JSONObject c = CommandGetContacts.getAllContacts(App.INSTANCE.getContentResolver());
@@ -350,12 +391,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             //Engine.processCommand(null, "cmd_smali net.kwatts.android.droidcommandpro");
         } catch (Exception e) {
                 Timber.d("Exception with experimental calls:" + e.getMessage());
-        }
+        } */
 
 
         try {
         	setContentView(R.layout.main);
-
 
             LinearLayout topLinearLayout = findViewById(R.id.topLinearLayout);
             mTextStatus = findViewById(R.id.textViewStatus);
@@ -369,6 +409,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             if (mSharedPref.getBoolean("disableAds", false)) {
                 topLinearLayout.removeView(mAdmobAds);
             } else {
+                timingLogger.addSplit("Loading Ads...");
                 mAdView = findViewById(R.id.adMobView);
                 AdRequest adRequest = new AdRequest.Builder().build();
                 mAdView.loadAd(adRequest);
@@ -377,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mGoogleUserSignedInImageButton = findViewById(R.id.signed_in_image_button);
             mGoogleUserSignInButton = findViewById(R.id.sign_in_button);
 
-
+            timingLogger.addSplit("Setting permissions on assets...");
             new AsyncTask<Void, Void, Integer>() {
                 protected Integer doInBackground(Void... params) {
                     int c1 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
@@ -398,7 +439,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 }
             }.execute();
 
-
+            timingLogger.addSplit("Done.");
             android.widget.AdapterView.OnItemSelectedListener myListener = new android.widget.AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -443,19 +484,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 }
             });
 
-            mFirebaseUser = mAuth.getCurrentUser();
-            if (mFirebaseUser != null) {
-                if (mFirebaseUser.isAnonymous()) {
-                    refreshUserUI(false );
-                } else {
-                    refreshUserUI(true);
-                }
-
-            } else {
-                refreshUserUI(false );
-            }
-
-
             // Notifications
             createNotificationChannel();
             Intent intent = new Intent(this, MainActivity.class);
@@ -471,7 +499,34 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     .setAutoCancel(false);
             mNotificationManager = NotificationManagerCompat.from(this);
 
+            timingLogger.addSplit("Completed notification channels.");
+
             loadVariables();
+
+            timingLogger.addSplit("Completed loading variables.");
+
+            timingLogger.addSplit("Getting current user...");
+
+
+
+            mFirebaseUser = mAuth.getCurrentUser();
+            timingLogger.addSplit("Done getting current user...");
+            if (mFirebaseUser != null) {
+                timingLogger.addSplit("mFirebaseUser is null, checking if anonymous else logging in and refreshing UI...");
+                if (mFirebaseUser.isAnonymous()) {
+                    refreshUserUI(false );
+                } else {
+                    refreshUserUI(true);
+                }
+
+            } else {
+                timingLogger.addSplit("mFirebaseUser is not null, already logged in, refreshing UI...");
+                refreshUserUI(false );
+            }
+
+            //mProgressDialog.hide();
+
+            timingLogger.addSplit("Completed authentication.");
 
 
             // EXPERIMENTAL: Smali Command
@@ -486,7 +541,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
 
-            checkIfFirstTime();
+            //checkIfFirstTime();
+
+            timingLogger.dumpToLog();
+
 
         } catch (Exception e) { 
          	Timber.e( "MainActivity onCreate() failed:" + e.getMessage());
@@ -514,40 +572,42 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
     public void refreshUserUI(boolean isLoggedIn) {
+        android.util.TimingLogger timingLogger = new android.util.TimingLogger("droidcommander","refreshUserUI");
+
+        timingLogger.addSplit("Invalidating OptionsMenu...");
         invalidateOptionsMenu();
 
+        timingLogger.addSplit("InitFirebase()");
         if (isLoggedIn) {
             setTextUserStatus(mFirebaseUser.getEmail() + " logged in");
+            timingLogger.addSplit("Checking if Admin...");
             if (isUserAdmin()) {
                 setTextUserStatus(mFirebaseUser.getEmail() + " as admin");
             }
+            timingLogger.addSplit("Setting user picture...");
             Glide.with(getApplicationContext()).load(mFirebaseUser.getPhotoUrl().toString())
                     .apply(new RequestOptions().circleCrop()).into(mGoogleUserSignedInImageButton);
             initFirebase();
         } else {
             setTextUserStatus("Showing public commands only, please login to access and save your own commands.");
+            timingLogger.addSplit("Setting anonymous user picture...");
             Glide.with(getApplicationContext()).load(R.drawable.ic_account_circle)
                     .apply(new RequestOptions().circleCrop()).into(mGoogleUserSignedInImageButton);
             initFirebase();
         }
 
+        timingLogger.addSplit("End with refreshUserUI");
         setTextState("Command ready" +
                 "... is_superuser=" + Shell.getShell().isRoot(), "","");
+
+        timingLogger.dumpToLog();
+
     }
 
 
 
     public void onClick(View v) {
-
-        /*
-            Shell tShell = com.topjohnwu.superuser.Shell.getShell();
-            try {
-                tShell.close();
-            } catch (IOException e) {
-                Timber.e("exception killing shell");
-            } */
-
-
+        try {
             Command c = mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
 
             // Drrty, setting this here in case command is changed.
@@ -559,6 +619,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             } else {
                 runCommand(c);
             }
+        } catch (Exception e) {
+            Crashlytics.logException(e);
+        }
+
     }
 
 
@@ -566,6 +630,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
+
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage("Logging in...");
+            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mProgressDialog.setIndeterminate(false);
+            mProgressDialog.show();
+
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 // https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=XYZ123
@@ -605,6 +676,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        mProgressDialog.cancel();
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Timber.d( "signInWithCredential:success");
@@ -622,8 +694,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     static long startTime;
     static int mExecState = 0;
+
+
+    com.topjohnwu.superuser.Shell.Job mJob;
+
     public void runCommand(Command c) {
-        //clear window
+
+        //clear past jobs...
+        if (mJob != null) {
+            Toast.makeText(getApplicationContext(), "Past command(ID: " + mJob.hashCode() + ") running, wait until complete or timeout in 20 seconds", Toast.LENGTH_SHORT).show();
+            return;
+            //Toast.makeText(getApplicationContext(), "Past command(ID: " + mJob.hashCode() + ") still running and added to display output", Toast.LENGTH_SHORT).show();
+        }
+
+        //clear window...
         mTopOutString.setLength(0);
         mTopOutStringError.setLength(0);
         mLines.removeAllViews();
@@ -723,6 +807,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             @MainThread
             @Override
             public void onResult(Shell.Result out) {
+
                 CharSequence l = "";
                 if (mLines.getChildCount() > 0) {
                     l =  ((TextView) mLines.getChildAt(mLines.getChildCount() -1 )).getText();
@@ -732,18 +817,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 logEvent("command_end", coreCommand, "complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"));
                 setTextState("Command finished after " + s + "secs... lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success") +
                         ",shell_code=" + out.getCode(),"",l.toString());
+                mJob = null;
             }
         };
 
 
+
         if (Shell.getShell().isRoot()) {
-            com.topjohnwu.superuser.Shell.Job j = Shell.su(runCommand).to(consoleList, consoleListError);
-            j.submit(runResultCallback);
+            mJob = Shell.su(runCommand).to(consoleList, consoleListError);
+            mJob.submit(runResultCallback);
         }
         else {
-            com.topjohnwu.superuser.Shell.Job j2 = Shell.sh(runCommand).to(consoleList, consoleListError);
-            j2.submit(runResultCallback);
+            mJob = Shell.sh(runCommand).to(consoleList, consoleListError);
+            mJob.submit(runResultCallback);
         }
+
+
 
     }
 
@@ -857,6 +946,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     }
 
     public void initFirebase() {
+        android.util.TimingLogger timingLogger = new android.util.TimingLogger("droidcommander","initFirebase");
+
+        timingLogger.addSplit("Init references...");
         DatabaseReference mFbaseDBCommandsRef = mFirebaseDB.getReference();
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         final FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -865,12 +957,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mGlobalCommands.clear();
         lastCommandUsed = null;
 
+        timingLogger.addSplit("Setup user commands...");
+
         if (mFirebaseUser != null) {
             if (!mFirebaseUser.isAnonymous()) {
                 User user = new User();
                 user.username = mFirebaseUser.getDisplayName();
                 user.email = mFirebaseUser.getEmail();
-                user.phone_number = mFirebaseUser.getPhoneNumber();
+                //user.phone_number = mFirebaseUser.getPhoneNumber();
                 user.photo_url = mFirebaseUser.getPhotoUrl().toString();
 
                 FirebaseDatabase.getInstance().getReference().child("users").child(mFirebaseUser.getUid()).setValue(user);
@@ -907,6 +1001,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         } catch (Exception e) {
                             isAdminUserClaim = false;
                             setTextUserStatus("Logged in not as user or admin?");
+                            Crashlytics.logException(e);
                         }
                     }
                 });
@@ -954,6 +1049,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             // setTextUserStatus("Logged in as anonymous");
         }
 
+        timingLogger.addSplit("Setup global commands...");
         /* global commands */
         mFbaseDBCommandsRef.child("commands_v2").child("global").addValueEventListener(new ValueEventListener() {
             @Override
@@ -980,6 +1076,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
+
+
+        timingLogger.dumpToLog();
 
     }
 
@@ -1078,7 +1177,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
         } catch (Exception e) {
             Timber.e("Unable to add dynamic shortcut!");
-            e.printStackTrace();
+            Crashlytics.logException(e);
         }
     }
 
@@ -1090,7 +1189,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
         } catch (Exception e) {
             Timber.e("Unable to remove dynamic shortcut!");
-            e.printStackTrace();
+            Crashlytics.logException(e);
         }
     }
 
@@ -1162,7 +1261,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mTextViewState.setText(spanString);
         } catch (Exception e) {
             Timber.e("Unable to set status with setTextState!");
-            e.printStackTrace();
+            Crashlytics.logException(e);
 
         }
 
@@ -1185,6 +1284,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     element.getMethodName(),
                     element.getLineNumber());
         }
+    }
+
+    public boolean checkCommandPermission(String permission) {
+        int result;
+        result = ContextCompat.checkSelfPermission(MainActivity.this,permission);
+        if (result != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {permission},COMMAND_PERMISSION );
+            return false;
+        }
+
+        return true;
     }
 
     private boolean checkPermissions() {
@@ -1218,6 +1328,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 }
                 return;
             }
+
+            case COMMAND_PERMISSION: {
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    // permissions granted.
+                } else {
+                    String permsNoGrant = "";
+                    for (String per : permissionsList) {
+                        permsNoGrant += "\n" + per;
+                    }
+                    // permissions list of don't granted permission
+                }
+                return;
+
+            }
         }
     }
     private void createNotificationChannel() {
@@ -1246,6 +1370,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             return map;
         } catch (Exception e) {
             Timber.e(e);
+            Crashlytics.logException(e);
         }
 
         return null;
@@ -1265,7 +1390,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 mAppPackagesList.add(info.packageName);
             } catch (Exception e) {
                 Timber.e("Unable to get list of packages!");
-                e.printStackTrace();
+                Crashlytics.logException(e);
             }
         }
 
@@ -1280,7 +1405,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
         } catch (Exception e) {
             Timber.e("Unable to get list of network interfaces!");
-            e.printStackTrace();
+            Crashlytics.logException(e);
         }
 
         //Defaults
@@ -1337,6 +1462,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
                                     } catch(Exception e ) {
                                         Timber.e( e.getMessage());
+                                        Crashlytics.logException(e);
                                     }
 
 
@@ -1356,8 +1482,25 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         mButtonFileSelectedVariables.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+
+                String startPath;
+
+                // first see if directory is entered
+                String inputFileName = mDialogFileSelectedVars.getText().toString();
+                if (!TextUtils.isEmpty(inputFileName)) {
+                    startPath = new File(inputFileName).getAbsolutePath();
+                }
+                else {
+                    if (Shell.getShell().isRoot()) {
+                        startPath = "/";
+                    } else {
+                        startPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+                    }
+                }
+
+
                 new ChooserDialog().with(MainActivity.this)
-                        .withStartFile("/")
+                        .withStartFile(startPath)
                         .withChosenListener(new ChooserDialog.Result() {
                             //@Override
                             public void onChoosePath(String path, SuFile pathFile) {
@@ -1447,6 +1590,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                             }
                                             catch (Exception e) {
                                                 Timber.e( e.getMessage());
+                                                Crashlytics.logException(e);
                                             }
                                             Toast.makeText(getApplicationContext(), "Command removed for " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
                                         } else {
@@ -1537,6 +1681,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                     }
                                     catch (Exception e) {
                                         Timber.e( e.getMessage());
+                                        Crashlytics.logException(e);
                                     }
 
 
@@ -1568,6 +1713,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                     }
                                     catch (Exception e) {
                                         Timber.e( e.getMessage());
+                                        Crashlytics.logException(e);
                                     }
                                     Toast.makeText(getApplicationContext(), "Command updated for " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
 

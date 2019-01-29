@@ -30,12 +30,17 @@ public class App extends ContainerApp  {
     @Override
     public synchronized void onCreate() {
         super.onCreate();
-        Shell.Config.addInitializers(BusyBoxInstaller.class);
+
+        android.util.TimingLogger timingLogger = new android.util.TimingLogger("droidcommander","App.create");
+        //Shell.Config.addInitializers(BusyBoxInstaller.class);
+        timingLogger.addSplit("Setting up Shell...");
+        Shell.Config.setTimeout(20); //20 second timeout
         Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR);
         Shell.Config.verboseLogging(BuildConfig.DEBUG);
         // Use internal busybox
        // BusyBox.setup(this);
 
+        timingLogger.addSplit("Firebase.setPersistence()");
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         Log.d(TAG, "onCreate");
         this.isopen = true;
@@ -69,6 +74,8 @@ public class App extends ContainerApp  {
         aboutConfig.acknowledgmentHtmlPath = null;
         aboutConfig.emailAddress = "kwatkins@gmail.com";
         aboutConfig.emailSubject = "Feedback for " + aboutConfig.packageName;
+
+        timingLogger.dumpToLog();
 
 
     }

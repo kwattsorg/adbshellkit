@@ -1032,12 +1032,16 @@ public class ChooserDialog implements AdapterView.OnItemClickListener, DialogInt
     private void listDirs() {
         _entries.clear();
 
-        if (_currentDir == null) {
+        if (_currentDir == null ) {
             _currentDir = new SuFile(FileUtil.getStoragePath(_context, false));
         }
 
+        SuFile[] files = null;
+        if (_currentDir.canRead()) {
+            files = _currentDir.listFiles(_fileFilter);
+        }
         // Get files
-        SuFile[] files = _currentDir.listFiles(_fileFilter);
+        //SuFile[] files = _currentDir.listFiles(_fileFilter);
 
         // Add the ".." entry
         boolean up = false;

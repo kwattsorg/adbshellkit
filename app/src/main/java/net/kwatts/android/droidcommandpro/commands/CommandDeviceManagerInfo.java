@@ -47,6 +47,9 @@ public class CommandDeviceManagerInfo implements Command {
     public String getCommandName() {
         return cmd;
     }
+    public String[] getPermissions() {
+        return new String[] { "" };
+    }
 
     public JSONObject execute(android.content.Context ctx, List<String> args) {
         JSONObject res = new JSONObject();

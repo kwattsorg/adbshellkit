@@ -27,6 +27,8 @@ public class Command {
     @SerializedName("runcounts")
     public Long mRuncounts;
 
+
+
     public String key;
 
     public Command() {};
@@ -61,6 +63,18 @@ public class Command {
         mRuncounts = runcounts;
     }
 
+
+
+
+
+/*
+    @SerializedName("needsroot")
+    public boolean needsRoot;
+    @SerializedName("permissions")
+    public List<String> mPermissions;
+    public List<String> getPermissions() { return mPermissions;}
+    public void setPermissions(List<String> permissions) { mPermissions = permissions; }
+*/
     public void addToRuncounts() {
         if (mRuncounts == null) {
             mRuncounts = 1L;
@@ -96,6 +110,8 @@ public class Command {
         result.put("description", mDescription);
         result.put("command", mCommand);
         result.put("runcounts", mRuncounts);
+
+        // result.put("permissions", mPermissions);
         return result;
     }
 

@@ -39,6 +39,7 @@ public class CommandSmali implements Command {
     public String getCommandName() {
         return cmd;
     }
+    public String[] getPermissions() { return new String[] { "" }; }
 
     public JSONObject execute(android.content.Context ctx, List<String> args) {
         String packageApkFileName = getApkFileName(ctx,args.get(0));

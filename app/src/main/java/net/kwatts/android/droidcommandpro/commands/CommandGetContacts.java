@@ -3,6 +3,8 @@ package net.kwatts.android.droidcommandpro.commands;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 
+import net.kwatts.android.droidcommandpro.Manifest;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,6 +18,7 @@ public class CommandGetContacts implements Command {
     public String getCommandName() {
         return cmd;
     }
+    public String[] getPermissions() { return new String[] {android.Manifest.permission.READ_CONTACTS }; }
 
     public JSONObject execute(android.content.Context ctx, List<String> args) {
         return getAllContacts(ctx.getContentResolver());
