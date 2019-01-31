@@ -2,6 +2,7 @@ package net.kwatts.android.droidcommandpro.commands;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
 import org.jf.dexlib2.DexFileFactory;
 import org.jf.dexlib2.Opcodes;
@@ -15,14 +16,26 @@ import org.jf.dexlib2.iface.MethodImplementation;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.ReferenceInstruction;
 import org.jf.dexlib2.iface.reference.MethodReference;
-import org.jf.dexlib2.iface.value.EncodedValue;
-import org.jf.dexlib2.util.EncodedValueUtils;
+import org.jf.dexlib2.iface.value.*;
+import org.jf.dexlib2.util.*;
 import org.jf.dexlib2.analysis.*;
+import org.jf.dexlib2.iface.reference.*;
+import org.jf.util.*;
+import org.jf.dexlib2.util.*;
+import lanchon.multidexlib2.BasicDexFileNamer;
+import lanchon.multidexlib2.DexIO;
+import lanchon.multidexlib2.DexFileNamer;
+import lanchon.multidexlib2.MultiDexIO;
+import lanchon.multidexlib2.OpcodeUtils;
+import lanchon.multidexlib2.SingletonDexContainer;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.io.Writer;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.io.File;
 
 import timber.log.Timber;
 
@@ -36,13 +49,21 @@ public class CommandSmali implements Command {
 
     public static String cmd = "cmd_smali";
 
+
     public String getCommandName() {
         return cmd;
     }
     public String[] getPermissions() { return new String[] { "" }; }
 
+    private DexFileNamer dexFileNamer;
+    private Opcodes opcodes;
+
     public JSONObject execute(android.content.Context ctx, List<String> args) {
-        String packageApkFileName = getApkFileName(ctx,args.get(0));
+
+        String appName = args.get(0);
+        String appNameSmali = appName.replace('.','/');
+        String packageApkFileName = getApkFileName(ctx,appName);
+
 
 
         JSONObject res = new JSONObject();
@@ -52,33 +73,133 @@ public class CommandSmali implements Command {
         }
 
 
-        org.jf.dexlib2.dexbacked.DexBackedDexFile dexFile = null ;
-        try {
 
-            dexFile = DexFileFactory.loadDexFile(packageApkFileName, Opcodes.getDefault());
+        DexFile dex = null;
+        try {
+            dexFileNamer = new BasicDexFileNamer();
+            opcodes = Opcodes.forApi(Build.VERSION.SDK_INT);
+            File apkFile = new File(packageApkFileName);
+
+            dex = MultiDexIO.readDexFile(true,
+                    apkFile,
+                    dexFileNamer,
+                    opcodes,
+                    null);
+
+
+            //dexFile = DexFileFactory.loadDexFile(packageApkFileName, Opcodes.getDefault());
             //TODO: process multiple dex files, see: https://github.com/Sable/soot/blob/develop/src/main/java/soot/dexpler/DexFileProvider.java
 
         } catch (IOException ioe) {
             Timber.e(ioe,"Unable to load APK");
             return res;
         }
-        if (dexFile != null) {
+        if (dex != null) {
             try {
-                res.put("dex_class_count", dexFile.getClassCount());
-                res.put("dex_field_count", dexFile.getFieldCount());
-                res.put("dex_method_count", dexFile.getMethodCount());
-                res.put("dex_string_count", dexFile.getStringCount());
-                res.put("dex_type_count", dexFile.getTypeCount());
+                //res.put("dex_class_count", dex.getClasses().size());
+                Set<? extends ClassDef> dexClasses = dex.getClasses();
+                ClassDef[] classDefs = dexClasses.toArray(new ClassDef[dexClasses.size()]);
 
-                JSONObject dex_types = new JSONObject();
-                for (int i = 0; i < dexFile.getTypeCount(); i++) {
-                    dex_types.put("dex_type_" + i, dexFile.getType(i));
+
+
+                JSONObject classes = new JSONObject();
+                for (int c = 0; c < classDefs.length; c++) {
+
+                    ClassDef clazz = classDefs[c];
+                    //                     if (!className.startsWith("Landroid") && !className.startsWith("Ljava") && !className.startsWith("Ldalvik")) {
+                    if (clazz.getType().startsWith("L" + appNameSmali)) {
+
+
+                        // CLASS INSTANCE VARIABLES
+
+                        Iterable<? extends Field> fields = clazz.getFields();
+
+                        JSONArray class_fields = new JSONArray();
+                        for (Field field:fields) {
+                            StringBuffer f = new StringBuffer(field.getName());
+                            EncodedValue initialValue = field.getInitialValue();
+
+                            if (initialValue != null) {
+
+                                // https://github.com/glasses007/smali/blob/master/baksmali/src/main/java/org/jf/baksmali/Adaptors/EncodedValue/EncodedValueAdaptor.java
+                                //https://github.com/ylya/horndroid/blob/master/src/main/java/com/horndroid/util/FormatEncodedValue.java
+                                switch (initialValue.getValueType()) {
+                                    case ValueType.STRING:
+                                        f.append("=" + ((StringEncodedValue) initialValue).getValue());
+                                        break;
+                                    case ValueType.INT:
+                                        f.append("=" + ((IntEncodedValue) initialValue).getValue());
+                                        break;
+                                    case ValueType.CHAR:
+                                        f.append("=" + ((CharEncodedValue) initialValue).getValue());
+                                        break;
+                                    case ValueType.BOOLEAN:
+                                        f.append("=" + ((BooleanEncodedValue) initialValue).getValue());
+                                        break;
+
+                                    default:
+                                        //f.append("=" + ValueType.getValueTypeName(initialValue.getValueType()) + ")");
+
+                                }
+
+                            }
+                            class_fields.put(f.toString());
+                        }
+
+
+
+
+
+                        // CLASS METHODS
+                        JSONArray class_methods = new JSONArray();
+
+                        for (Method methodDef: clazz.getMethods()) {
+                            MethodImplementation methodImpl = methodDef.getImplementation();
+                            if (methodImpl != null) {
+                                for (Instruction instruction: methodImpl.getInstructions()) {
+                                    if (instruction instanceof ReferenceInstruction) {
+                                        if (((ReferenceInstruction)instruction).getReferenceType() == ReferenceType.METHOD) {
+                                            MethodReference method =
+                                                    (MethodReference) ((ReferenceInstruction)instruction).getReference();
+
+                                            String definingClass = method.getDefiningClass();
+                                            String returnType = method.getReturnType();
+
+                                            List<? extends CharSequence> paramTypes = method.getParameterTypes();
+                                            StringBuffer returnTypes = new StringBuffer("(");
+                                            if (paramTypes != null) {
+                                                for (CharSequence type : paramTypes) {
+                                                    returnTypes.append(type.toString());
+                                                }
+                                            }
+                                            returnTypes.append(")");
+
+                                            class_methods.put(returnType + returnTypes.toString());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
+
+
+                    JSONObject f = new JSONObject();
+                    f.put("fields", class_fields);
+                    f.put("methods", class_methods);
+
+                    res.put(String.valueOf(c),f);
+
+                    }
+
                 }
-                res.put("dex_types", dex_types);
 
-            } catch (Exception e) { }
 
-            //res = getAppSmali(dexFile);
+
+            } catch (Exception e) {
+                Timber.e(e);
+            }
+
         } else
         {
             Timber.d("dex file is null");
@@ -88,11 +209,7 @@ public class CommandSmali implements Command {
     }
 
 
-    public static void decompileApp(String appname) {
 
-
-
-    }
 
     // Get resources for package
     // aapt2 dump resources ./app/release/app-release.apk
@@ -252,5 +369,8 @@ public class CommandSmali implements Command {
 
         return classFields;
     }
+
+
+
 
 }

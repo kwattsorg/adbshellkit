@@ -6,12 +6,16 @@ package net.kwatts.android.droidcommandpro;
 
 import android.app.Application;
 import android.util.Log;
-
+import timber.log.Timber;
 import com.google.firebase.database.FirebaseDatabase;
 import com.topjohnwu.superuser.BusyBoxInstaller;
 import com.topjohnwu.superuser.Shell;
 import com.topjohnwu.superuser.ContainerApp;
 import com.eggheadgames.aboutbox.AboutConfig;
+import com.crashlytics.android.Crashlytics;
+import android.os.*;
+
+import static timber.log.Timber.DebugTree;
 
 /**
  * This is a subclass of {@link Application} used to provide shared objects and superuser functionality across the full app
@@ -31,16 +35,23 @@ public class App extends ContainerApp  {
     public synchronized void onCreate() {
         super.onCreate();
 
-        android.util.TimingLogger timingLogger = new android.util.TimingLogger("droidcommander","App.create");
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new DebugTree());
+        } else {
+            Timber.plant(new ReleaseTree());
+        }
+
+
+        //android.util.TimingLogger timingLogger = new android.util.TimingLogger("droidcommander","App.create");
         //Shell.Config.addInitializers(BusyBoxInstaller.class);
-        timingLogger.addSplit("Setting up Shell...");
+        //timingLogger.addSplit("Setting up Shell...");
         Shell.Config.setTimeout(20); //20 second timeout
         Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR);
         Shell.Config.verboseLogging(BuildConfig.DEBUG);
         // Use internal busybox
        // BusyBox.setup(this);
 
-        timingLogger.addSplit("Firebase.setPersistence()");
+        //timingLogger.addSplit("Firebase.setPersistence()");
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         Log.d(TAG, "onCreate");
         this.isopen = true;
@@ -75,9 +86,60 @@ public class App extends ContainerApp  {
         aboutConfig.emailAddress = "kwatkins@gmail.com";
         aboutConfig.emailSubject = "Feedback for " + aboutConfig.packageName;
 
-        timingLogger.dumpToLog();
+        //timingLogger.dumpToLog();
 
 
+    }
+
+
+
+    /** A tree which logs important information for crash reporting. */
+    public static final class ReleaseTree extends Timber.Tree {
+        @Override protected void log(int priority, String tag, String message, Throwable throwable) {
+            switch (priority) {
+                case Log.VERBOSE:
+                case Log.DEBUG:
+                case Log.INFO:
+                    break;
+                case Log.WARN:
+                    logWarning(priority, tag, message);
+                    break;
+                case Log.ERROR:
+                    logException(throwable);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void logWarning(int priority, String tag, String message) {
+            Crashlytics.log(priority, tag, message);
+        }
+
+        private void logException(final Throwable throwable) {
+            Crashlytics.logException(throwable);
+        }
+    }
+
+
+
+    public static final class DebugTree extends Timber.DebugTree {
+        @Override
+        protected void log(int priority, String tag, String message, Throwable t) {
+            // Workaround for devices that doesn't show lower priority logs
+            if (Build.MANUFACTURER.equals("HUAWEI") || Build.MANUFACTURER.equals("samsung")) {
+                if (priority == Log.VERBOSE || priority == Log.DEBUG || priority == Log.INFO)
+                    priority = Log.ERROR;
+            }
+            super.log(priority, tag, message, t);
+        }
+        @Override
+        protected String createStackElementTag(StackTraceElement element) {
+            return String.format("net.kwatts.android.droidcommander [C:%s] [M:%s] [L:%s] ",
+                    super.createStackElementTag(element),
+                    element.getMethodName(),
+                    element.getLineNumber());
+        }
     }
 
 }

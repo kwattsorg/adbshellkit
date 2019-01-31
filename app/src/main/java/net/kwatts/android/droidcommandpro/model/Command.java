@@ -20,10 +20,13 @@ public class Command {
     public boolean isPublic;
     @SerializedName("taglist")
     private List<String> mTagList;
+    @SerializedName("permissionlist")
+    private List<String> mPermissionlist;
     @SerializedName("description")
     private String mDescription;
     @SerializedName("command")
     public String mCommand;
+
     @SerializedName("runcounts")
     public Long mRuncounts;
 
@@ -44,6 +47,10 @@ public class Command {
     public void setEmail(String email) { mEmail = email;}
     public List<String> getTagList() { return mTagList;}
     public void setTagList(List<String> tagList) {
+        mTagList = tagList;
+    }
+    public List<String> getPermissionlist() { return mTagList;}
+    public void setPermissionlist(List<String> tagList) {
         mTagList = tagList;
     }
     public String getDescription() {
@@ -107,6 +114,7 @@ public class Command {
         result.put("email", mEmail);
         result.put("isPublic", isPublic);
         result.put("tagList", mTagList);
+        result.put("permissionList", mTagList);
         result.put("description", mDescription);
         result.put("command", mCommand);
         result.put("runcounts", mRuncounts);

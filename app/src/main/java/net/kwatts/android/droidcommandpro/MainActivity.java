@@ -63,7 +63,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.crashlytics.android.Crashlytics;
 import com.github.pedrovgs.lynx.LynxActivity;
 import com.github.pedrovgs.lynx.LynxConfig;
 import com.google.android.gms.ads.AdRequest;
@@ -120,7 +119,7 @@ import java.util.Map;
 import java.util.Set;
 
 import timber.log.Timber;
-
+import android.util.TimingLogger;
 
 
 
@@ -216,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public String[] permissionsList = new String[]{
             Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ,Manifest.permission.READ_CONTACTS
+            //,Manifest.permission.READ_CONTACTS
     };
 
 
@@ -324,14 +323,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //mAppContext = getApplicationContext();
-        Timber.plant(new DebugTree());
 
+
+
+
+
+        //TODO: get trace times
         // adb shell setprop log.tag.droidcommander VERBOSE
+        //isDebuggable =  ( 0 != ( getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
+        //TimingLogger timingLogger = new TimingLogger("droidcommander", "onCreate");
 
 
-
-        android.util.TimingLogger timingLogger = new android.util.TimingLogger("droidcommander","onCreate");
 
         // am start -n "net.kwatts.android.droidcommandpro/net.kwatts.android.droidcommandpro.MainActivity"
         //          -a "android.intent.action.MAIN" --es net.kwatts.android.droidcommandpro.EXTRA_COMMAND id
@@ -361,8 +363,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mFirebaseDB = FirebaseDatabase.getInstance();
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        //TODO if debug
-        isDebuggable =  ( 0 != ( getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
+
 
 
         Configuration.setDefaults(new Configuration.Defaults() {
@@ -383,12 +384,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         });
 
 
-        /*
+/*
         try {
             // EXPERIMENTAL: Contacts
             //org.json.JSONObject c = CommandGetContacts.getAllContacts(App.INSTANCE.getContentResolver());
             // EXPERIMENTAL: SMali
-            //Engine.processCommand(null, "cmd_smali net.kwatts.android.droidcommandpro");
+            Engine cmd_engine = new Engine();
+            String experiment_res = cmd_engine.process(mUserMapVars, "cmd_smali net.kwatts.android.droidcommandpro");
+            Timber.d(experiment_res);
         } catch (Exception e) {
                 Timber.d("Exception with experimental calls:" + e.getMessage());
         } */
@@ -409,7 +412,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             if (mSharedPref.getBoolean("disableAds", false)) {
                 topLinearLayout.removeView(mAdmobAds);
             } else {
-                timingLogger.addSplit("Loading Ads...");
                 mAdView = findViewById(R.id.adMobView);
                 AdRequest adRequest = new AdRequest.Builder().build();
                 mAdView.loadAd(adRequest);
@@ -418,7 +420,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mGoogleUserSignedInImageButton = findViewById(R.id.signed_in_image_button);
             mGoogleUserSignInButton = findViewById(R.id.sign_in_button);
 
-            timingLogger.addSplit("Setting permissions on assets...");
             new AsyncTask<Void, Void, Integer>() {
                 protected Integer doInBackground(Void... params) {
                     int c1 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
@@ -439,7 +440,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 }
             }.execute();
 
-            timingLogger.addSplit("Done.");
             android.widget.AdapterView.OnItemSelectedListener myListener = new android.widget.AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -499,20 +499,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     .setAutoCancel(false);
             mNotificationManager = NotificationManagerCompat.from(this);
 
-            timingLogger.addSplit("Completed notification channels.");
 
             loadVariables();
 
-            timingLogger.addSplit("Completed loading variables.");
 
-            timingLogger.addSplit("Getting current user...");
+
 
 
 
             mFirebaseUser = mAuth.getCurrentUser();
-            timingLogger.addSplit("Done getting current user...");
+
             if (mFirebaseUser != null) {
-                timingLogger.addSplit("mFirebaseUser is null, checking if anonymous else logging in and refreshing UI...");
                 if (mFirebaseUser.isAnonymous()) {
                     refreshUserUI(false );
                 } else {
@@ -520,13 +517,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 }
 
             } else {
-                timingLogger.addSplit("mFirebaseUser is not null, already logged in, refreshing UI...");
                 refreshUserUI(false );
             }
 
-            //mProgressDialog.hide();
 
-            timingLogger.addSplit("Completed authentication.");
+            //timingLogger.dumpToLog();
 
 
             // EXPERIMENTAL: Smali Command
@@ -543,12 +538,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
             //checkIfFirstTime();
 
-            timingLogger.dumpToLog();
+
 
 
         } catch (Exception e) { 
-         	Timber.e( "MainActivity onCreate() failed:" + e.getMessage());
-         	e.printStackTrace();
+         	Timber.e(e,"MainActivity onCreate() failed:" + e.getMessage());
         }
 
     }
@@ -572,35 +566,28 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
     public void refreshUserUI(boolean isLoggedIn) {
-        android.util.TimingLogger timingLogger = new android.util.TimingLogger("droidcommander","refreshUserUI");
 
-        timingLogger.addSplit("Invalidating OptionsMenu...");
+
         invalidateOptionsMenu();
 
-        timingLogger.addSplit("InitFirebase()");
         if (isLoggedIn) {
             setTextUserStatus(mFirebaseUser.getEmail() + " logged in");
-            timingLogger.addSplit("Checking if Admin...");
             if (isUserAdmin()) {
                 setTextUserStatus(mFirebaseUser.getEmail() + " as admin");
             }
-            timingLogger.addSplit("Setting user picture...");
             Glide.with(getApplicationContext()).load(mFirebaseUser.getPhotoUrl().toString())
                     .apply(new RequestOptions().circleCrop()).into(mGoogleUserSignedInImageButton);
             initFirebase();
         } else {
             setTextUserStatus("Showing public commands only, please login to access and save your own commands.");
-            timingLogger.addSplit("Setting anonymous user picture...");
             Glide.with(getApplicationContext()).load(R.drawable.ic_account_circle)
                     .apply(new RequestOptions().circleCrop()).into(mGoogleUserSignedInImageButton);
             initFirebase();
         }
 
-        timingLogger.addSplit("End with refreshUserUI");
         setTextState("Command ready" +
                 "... is_superuser=" + Shell.getShell().isRoot(), "","");
 
-        timingLogger.dumpToLog();
 
     }
 
@@ -620,7 +607,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 runCommand(c);
             }
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            Timber.e(e);
         }
 
     }
@@ -646,7 +633,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     firebaseAuthWithGoogle(account);
                 }
             } catch (com.google.android.gms.common.api.ApiException e) {
-                Timber.d( "signInResult:failed code=" + e.getStatusCode());
+                Timber.e(e,"signInResult:failed code=" + e.getStatusCode());
                 Toast.makeText(getApplicationContext(), "Unable to sign in with Google Play Services (status_code: " + e.getStatusCode() + ")", Toast.LENGTH_SHORT).show();
             }
         }
@@ -684,7 +671,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                             FirebaseDatabase.getInstance().getReference().child("google_users").child(mFirebaseUser.getUid()).setValue(mGoogleUser);
                             refreshUserUI(true);
                         } else {
-                            Timber.d( "signInWithCredential:failure:" + task.getException());
+                            Timber.w( "signInWithCredential:failure:" + task.getException());
                             Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
                         }
                     }
@@ -946,9 +933,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     }
 
     public void initFirebase() {
-        android.util.TimingLogger timingLogger = new android.util.TimingLogger("droidcommander","initFirebase");
-
-        timingLogger.addSplit("Init references...");
         DatabaseReference mFbaseDBCommandsRef = mFirebaseDB.getReference();
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         final FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -957,7 +941,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mGlobalCommands.clear();
         lastCommandUsed = null;
 
-        timingLogger.addSplit("Setup user commands...");
 
         if (mFirebaseUser != null) {
             if (!mFirebaseUser.isAnonymous()) {
@@ -1001,7 +984,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         } catch (Exception e) {
                             isAdminUserClaim = false;
                             setTextUserStatus("Logged in not as user or admin?");
-                            Crashlytics.logException(e);
+                            Timber.e(e, "Exception checking for user permission claims");
                         }
                     }
                 });
@@ -1049,7 +1032,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             // setTextUserStatus("Logged in as anonymous");
         }
 
-        timingLogger.addSplit("Setup global commands...");
         /* global commands */
         mFbaseDBCommandsRef.child("commands_v2").child("global").addValueEventListener(new ValueEventListener() {
             @Override
@@ -1078,7 +1060,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         });
 
 
-        timingLogger.dumpToLog();
+
 
     }
 
@@ -1157,7 +1139,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public void addDynamicShortcut(String cmd_key, String cmd, String label) {
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
                 ShortcutManager smgr = (ShortcutManager) getSystemService(SHORTCUT_SERVICE);
                 Intent di = new Intent(App.INSTANCE.getApplicationContext(), MainActivity.class);
                 di.setAction(Intent.ACTION_MAIN);
@@ -1176,20 +1158,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 }
             }
         } catch (Exception e) {
-            Timber.e("Unable to add dynamic shortcut!");
-            Crashlytics.logException(e);
+            Timber.e(e,"Unable to add dynamic shortcut!");
         }
     }
 
     public void removeDynamicShortcuts() {
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
                 ShortcutManager smgr = (ShortcutManager) getSystemService(SHORTCUT_SERVICE);
                 smgr.removeAllDynamicShortcuts();
             }
         } catch (Exception e) {
-            Timber.e("Unable to remove dynamic shortcut!");
-            Crashlytics.logException(e);
+            Timber.e(e,"Unable to remove dynamic shortcut!");
         }
     }
 
@@ -1261,30 +1241,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mTextViewState.setText(spanString);
         } catch (Exception e) {
             Timber.e("Unable to set status with setTextState!");
-            Crashlytics.logException(e);
-
         }
 
         // send analytics
     }
 
-    private static class ReleaseTree extends Timber.Tree {
-        @Override
-        protected void log(final int priority, final String tag, final String message, final Throwable throwable) {
-            if (priority == Log.VERBOSE || priority == Log.DEBUG) {
-                return;
-            }
-        }
-    }
-    private static class DebugTree extends Timber.DebugTree {
-        @Override
-        protected String createStackElementTag(StackTraceElement element) {
-            return String.format("net.kwatts.android.droidcommander [C:%s] [M:%s] [L:%s] ",
-                    super.createStackElementTag(element),
-                    element.getMethodName(),
-                    element.getLineNumber());
-        }
-    }
 
     public boolean checkCommandPermission(String permission) {
         int result;
@@ -1369,8 +1330,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     .split(v);
             return map;
         } catch (Exception e) {
-            Timber.e(e);
-            Crashlytics.logException(e);
+            Timber.e(e,"Unable to parse variables!");
         }
 
         return null;
@@ -1389,8 +1349,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 }
                 mAppPackagesList.add(info.packageName);
             } catch (Exception e) {
-                Timber.e("Unable to get list of packages!");
-                Crashlytics.logException(e);
+                Timber.e(e,"Unable to get list of packages!");
             }
         }
 
@@ -1404,8 +1363,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 //Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
             }
         } catch (Exception e) {
-            Timber.e("Unable to get list of network interfaces!");
-            Crashlytics.logException(e);
+            Timber.e(e,"Unable to get list of network interfaces!");
         }
 
         //Defaults
@@ -1461,8 +1419,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                         }
 
                                     } catch(Exception e ) {
-                                        Timber.e( e.getMessage());
-                                        Crashlytics.logException(e);
+                                        Timber.e(e);
                                     }
 
 
@@ -1589,8 +1546,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                                 removeCommand(c);
                                             }
                                             catch (Exception e) {
-                                                Timber.e( e.getMessage());
-                                                Crashlytics.logException(e);
+                                                Timber.e(e);
                                             }
                                             Toast.makeText(getApplicationContext(), "Command removed for " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
                                         } else {
@@ -1680,8 +1636,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                         writeCommand(c);
                                     }
                                     catch (Exception e) {
-                                        Timber.e( e.getMessage());
-                                        Crashlytics.logException(e);
+                                        Timber.e(e);
                                     }
 
 
@@ -1712,8 +1667,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                         writeCommand(currentCommand);
                                     }
                                     catch (Exception e) {
-                                        Timber.e( e.getMessage());
-                                        Crashlytics.logException(e);
+                                        Timber.e(e);
                                     }
                                     Toast.makeText(getApplicationContext(), "Command updated for " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
 

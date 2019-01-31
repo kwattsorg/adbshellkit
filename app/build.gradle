@@ -33,6 +33,8 @@ android {
         exclude 'META-INF/DEPENDENCIES'
     }
 
+
+
     dependencies {
         ext.googleSupportVersion = "27.1.1"
         ext.gmsFirebaseVersion = "16.0.1"
@@ -61,10 +63,13 @@ android {
         implementation ('com.google.cloud:google-cloud:0.32.0-alpha') {
             exclude module: 'guava-jdk5'
         }
+
+        implementation 'com.github.lanchon.dexpatcher:multidexlib2:2.2.4'
         implementation 'org.smali:dexlib2:2.2.4'
+
         implementation project(":lynx") //compile 'com.github.pedrovgs:lynx:1.1.0'
         implementation project(":android-file-chooser")
-        implementation 'com.jakewharton.timber:timber:4.6.1'
+        implementation 'com.jakewharton.timber:timber:4.7.1'
         implementation 'com.github.flipagram:android-assetcopier:0.1.1'
         implementation 'com.squareup.okhttp3:okhttp:3.9.1'
         implementation 'com.github.bumptech.glide:glide:4.7.1'
@@ -91,7 +96,7 @@ android {
         //implementation "com.google.apis:google-api-services-people:v1-rev337-1.25.0"
         implementation "com.crashlytics.sdk.android:crashlytics:2.9.8"
         //implementation 'com.github.pwittchen.kirai:library:1.4.1'
-        implementation 'org.fusesource.jansi:jansi:1.8'
+        //implementation 'org.fusesource.jansi:jansi:1.8'
         implementation 'com.binaryfork:spanny:1.0.4'
     }
 
