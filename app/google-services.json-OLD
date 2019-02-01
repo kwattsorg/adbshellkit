@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "476590821360",
+    "firebase_url": "https://adb-shell.firebaseio.com",
+    "project_id": "adb-shell",
+    "storage_bucket": "adb-shell.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:476590821360:android:3354e7808305b93f",
+        "android_client_info": {
+          "package_name": "net.kwatts.android.droidcommandpro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "476590821360-sp7it79i0cddhpli6mn455gfqh9dgvpr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.kwatts.android.droidcommandpro",
+            "certificate_hash": "2f35ed79409793ded390aaa715bc05693ca04659"
+          }
+        },
+        {
+          "client_id": "476590821360-jmb6m9gtcftt43h8enuv4j9bfn7ernh3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.kwatts.android.droidcommandpro",
+            "certificate_hash": "c868faad3367f12119451c8af4e33fa9acfe1182"
+          }
+        },
+        {
+          "client_id": "476590821360-kp6v3tum1rjofutcea5fjulu1an14ivk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7rPpk3hzX5_IekScolHQNtpgxjwFFFOo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "476590821360-kp6v3tum1rjofutcea5fjulu1an14ivk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

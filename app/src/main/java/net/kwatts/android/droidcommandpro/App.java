@@ -28,8 +28,6 @@ public class App extends ContainerApp  {
         INSTANCE = this;
     }
 
-    private static boolean isopen = true;
-
 
     @Override
     public synchronized void onCreate() {
@@ -41,20 +39,11 @@ public class App extends ContainerApp  {
             Timber.plant(new ReleaseTree());
         }
 
-
-        //android.util.TimingLogger timingLogger = new android.util.TimingLogger("droidcommander","App.create");
-        //Shell.Config.addInitializers(BusyBoxInstaller.class);
-        //timingLogger.addSplit("Setting up Shell...");
         Shell.Config.setTimeout(20); //20 second timeout
         Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR);
-        Shell.Config.verboseLogging(BuildConfig.DEBUG);
-        // Use internal busybox
-       // BusyBox.setup(this);
+        Shell.Config.verboseLogging(BuildConfig.DEBUG);;
 
-        //timingLogger.addSplit("Firebase.setPersistence()");
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-        Log.d(TAG, "onCreate");
-        this.isopen = true;
+
 
         AboutConfig aboutConfig = AboutConfig.getInstance();
         aboutConfig.appName = getString(R.string.app_name);
@@ -86,14 +75,37 @@ public class App extends ContainerApp  {
         aboutConfig.emailAddress = "kwatkins@gmail.com";
         aboutConfig.emailSubject = "Feedback for " + aboutConfig.packageName;
 
-        //timingLogger.dumpToLog();
+
+        // Request a root shell
+        if (Shell.rootAccess()) {
+            Timber.d("Superuser: YES");
+        } else {
+            Timber.d("Superuser: NO");
+        }
+
+        // Prepare local file and scripts, making them executable etc
+        new Thread(new Runnable() {
+            public void run() {
+                int c1 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
+                int c2 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
+                int c3 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"share");
+                int c = c1 + c2 + c3;
+
+                //if (c > 0) {
+                Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/bin").submit();
+                Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/scripts").submit();
+                Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/share").submit();
+                Timber.d(c + " files copied!");
+            }
+        }).start();
+
+
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
 
     }
 
 
-
-    /** A tree which logs important information for crash reporting. */
     public static final class ReleaseTree extends Timber.Tree {
         @Override protected void log(int priority, String tag, String message, Throwable throwable) {
             switch (priority) {

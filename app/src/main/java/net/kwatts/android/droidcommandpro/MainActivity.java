@@ -323,10 +323,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-
-
-
+        MobileAds.initialize(this, "ca-app-pub-2189980367471582~1443964910");
 
         //TODO: get trace times
         // adb shell setprop log.tag.droidcommander VERBOSE
@@ -334,29 +331,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         //TimingLogger timingLogger = new TimingLogger("droidcommander", "onCreate");
 
 
-
-        // am start -n "net.kwatts.android.droidcommandpro/net.kwatts.android.droidcommandpro.MainActivity"
-        //          -a "android.intent.action.MAIN" --es net.kwatts.android.droidcommandpro.EXTRA_COMMAND id
-
+        // Support for running commands from intents:
+        // 'am start -n "net.kwatts.android.droidcommandpro/net.kwatts.android.droidcommandpro.MainActivity"
+        //          -a "android.intent.action.MAIN" --es net.kwatts.android.droidcommandpro.EXTRA_COMMAND id'
         String extra_cmd_key = getIntent().getStringExtra(EXTRA_COMMAND_KEY);
         if (extra_cmd_key != null) {
             Timber.d("Intent.getStringExtra(" + EXTRA_COMMAND_KEY + "):" + extra_cmd_key);
             Command c = getUserCommandByKey(extra_cmd_key);
             mCommandQueue.add(c);
-            Timber.d("Added command " + c.key + " to queue!");
+            Timber.d("Added command " + c.key + " to queue from intent");
         }
 
-
-
-        if (checkPermissions()) { /* permissions granted */ }
-
-        MobileAds.initialize(this, "ca-app-pub-2189980367471582~1443964910");
 
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         mSharedPref.registerOnSharedPreferenceChangeListener(this);
 
         GoogleSignInOptions gso = new GoogleSignInOptions
-                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(getString(R.string.default_web_client_id))
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken("476590821360-kp6v3tum1rjofutcea5fjulu1an14ivk.apps.googleusercontent.com")
                 .requestEmail().build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         mAuth = FirebaseAuth.getInstance();
@@ -420,6 +411,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mGoogleUserSignedInImageButton = findViewById(R.id.signed_in_image_button);
             mGoogleUserSignInButton = findViewById(R.id.sign_in_button);
 
+/*
             new AsyncTask<Void, Void, Integer>() {
                 protected Integer doInBackground(Void... params) {
                     int c1 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
@@ -439,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     Timber.d(count + " files copied!");
                 }
             }.execute();
-
+*/
             android.widget.AdapterView.OnItemSelectedListener myListener = new android.widget.AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -595,6 +587,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public void onClick(View v) {
         try {
+
+            //TODO: Check permissions needed by command. Right now just request
             Command c = mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
 
             // Drrty, setting this here in case command is changed.
@@ -702,6 +696,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         lastCommandUsed = c;
         addToCommandRuncounts(c);
 
+        //TODO: ask for permissions needed by the command to execute
+        if (checkPermissions()) { /* permissions granted */ }
+
         String coreCommand = c.getCommand();
 
 
@@ -801,7 +798,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 }
                 long ms = SystemClock.elapsedRealtime() - startTime;
                 double s = ms / 1000.0;
-                logEvent("command_end", coreCommand, "complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"));
+                //logEvent("command_end", coreCommand, "complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"));
                 setTextState("Command finished after " + s + "secs... lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success") +
                         ",shell_code=" + out.getCode(),"",l.toString());
                 mJob = null;

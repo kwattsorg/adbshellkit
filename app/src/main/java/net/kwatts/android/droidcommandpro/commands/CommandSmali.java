@@ -94,6 +94,7 @@ public class CommandSmali implements Command {
             Timber.e(ioe,"Unable to load APK");
             return res;
         }
+
         if (dex != null) {
             try {
                 //res.put("dex_class_count", dex.getClasses().size());
@@ -287,87 +288,6 @@ public class CommandSmali implements Command {
         }
 
         return null;
-    }
-
-
-
-    // Helper methods
-    public static JSONObject getAppSmali(DexFile dexFile) {
-
-        JSONObject classStaticFields = new JSONObject();
-        JSONObject classFields = new JSONObject();
-
-
-
-        //SKIP_CLASS:
-        for (ClassDef classDef: dexFile.getClasses()) {
-
-            try {
-                classFields.put(classDef.getSourceFile(),classDef.getType());
-             /*
-                for (Field f : classDef.getFields()) {
-                    String containingClass1 = f.getDefiningClass();
-                    if (!containingClass1.startsWith("Landroid") || containingClass1.startsWith("Lgoogle")) {
-                        classFields.put(containingClass1, f.getName() );
-                        EncodedValue initialValue = f.getInitialValue();
-                        if (initialValue != null) {
-                            if (!EncodedValueUtils.isDefaultValue(initialValue)) {
-                                classFields.put(containingClass1 + "." + f.getType() + "." + f.getName(), initialValue.getValueType() + "." + initialValue);
-                            }
-                        }
-
-                    }
-                }
-            /*
-
-/*
-                for (Field field : classDef.getStaticFields()) {
-                    String containingClass = field.getDefiningClass();
-                    if (!containingClass.startsWith("Landroid") || containingClass.startsWith("Lgoogle")) {
-                        EncodedValue initialValue = field.getInitialValue();
-                        if (!EncodedValueUtils.isDefaultValue(initialValue)) {
-                            // only dump strings
-                            if (initialValue.getValueType() == ValueType.STRING) {
-                                //org.jf.baksmali.Adaptors.EncodedValue.EncodedValueAdaptor.writeTo(writer, initialValue, containingClass);
-                                // https://github.com/glasses007/smali/blob/master/baksmali/src/main/java/org/jf/baksmali/Adaptors/EncodedValue/EncodedValueAdaptor.java
-                                classStaticFields.put("[" +
-                                                field.getDefiningClass() + "->" +
-                                                field.getName() + "]",
-                                        initialValue);
-
-                            }
-                        }
-
-                    }
-
-                } */
-
-            } catch (Exception e) {
-                Timber.e(e,"Unable to get fields " + e.getMessage());
-                try {
-                    classFields.put("exception", e.getMessage());
-                } catch (Exception e2) { }
-            }
-
-
-/*
-            for (Method methodDef: classDef.getMethods()) {
-                MethodImplementation methodImpl = methodDef.getImplementation();
-                if (methodImpl != null) {
-                    for (Instruction instruction: methodImpl.getInstructions()) {
-                        if (instruction instanceof ReferenceInstruction) {
-                            if (((ReferenceInstruction)instruction).getReferenceType() == ReferenceType.METHOD) {
-                                MethodReference methodReference =
-                                        (MethodReference) ((ReferenceInstruction)instruction).getReference();
-                                //Timber.d(String.format("found invocation of method: %s", methodReference));
-                            }
-                        }
-                    }
-                }
-            } */
-        }
-
-        return classFields;
     }
 
 
