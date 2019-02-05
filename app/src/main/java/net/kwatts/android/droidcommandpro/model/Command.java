@@ -8,6 +8,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * Created by kwatts on 11/9/17.
@@ -49,10 +51,30 @@ public class Command {
     public void setTagList(List<String> tagList) {
         mTagList = tagList;
     }
-    public List<String> getPermissionlist() { return mTagList;}
-    public void setPermissionlist(List<String> tagList) {
-        mTagList = tagList;
+    public List<String> getPermissionlist() {
+        if (mPermissionlist == null) {
+            mPermissionlist = new ArrayList<String>();
+        }
+        return mPermissionlist;
     }
+    public void setPermissionlist(List<String> permissionList) {
+        mPermissionlist = permissionList;
+    }
+
+    public void addPermission(String permission) {
+        if (mPermissionlist != null) {
+            mPermissionlist.add(permission);
+        } else {
+            mPermissionlist = Arrays.asList(permission);
+        }
+
+    }
+    public void removePermission(String permission) {
+        if (mPermissionlist != null) {
+            mPermissionlist.remove(permission);
+        }
+    }
+
     public String getDescription() {
         return mDescription;
     }

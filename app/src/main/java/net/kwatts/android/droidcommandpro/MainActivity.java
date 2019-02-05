@@ -122,7 +122,12 @@ import timber.log.Timber;
 import android.util.TimingLogger;
 
 
+import android.widget.ArrayAdapter;
 
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 //TODO:
 // Package support - https://github.com/termux/termux-packages
@@ -697,7 +702,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         addToCommandRuncounts(c);
 
         //TODO: ask for permissions needed by the command to execute
-        if (checkPermissions()) { /* permissions granted */ }
+        //if (checkPermissions()) { /* permissions granted */ }
+
+        checkCommandPermissions(c);
+
+
 
         String coreCommand = c.getCommand();
 
@@ -1244,11 +1253,50 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     }
 
 
+    public void checkCommandPermissions(Command c) {
+        // Commands requiring superuser
+        if (c.isSuperUser()) {
+            // Check if we are superuser
+            if (!Shell.rootAccess()) {
+                Toast.makeText(getApplicationContext(), "Superuser/root access not detected! This command needs it and may not run properly", Toast.LENGTH_LONG).show();
+            }
+        }
+        // Command defined permissions
+        // full list: adb shell pm list permissions -d -g
+        // app state: adb shell dumpsys package net.kwatts.android.droidcommandpro
+        // grant/revoke: adb shell pm (grant|revoke) net.kwatts.android.droidcommandpro
+        //TODO: this is user defined data, need to sanitize/make sure it doesn't lead to crashes. For now wrapping in try/catch block
+        try {
+            for (String p : c.getPermissionlist()) {
+                checkCommandPermission(p);
+            }
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+        //TODO: remove default permissions for all commands after UI updates to allow users to set
+        //for (int x = 0; x < permissionsList.length;x++) {
+        //    checkCommandPermission(permissionsList[x]);
+        //}
+
+
+
+    }
+
     public boolean checkCommandPermission(String permission) {
         int result;
+
         result = ContextCompat.checkSelfPermission(MainActivity.this,permission);
         if (result != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {permission},COMMAND_PERMISSION );
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                Toast.makeText(getApplicationContext(), "This command needs permission " + permission + " and may not run properly without it granted", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(this, new String[]{permission}, COMMAND_PERMISSION);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{permission}, COMMAND_PERMISSION);
+            }
+
             return false;
         }
 
@@ -1592,6 +1640,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public View updateAction;
     public View createNewAction;
 
+    public Spinner spinnerAddPermission;
+    public Spinner spinnerRemovePermission;
+
     public void showAddCommandView() {
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -1650,6 +1701,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                 {
 
                                 if (firebaseUser != null && mFullCommand != null) {
+
+                                    String addPermissionSelected = spinnerAddPermission.getSelectedItem().toString();
+                                    String removePermissionSelected = spinnerRemovePermission.getSelectedItem().toString();
+
+                                    if ( addPermissionSelected != "--SELECT PERMISSION--") {
+                                        currentCommand.addPermission(addPermissionSelected);
+                                    }
+
+                                    if ( removePermissionSelected != "--SELECT PERMISSION--") {
+                                        currentCommand.removePermission(removePermissionSelected);
+                                    }
+
+
                                     List<String> tags = new ArrayList<>();
                                     if (tagSuperUserCheckBox.isChecked()) {
                                         tags.add("superuser");
@@ -1678,9 +1742,38 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         addCommandLinearLayoutAdmin = dialog.getCustomView().findViewById(R.id.addCommandLinearLayoutAdmin);
         tagAdminIsPublicCheckBox = dialog.getCustomView().findViewById(R.id.tagAdminIsPublicCheckBox);
+
         if (isUserAdmin()) {
+            spinnerAddPermission = dialog.getCustomView().findViewById(R.id.spinnerAddPermission);
+            String[] permAddList = new String[]{
+                    "--SELECT PERMISSION--",
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.READ_CALENDAR,
+                    Manifest.permission.READ_CALL_LOG,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            };
+            final List<String> permsAddStringList = new ArrayList<>(Arrays.asList(permAddList));
+            final ArrayAdapter<String> spinnerArrayPermsAddAdapter = new ArrayAdapter<String>(
+                    this,android.R.layout.simple_spinner_item,permsAddStringList);
+            spinnerArrayPermsAddAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerAddPermission.setAdapter(spinnerArrayPermsAddAdapter);
+
+            spinnerRemovePermission = dialog.getCustomView().findViewById(R.id.spinnerRemovePermission);
+
+            List<String> removePermissionList = new ArrayList<String>(currentCommand.getPermissionlist());
+            removePermissionList.add(0,"--SELECT PERMISSION--");
+            //final List<String> permsRemoveList = new ArrayList<>(Arrays.asList(stringArrayPermissions));
+            final ArrayAdapter<String> spinnerArrayPermsRemoveAdapter = new ArrayAdapter<String>(
+                    this,android.R.layout.simple_spinner_item,removePermissionList);
+            spinnerArrayPermsRemoveAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerRemovePermission.setAdapter(spinnerArrayPermsRemoveAdapter);
+
             addCommandLinearLayoutAdmin.setVisibility(View.VISIBLE);
         }
+
+
+
+        String[] showPermissionsArray = currentCommand.getPermissionlist().toArray(new String[0]);
 
         tvAddCommandAttributes = dialog.getCustomView().findViewById(R.id.tvAddCommandAttributes);
         tvAddCommandAttributes.setText("key: " + currentCommand.key +
@@ -1688,7 +1781,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 "\nuser: " + currentCommand.getEmail() +
                 "\nisAdmin:" + isUserAdmin() +
                 "\nruncounts: " + currentCommand.getRuncounts() +
-                "\nisPublic=" + currentCommand.isPublic);
+                "\nisPublic=" + currentCommand.isPublic +
+                "\nneeds_superuser=" + currentCommand.isSuperUser() +
+                "\nneeds_permissions=" + Arrays.toString(showPermissionsArray)
+            );
 
         createNewAction = dialog.getActionButton(DialogAction.POSITIVE);
         updateAction = dialog.getActionButton(DialogAction.NEUTRAL);
