@@ -3,6 +3,8 @@ package net.kwatts.android.droidcommandpro.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +13,10 @@ import java.util.Map;
  * Created by kwatts on 11/9/17.
  */
 
+//public class Command implements net.kwatts.android.droidcommandpro.commands.Command {
 public class Command {
+    public String key;
+
     @SerializedName("uid")
     private String mUid;
     @SerializedName("email")
@@ -26,17 +31,12 @@ public class Command {
     private String mDescription;
     @SerializedName("command")
     public String mCommand;
-
     @SerializedName("runcounts")
     public Long mRuncounts;
 
 
 
-    public String key;
-
     public Command() {};
-
-
     public String getUid() {
         return mUid;
     }
@@ -70,18 +70,21 @@ public class Command {
         mRuncounts = runcounts;
     }
 
-
-
-
-
 /*
-    @SerializedName("needsroot")
-    public boolean needsRoot;
-    @SerializedName("permissions")
-    public List<String> mPermissions;
-    public List<String> getPermissions() { return mPermissions;}
-    public void setPermissions(List<String> permissions) { mPermissions = permissions; }
+    public String getCommandName() {
+        return key;
+    }
+    public String[] getPermissions() {
+        return mPermissionlist.toArray(new String[0]);
+    }
+    public JSONObject execute(android.content.Context ctx, List<String> args) {
+        JSONObject res = new JSONObject();
+        res.put("key", key);
+        return res;
+    }
 */
+
+
     public void addToRuncounts() {
         if (mRuncounts == null) {
             mRuncounts = 1L;

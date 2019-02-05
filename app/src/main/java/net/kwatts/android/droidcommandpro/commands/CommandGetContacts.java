@@ -3,7 +3,7 @@ package net.kwatts.android.droidcommandpro.commands;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 
-import net.kwatts.android.droidcommandpro.Manifest;
+//import net.kwatts.android.droidcommandpro.Manifest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
