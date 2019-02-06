@@ -87,12 +87,15 @@ public class App extends ContainerApp  {
         new Thread(new Runnable() {
             public void run() {
                 int c1 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
-                int c2 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
-                int c3 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"share");
-                int c = c1 + c2 + c3;
+                int c2 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"lib");
+                int c3 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
+                int c4 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"share");
+
+                int c = c1 + c2 + c3 + c4;
 
                 //if (c > 0) {
                 Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/bin").submit();
+                Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/lib").submit();
                 Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/scripts").submit();
                 Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/share").submit();
                 Timber.d(c + " files copied!");

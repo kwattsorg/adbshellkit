@@ -51,13 +51,13 @@ public class Command {
     public void setTagList(List<String> tagList) {
         mTagList = tagList;
     }
-    public List<String> getPermissionlist() {
+    public List<String> getPermissionList() {
         if (mPermissionlist == null) {
             mPermissionlist = new ArrayList<String>();
         }
         return mPermissionlist;
     }
-    public void setPermissionlist(List<String> permissionList) {
+    public void setPermissionList(List<String> permissionList) {
         mPermissionlist = permissionList;
     }
 

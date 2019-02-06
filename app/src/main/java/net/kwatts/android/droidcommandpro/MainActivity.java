@@ -218,6 +218,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public static Command lastCommandUsed;
 
+    public static boolean lastPermissionStatus;
+
     public String[] permissionsList = new String[]{
             Manifest.permission.WRITE_EXTERNAL_STORAGE
             //,Manifest.permission.READ_CONTACTS
@@ -339,12 +341,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         // Support for running commands from intents:
         // 'am start -n "net.kwatts.android.droidcommandpro/net.kwatts.android.droidcommandpro.MainActivity"
         //          -a "android.intent.action.MAIN" --es net.kwatts.android.droidcommandpro.EXTRA_COMMAND id'
-        String extra_cmd_key = getIntent().getStringExtra(EXTRA_COMMAND_KEY);
-        if (extra_cmd_key != null) {
-            Timber.d("Intent.getStringExtra(" + EXTRA_COMMAND_KEY + "):" + extra_cmd_key);
-            Command c = getUserCommandByKey(extra_cmd_key);
-            mCommandQueue.add(c);
-            Timber.d("Added command " + c.key + " to queue from intent");
+        try {
+            String extra_cmd_key = getIntent().getStringExtra(EXTRA_COMMAND_KEY);
+            if (extra_cmd_key != null) {
+                Timber.d("Intent.getStringExtra(" + EXTRA_COMMAND_KEY + "):" + extra_cmd_key);
+                Command c = getUserCommandByKey(extra_cmd_key);
+                mCommandQueue.add(c);
+                Timber.d("Added command " + c.key + " to queue from intent");
+            }
+        } catch (Exception e) {
+            Timber.e(e);
         }
 
 
@@ -1267,7 +1273,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         // grant/revoke: adb shell pm (grant|revoke) net.kwatts.android.droidcommandpro
         //TODO: this is user defined data, need to sanitize/make sure it doesn't lead to crashes. For now wrapping in try/catch block
         try {
-            for (String p : c.getPermissionlist()) {
+            for (String p : c.getPermissionList()) {
                 checkCommandPermission(p);
             }
         } catch (Exception e) {
@@ -1325,11 +1331,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             case MULTIPLE_PERMISSIONS:{
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     // permissions granted.
+                    lastPermissionStatus = true;
                 } else {
                     String permsNoGrant = "";
                     for (String per : permissionsList) {
                         permsNoGrant += "\n" + per;
                     }
+                    lastPermissionStatus = false;
                     // permissions list of don't granted permission
                 }
                 return;
@@ -1338,11 +1346,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             case COMMAND_PERMISSION: {
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     // permissions granted.
+                    lastPermissionStatus = true;
+
                 } else {
                     String permsNoGrant = "";
                     for (String per : permissionsList) {
                         permsNoGrant += "\n" + per;
                     }
+                    lastPermissionStatus = false;
                     // permissions list of don't granted permission
                 }
                 return;
@@ -1745,13 +1756,38 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         if (isUserAdmin()) {
             spinnerAddPermission = dialog.getCustomView().findViewById(R.id.spinnerAddPermission);
-            String[] permAddList = new String[]{
+            String[] permAddList = new String[] {
                     "--SELECT PERMISSION--",
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.READ_CALENDAR,
-                    Manifest.permission.READ_CALL_LOG,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    "android.permission.WRITE_CONTACTS",
+                    "android.permission.GET_ACCOUNTS",
+                    "android.permission.READ_CONTACTS",
+                    "android.permission.ANSWER_PHONE_CALLS",
+                    "android.permission.READ_PHONE_NUMBERS",
+                    "android.permission.READ_PHONE_STATE",
+                    "android.permission.CALL_PHONE",
+                    "android.permission.ACCEPT_HANDOVER",
+                    "android.permission.USE_SIP",
+                    "android.permission.READ_CALENDAR",
+                    "android.permission.WRITE_CALENDAR",
+                    "android.permission.READ_CALL_LOG",
+                    "android.permission.WRITE_CALL_LOG",
+                    "android.permission.PROCESS_OUTGOING_CALLS",
+                    "android.permission.CAMERA",
+                    "android.permission.BODY_SENSORS",
+                    "android.permission.ACCESS_FINE_LOCATION",
+                    "android.permission.ACCESS_COARSE_LOCATION",
+                    "android.permission.READ_EXTERNAL_STORAGE",
+                    "android.permission.WRITE_EXTERNAL_STORAGE",
+                    "android.permission.RECORD_AUDIO",
+                    "android.permission.READ_SMS",
+                    "android.permission.RECEIVE_WAP_PUSH",
+                    "android.permission.RECEIVE_MMS",
+                    "android.permission.RECEIVE_SMS",
+                    "android.permission.SEND_SMS",
+                    "android.permission.READ_CELL_BROADCASTS"
             };
+
+
             final List<String> permsAddStringList = new ArrayList<>(Arrays.asList(permAddList));
             final ArrayAdapter<String> spinnerArrayPermsAddAdapter = new ArrayAdapter<String>(
                     this,android.R.layout.simple_spinner_item,permsAddStringList);
@@ -1760,7 +1796,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
             spinnerRemovePermission = dialog.getCustomView().findViewById(R.id.spinnerRemovePermission);
 
-            List<String> removePermissionList = new ArrayList<String>(currentCommand.getPermissionlist());
+            List<String> removePermissionList = new ArrayList<String>(currentCommand.getPermissionList());
             removePermissionList.add(0,"--SELECT PERMISSION--");
             //final List<String> permsRemoveList = new ArrayList<>(Arrays.asList(stringArrayPermissions));
             final ArrayAdapter<String> spinnerArrayPermsRemoveAdapter = new ArrayAdapter<String>(
@@ -1773,11 +1809,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
 
-        String[] showPermissionsArray = currentCommand.getPermissionlist().toArray(new String[0]);
+        String[] showPermissionsArray = currentCommand.getPermissionList().toArray(new String[0]);
 
         tvAddCommandAttributes = dialog.getCustomView().findViewById(R.id.tvAddCommandAttributes);
         tvAddCommandAttributes.setText("key: " + currentCommand.key +
-                "\nuid: " + currentCommand.getUid() +
+               // "\nuid: " + currentCommand.getUid() +
                 "\nuser: " + currentCommand.getEmail() +
                 "\nisAdmin:" + isUserAdmin() +
                 "\nruncounts: " + currentCommand.getRuncounts() +
