@@ -14,7 +14,6 @@ import com.eggheadgames.aboutbox.AboutConfig;
 import com.crashlytics.android.Crashlytics;
 import android.os.*;
 
-import static timber.log.Timber.DebugTree;
 
 /**
  * This is a subclass of {@link Application} used to provide shared objects and superuser functionality across the full app
@@ -31,7 +30,6 @@ public class App extends ContainerApp  {
     @Override
     public synchronized void onCreate() {
         super.onCreate();
-
         if (BuildConfig.DEBUG) {
             Timber.plant(new DebugTree());
         } else {
@@ -41,8 +39,6 @@ public class App extends ContainerApp  {
         Shell.Config.setTimeout(20); //20 second timeout
         Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR);
         Shell.Config.verboseLogging(BuildConfig.DEBUG);;
-
-
 
         AboutConfig aboutConfig = AboutConfig.getInstance();
         aboutConfig.appName = getString(R.string.app_name);

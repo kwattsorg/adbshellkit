@@ -11,4 +11,6 @@
     <color name="colorAccentDark">#c51162</color>
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_300">#e0e0e0</color>
+    <color name="colorTextGreen">#ff00ff00</color>
+    <color name="colorTextRed">#ffff0000</color>
 </resources>

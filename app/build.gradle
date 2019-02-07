@@ -8,8 +8,8 @@ android {
         applicationId "net.kwatts.android.droidcommandpro"
         minSdkVersion 21
         targetSdkVersion 27 //26
-        versionCode 70
-        versionName "7.0"
+        versionCode 71
+        versionName "7.1"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
@@ -96,7 +96,7 @@ android {
         //compile 'io.nlopez.smartlocation:library:3.3.3'
         //implementation "com.google.apis:google-api-services-people:v1-rev337-1.25.0"
         implementation "com.crashlytics.sdk.android:crashlytics:2.9.8"
-        implementation 'com.binaryfork:spanny:1.0.4'
+        //implementation 'com.binaryfork:spanny:1.0.4'
     }
 
     compileOptions {

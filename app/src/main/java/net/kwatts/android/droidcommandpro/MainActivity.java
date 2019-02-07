@@ -12,6 +12,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
@@ -39,6 +40,7 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
+import android.text.style.TabStopSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -225,7 +227,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             //,Manifest.permission.READ_CONTACTS
     };
 
-
     public static boolean isAdminUserClaim = false;
     public static boolean isUserAdmin() {
         return isAdminUserClaim;
@@ -270,30 +271,28 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         final boolean autoscroll = mScrollView.getScrollY() + mScrollView.getHeight() >= mLines.getBottom();
         TextView lineView = new TextView(App.INSTANCE.getApplicationContext());
 
-
-
-        lineView.setTypeface(Typeface.MONOSPACE);
         lineView.setTextIsSelectable(true);
 
-        int defaultTextColor = Color.GREEN;
+
+        ColorStateList displayTextColor;
         if (cmd_state < 0) {
-            defaultTextColor = Color.RED;
+            displayTextColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.RED });
+        } else {
+            displayTextColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.GREEN });
         }
 
+
         SpannableString spanString = new SpannableString(line);
-        spanString.setSpan(new TextAppearanceSpan("monospace", 0, mTextSize, null, null), 0, spanString.length(), 0);
-        spanString.setSpan(new ForegroundColorSpan(defaultTextColor), 0, spanString.length(), 0);
-/*
-        if (line.indexOf(Ansi.RED) != -1 ) {
-            int idx = line.indexOf(Ansi.RED);
-            spanString.setSpan(new ForegroundColorSpan(Color.RED), idx, spanString.length(), 0);
-        } else if(line.indexOf(Ansi.YELLOW) != -1 ) {
-            int idx = line.indexOf(Ansi.YELLOW);
-            spanString.setSpan(new ForegroundColorSpan(Color.YELLOW), idx, spanString.length(), 0);
-        } */
+
+        // Display with the color and text size
+        TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan("monospace", Typeface.NORMAL, mTextSize, displayTextColor,null);
+        spanString.setSpan(textAppearanceSpan, 0, spanString.length(), 0);
+        // Display "\t", offset by 100 pixels
+        spanString.setSpan(new TabStopSpan.Standard(100), 0, spanString.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 
-        lineView.setText(spanString);
+
+        lineView.setText(spanString, TextView.BufferType.SPANNABLE);
 
 
 
@@ -315,16 +314,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         });                            
     }
 
-    // https://stackoverflow.com/questions/10828182/spannablestringbuilder-to-create-string-with-multiple-fonts-text-sizes-etc-exampe
-    private static class FormattedString extends SpannableString
-    {
-        public FormattedString(String line, int size, int color)
-        {
-            super(line);
-            setSpan(new TextAppearanceSpan("monospace", 0, size, null, null), 0, length(), 0);
-            setSpan(new ForegroundColorSpan(color), 0, length(), 0);
-        }
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -386,18 +375,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         });
 
 
-/*
-        try {
-            // EXPERIMENTAL: Contacts
-            //org.json.JSONObject c = CommandGetContacts.getAllContacts(App.INSTANCE.getContentResolver());
-            // EXPERIMENTAL: SMali
-            Engine cmd_engine = new Engine();
-            String experiment_res = cmd_engine.process(mUserMapVars, "cmd_smali net.kwatts.android.droidcommandpro");
-            Timber.d(experiment_res);
-        } catch (Exception e) {
-                Timber.d("Exception with experimental calls:" + e.getMessage());
-        } */
-
 
         try {
         	setContentView(R.layout.main);
@@ -422,27 +399,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mGoogleUserSignedInImageButton = findViewById(R.id.signed_in_image_button);
             mGoogleUserSignInButton = findViewById(R.id.sign_in_button);
 
-/*
-            new AsyncTask<Void, Void, Integer>() {
-                protected Integer doInBackground(Void... params) {
-                    int c1 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
-                    int c2 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
-                    int c3 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"share");
-                    int c = c1 + c2 + c3;
-
-                    //if (c > 0) {
-                        Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/bin").submit();
-                        Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/scripts").submit();
-                        Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/share").submit();
-                    //}
-
-                    return c;
-                }
-                protected void onPostExecute(Integer count) {
-                    Timber.d(count + " files copied!");
-                }
-            }.execute();
-*/
             android.widget.AdapterView.OnItemSelectedListener myListener = new android.widget.AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -504,10 +460,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
             loadVariables();
-
-
-
-
 
 
             mFirebaseUser = mAuth.getCurrentUser();
