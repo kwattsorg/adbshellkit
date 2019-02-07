@@ -1686,10 +1686,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                     c.setDescription(dialogEditDescription.getText().toString());
                                     c.setCommand(dialogEditCommand.getText().toString());
 
-                                    if (tagAdminIsPublicCheckBox.isChecked()) {
-                                        c.isPublic = true;
-                                    } else {
-                                        c.isPublic = false;
+                                    if (isUserAdmin()) {
+                                        if (tagAdminIsPublicCheckBox.isChecked()) {
+                                            c.isPublic = true;
+                                        } else {
+                                            c.isPublic = false;
+                                        }
                                     }
 
                                     try {
@@ -1714,15 +1716,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
                                 if (firebaseUser != null && mFullCommand != null) {
 
-                                    String addPermissionSelected = spinnerAddPermission.getSelectedItem().toString();
-                                    String removePermissionSelected = spinnerRemovePermission.getSelectedItem().toString();
-
-                                    if ( addPermissionSelected != "--SELECT PERMISSION--") {
-                                        currentCommand.addPermission(addPermissionSelected);
-                                    }
-
-                                    if ( removePermissionSelected != "--SELECT PERMISSION--") {
-                                        currentCommand.removePermission(removePermissionSelected);
+                                    if (isUserAdmin()) {
+                                        try {
+                                            String addPermissionSelected = spinnerAddPermission.getSelectedItem().toString();
+                                            String removePermissionSelected = spinnerRemovePermission.getSelectedItem().toString();
+                                            if (addPermissionSelected != "--SELECT PERMISSION--") {
+                                                currentCommand.addPermission(addPermissionSelected);
+                                            }
+                                            if (removePermissionSelected != "--SELECT PERMISSION--") {
+                                                currentCommand.removePermission(removePermissionSelected);
+                                            }
+                                        } catch (Exception e) {
+                                            Timber.e(e);
+                                        }
                                     }
 
 
@@ -1752,10 +1758,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         })
                         .build();
 
-        addCommandLinearLayoutAdmin = dialog.getCustomView().findViewById(R.id.addCommandLinearLayoutAdmin);
-        tagAdminIsPublicCheckBox = dialog.getCustomView().findViewById(R.id.tagAdminIsPublicCheckBox);
 
         if (isUserAdmin()) {
+            addCommandLinearLayoutAdmin = dialog.getCustomView().findViewById(R.id.addCommandLinearLayoutAdmin);
+            tagAdminIsPublicCheckBox = dialog.getCustomView().findViewById(R.id.tagAdminIsPublicCheckBox);
             spinnerAddPermission = dialog.getCustomView().findViewById(R.id.spinnerAddPermission);
             String[] permAddList = new String[] {
                     "--SELECT PERMISSION--",
@@ -1799,7 +1805,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
             List<String> removePermissionList = new ArrayList<String>(currentCommand.getPermissionList());
             removePermissionList.add(0,"--SELECT PERMISSION--");
-            //final List<String> permsRemoveList = new ArrayList<>(Arrays.asList(stringArrayPermissions));
+
             final ArrayAdapter<String> spinnerArrayPermsRemoveAdapter = new ArrayAdapter<String>(
                     this,android.R.layout.simple_spinner_item,removePermissionList);
             spinnerArrayPermsRemoveAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -1809,12 +1815,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
 
 
-
-        List<String> showPermissions = currentCommand.getPermissionList();
-
         String[] showPermissionsArray;
         String showPermissionsString;
-
+        List<String> showPermissions = currentCommand.getPermissionList();
         if (showPermissions != null) {
             showPermissionsArray = showPermissions.toArray(new String[0]);
             showPermissionsString = Arrays.toString(showPermissionsArray);
@@ -1859,8 +1862,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
 
         }
-
-
 
         dialog.show();
 
