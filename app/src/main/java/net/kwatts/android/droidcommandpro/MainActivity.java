@@ -25,7 +25,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.MainThread;
-import android.support.design.widget.Snackbar;
+//import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -677,7 +677,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                             refreshUserUI(true);
                         } else {
                             Timber.w( "signInWithCredential:failure:" + task.getException());
-                            Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "Authentication Failed.", Toast.LENGTH_SHORT).show();
+                            //Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -1809,7 +1810,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
 
-        String[] showPermissionsArray = currentCommand.getPermissionList().toArray(new String[0]);
+        List<String> showPermissions = currentCommand.getPermissionList();
+
+        String[] showPermissionsArray;
+        String showPermissionsString;
+
+        if (showPermissions != null) {
+            showPermissionsArray = showPermissions.toArray(new String[0]);
+            showPermissionsString = Arrays.toString(showPermissionsArray);
+        } else {
+            showPermissionsString = "[]";
+        }
+
 
         tvAddCommandAttributes = dialog.getCustomView().findViewById(R.id.tvAddCommandAttributes);
         tvAddCommandAttributes.setText("key: " + currentCommand.key +
@@ -1819,7 +1831,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 "\nruncounts: " + currentCommand.getRuncounts() +
                 "\nisPublic=" + currentCommand.isPublic +
                 "\nneeds_superuser=" + currentCommand.isSuperUser() +
-                "\nneeds_permissions=" + Arrays.toString(showPermissionsArray)
+                "\nneeds_permissions=" + showPermissionsString
             );
 
         createNewAction = dialog.getActionButton(DialogAction.POSITIVE);

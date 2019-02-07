@@ -45,6 +45,7 @@ android {
         implementation "com.android.support:support-compat:$googleSupportVersion"
         implementation "com.android.support:design:$googleSupportVersion"
         implementation "com.android.support:customtabs:$googleSupportVersion"
+        implementation "com.android.support:cardview-v7:$googleSupportVersion"
 
 
 
@@ -80,7 +81,7 @@ android {
         /* Optional: For using com.topjohnwu.superuser.io classes */
         implementation "com.github.topjohnwu.libsu:io:${libsuVersion}"
         /* Optional: For including a prebuild busybox */
-        implementation "com.github.topjohnwu.libsu:busybox:${libsuVersion}"
+        //implementation "com.github.topjohnwu.libsu:busybox:${libsuVersion}"
 
 
         //implementation 'com.obsez.android.lib.filechooser:filechooser:1.1.10'

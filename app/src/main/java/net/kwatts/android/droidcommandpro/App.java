@@ -8,7 +8,6 @@ import android.app.Application;
 import android.util.Log;
 import timber.log.Timber;
 import com.google.firebase.database.FirebaseDatabase;
-import com.topjohnwu.superuser.BusyBoxInstaller;
 import com.topjohnwu.superuser.Shell;
 import com.topjohnwu.superuser.ContainerApp;
 import com.eggheadgames.aboutbox.AboutConfig;
@@ -77,6 +76,7 @@ public class App extends ContainerApp  {
 
 
         // Request a root shell
+
         if (Shell.rootAccess()) {
             Timber.d("Superuser: YES");
         } else {

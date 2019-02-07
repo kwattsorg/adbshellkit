@@ -12,6 +12,9 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="divider_bg">@color/divider_bg_dark</item>
         <item name="output_bg">@color/bg_output_dark</item>
+        <!-- Gets rid of white screen? -->
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowIsTranslucent">true</item>
 
     </style>
 
