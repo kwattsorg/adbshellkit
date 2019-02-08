@@ -271,18 +271,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         lineView.setTextIsSelectable(true);
 
 
-        //ColorStateList displayTextColor;
+        ColorStateList displayTextColor;
         if (cmd_state < 0) {
-           // displayTextColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.RED });
+            displayTextColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.RED });
         } else {
-           // displayTextColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.GREEN });
+            displayTextColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.GREEN });
         }
 
 
         //TODO: Custom span to handle ANSI color codes, fix to make default green instead of black
         //android.text.Spannable parsedLine = new AnsiParser().parse(line);
         SpannableString spanString = new SpannableString(line);
-        TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan("monospace", Typeface.NORMAL, mTextSize, null,null);
+        TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan("monospace", Typeface.NORMAL, mTextSize, displayTextColor,null);
         spanString.setSpan(textAppearanceSpan, 0, spanString.length(), 0);
         // Display "\t", offset by 100 pixels
         spanString.setSpan(new TabStopSpan.Standard(100), 0, spanString.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
