@@ -260,13 +260,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
     };
 
-    //TODO: Custom span to handle ANSI color codes
-    // convert to TerminalRow's - https://github.com/termux/termux-app/blob/c80e126b8fc07e8c322bba4c1f277086a962f81f/terminal-emulator/src/main/java/com/termux/terminal/TerminalRow.java
     private void handleMessageNewline(Message msg)
     {
         int cmd_state = msg.arg1;
         String line = (String) msg.obj;
-
 
         final boolean autoscroll = mScrollView.getScrollY() + mScrollView.getHeight() >= mLines.getBottom();
         TextView lineView = new TextView(App.INSTANCE.getApplicationContext());
@@ -274,25 +271,24 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         lineView.setTextIsSelectable(true);
 
 
-        ColorStateList displayTextColor;
+        //ColorStateList displayTextColor;
         if (cmd_state < 0) {
-            displayTextColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.RED });
+           // displayTextColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.RED });
         } else {
-            displayTextColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.GREEN });
+           // displayTextColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.GREEN });
         }
 
 
+        //TODO: Custom span to handle ANSI color codes, fix to make default green instead of black
+        //android.text.Spannable parsedLine = new AnsiParser().parse(line);
         SpannableString spanString = new SpannableString(line);
-
-        // Display with the color and text size
-        TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan("monospace", Typeface.NORMAL, mTextSize, displayTextColor,null);
+        TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan("monospace", Typeface.NORMAL, mTextSize, null,null);
         spanString.setSpan(textAppearanceSpan, 0, spanString.length(), 0);
         // Display "\t", offset by 100 pixels
         spanString.setSpan(new TabStopSpan.Standard(100), 0, spanString.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 
-
-        lineView.setText(spanString, TextView.BufferType.SPANNABLE);
+        lineView.setText(spanString);
 
 
 

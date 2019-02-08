@@ -189,7 +189,7 @@
                 android:id="@+id/topOutputView"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:background="?output_bg"
+                android:background="#000000"
                 android:padding="2dp">
                 <LinearLayout
                     android:id="@+id/lines"
