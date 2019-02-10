@@ -130,9 +130,11 @@ import android.widget.ArrayAdapter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 //TODO:
 // Package support - https://github.com/termux/termux-packages
+// notasecret
 
 
 public class MainActivity extends AppCompatActivity implements OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -536,9 +538,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             initFirebase();
         }
 
-        setTextState("Command ready" +
-                "... is_superuser=" + Shell.getShell().isRoot(), "","");
-
+        setTextState("Select a command to run...", "","");
 
     }
 
@@ -595,19 +595,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     }
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        mGoogleUser = new GoogleUser();
-        mGoogleUser.email = acct.getEmail();
-        mGoogleUser.displayName = acct.getDisplayName();
-        mGoogleUser.photoUrl = acct.getPhotoUrl().toString();
-        mGoogleUser.serverAuthCode = acct.getServerAuthCode();
-        mGoogleUser.gId = acct.getId();
-        mGoogleUser.gIdToken = acct.getIdToken();
-        StringBuffer tmpScopes = new StringBuffer();
-        for(com.google.android.gms.common.api.Scope s : acct.getGrantedScopes()) {
-            tmpScopes.append(s.getScopeUri() + " ");
-        }
-        mGoogleUser.oauthScopes = tmpScopes.toString();
-        mGoogleUser.expirationTime = acct.getExpirationTimeSecs();
 
         Timber.d( "firebaseAuthWithGoogle:" + acct.getId());
 
@@ -621,12 +608,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                             // Sign in success, update UI with the signed-in user's information
                             Timber.d( "signInWithCredential:success");
                             mFirebaseUser = mAuth.getCurrentUser();
-                            FirebaseDatabase.getInstance().getReference().child("google_users").child(mFirebaseUser.getUid()).setValue(mGoogleUser);
                             refreshUserUI(true);
                         } else {
                             Timber.w( "signInWithCredential:failure:" + task.getException());
                             Toast.makeText(getApplicationContext(), "Authentication Failed.", Toast.LENGTH_SHORT).show();
-                            //Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -641,49 +626,40 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public void runCommand(Command c) {
 
-        //clear past jobs...
+        // Are we already running a job?
         if (mJob != null) {
             Toast.makeText(getApplicationContext(), "Past command(ID: " + mJob.hashCode() + ") running, wait until complete or timeout in 20 seconds", Toast.LENGTH_SHORT).show();
             return;
-            //Toast.makeText(getApplicationContext(), "Past command(ID: " + mJob.hashCode() + ") still running and added to display output", Toast.LENGTH_SHORT).show();
         }
+
+        // Create a new shell and job
+        // Note default shell creation tries superuser and falls back to user
+        Shell shell = Shell.newInstance();
+        mJob = shell.newJob();
+
+        setTextState("Command running as " + ((shell.getStatus() > 0) ? "superuser" : "user"), "","");
 
         //clear window...
         mTopOutString.setLength(0);
         mTopOutStringError.setLength(0);
         mLines.removeAllViews();
 
+        // set last command for ui selection and add command to run counts
         lastCommandUsed = c;
         addToCommandRuncounts(c);
 
-        //TODO: ask for permissions needed by the command to execute
-        //if (checkPermissions()) { /* permissions granted */ }
-
+        //Ask for permissions needed by the command to execute
         checkCommandPermissions(c);
 
-
-
         String coreCommand = c.getCommand();
-
-
-
+        String runCommand;
 
         mTextSize = Integer.parseInt(mSharedPref.getString("textSize","22"));
 
         StringBuffer vars = new StringBuffer();
-
-        if (mSharedPref.getBoolean("includeToolsPath", true)) {
-            vars.append("PATH=$PATH:" + App.INSTANCE.getCacheDir().getAbsolutePath() + "/scripts:" +
-                                        App.INSTANCE.getCacheDir().getAbsolutePath() + "/bin" + ";");
-        }
-
         for (Map.Entry<String, String> entry : mUserMapVars.entrySet()) {
             vars.append(entry.getKey() + "=" + entry.getValue() + ";");
         }
-
-        Timber.d( "User Variables:" + vars.toString());
-
-        String runCommand;
 
         if (mToggleButtonVariables != null) {
             if (mToggleButtonVariables.isChecked()) {
@@ -695,7 +671,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             runCommand = vars.toString() + coreCommand;
         }
 
-//Experimental
+        //Experimental code commands
         long engine_start = SystemClock.elapsedRealtime();
         Engine cmd_engine = new Engine();
         String res_cmd = cmd_engine.process(mUserMapVars, coreCommand);
@@ -708,21 +684,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             long engine_ms = SystemClock.elapsedRealtime() - engine_start;
             double engine_s = engine_ms / 1000.0;
             logEvent("command_end", coreCommand, "complete in " + engine_s + "s length=" + res_cmd.length());
-            setTextState("Command finished after " + engine_s + "secs... length=" + res_cmd.length(),"","");
+            setTextState("Command done after " + engine_s + "secs... length=" + res_cmd.length(),"","");
+            mJob = null;
             return;
-        } else { /* run below */ }
-
-
+        }
 
         // NOW WE RUN!!!
         Timber.d( "Running:" + runCommand);
-        int shell_status = Shell.getShell().getStatus();
-        setTextState("Command running as " + ((shell_status > 0) ? "root" : "user") +
-                           "... shell_status=" + shell_status +
-                           ",is_superuser=" + Shell.getShell().isRoot(),
-                      "","");
-        logEvent("command_run", runCommand, "root_available=" + shell_status);
-
 
         List<String> consoleList;
         List<String> consoleListError;
@@ -765,22 +733,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 //logEvent("command_end", coreCommand, "complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"));
                 setTextState("Command finished after " + s + "secs... lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success") +
                         ",shell_code=" + out.getCode(),"",l.toString());
+
+                // clear the job...
                 mJob = null;
+                // ... and close the shell after a couple of seconds
+                try {
+                    shell.waitAndClose(2, TimeUnit.SECONDS);
+                } catch (Exception e)  {
+                    Timber.e(e);
+                }
             }
         };
 
 
-
-        if (Shell.getShell().isRoot()) {
-            mJob = Shell.su(runCommand).to(consoleList, consoleListError);
-            mJob.submit(runResultCallback);
-        }
-        else {
-            mJob = Shell.sh(runCommand).to(consoleList, consoleListError);
-            mJob.submit(runResultCallback);
-        }
-
-
+        mJob.add(runCommand);
+        mJob.to(consoleList, consoleListError);
+        mJob.submit(runResultCallback);
 
     }
 
@@ -1086,7 +1054,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public static void addToCommandRuncounts(Command c) {
         DatabaseReference db = FirebaseDatabase.getInstance().getReference();
-
         if ((!c.isPublic) && (c.key != null)) {
             c.addToRuncounts();
             Map<String, Object> cmdValues = c.toMap();

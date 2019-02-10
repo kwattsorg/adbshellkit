@@ -5,6 +5,9 @@ package net.kwatts.android.droidcommandpro;
  */
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import timber.log.Timber;
 import com.google.firebase.database.FirebaseDatabase;
@@ -14,6 +17,7 @@ import com.eggheadgames.aboutbox.AboutConfig;
 import com.crashlytics.android.Crashlytics;
 import android.os.*;
 
+import androidx.annotation.NonNull;
 
 /**
  * This is a subclass of {@link Application} used to provide shared objects and superuser functionality across the full app
@@ -21,11 +25,33 @@ import android.os.*;
 public class App extends ContainerApp  {
     private static final String TAG = "Application";
     public static App INSTANCE = null;
-
     public App() {
         INSTANCE = this;
     }
 
+
+    static {
+        Shell.Config.setTimeout(20); //20 second timeout
+        Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR);
+        Shell.Config.verboseLogging(BuildConfig.DEBUG);
+        Shell.Config.addInitializers(ADBShellInitializer.class);
+    }
+
+    static class ADBShellInitializer extends Shell.Initializer {
+        @Override
+        public boolean onInit(Context context, @NonNull Shell shell) {
+            SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
+            if (p.getBoolean("includeToolsPath", true)) {
+                String exportPath = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + App.INSTANCE.getCacheDir().getAbsolutePath() + "/lib" + ";" +
+                                 "PATH=$PATH:" + App.INSTANCE.getCacheDir().getAbsolutePath() + "/scripts:" + App.INSTANCE.getCacheDir().getAbsolutePath() + "/bin" + ";";
+                shell.newJob()
+                        //.add(bashrc)                            /* Load a script from raw resources */
+                        .add("export " + exportPath)   /* Run some commands */
+                        .exec();
+            }
+            return true;
+        }
+    }
 
     @Override
     public synchronized void onCreate() {
@@ -36,9 +62,7 @@ public class App extends ContainerApp  {
             Timber.plant(new ReleaseTree());
         }
 
-        Shell.Config.setTimeout(20); //20 second timeout
-        Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR);
-        Shell.Config.verboseLogging(BuildConfig.DEBUG);;
+
 
         AboutConfig aboutConfig = AboutConfig.getInstance();
         aboutConfig.appName = getString(R.string.app_name);
@@ -71,14 +95,6 @@ public class App extends ContainerApp  {
         aboutConfig.emailSubject = "Feedback for " + aboutConfig.packageName;
 
 
-        // Request a root shell
-
-        if (Shell.rootAccess()) {
-            Timber.d("Superuser: YES");
-        } else {
-            Timber.d("Superuser: NO");
-        }
-
         // Prepare local file and scripts, making them executable etc
         new Thread(new Runnable() {
             public void run() {
@@ -86,15 +102,18 @@ public class App extends ContainerApp  {
                 int c2 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"lib");
                 int c3 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
                 int c4 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"share");
+                Timber.d((c1 + c2 + c3 + c4) + " asset files copied!");
 
-                int c = c1 + c2 + c3 + c4;
 
-                //if (c > 0) {
-                Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/bin").submit();
-                Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/lib").submit();
-                Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/scripts").submit();
-                Shell.sh("/system/bin/chmod -R 755 " + getCacheDir().getAbsolutePath() + "/share").submit();
-                Timber.d(c + " files copied!");
+                String appCacheDir = getCacheDir().getAbsolutePath();
+
+
+                Shell.sh("/system/bin/chmod -R 755 " + appCacheDir + "/bin "
+                                + appCacheDir + "/lib " + appCacheDir + "/scripts "
+                                + appCacheDir + "/share").exec();
+                Timber.d("done setting asset permissions to executable!");
+
+
             }
         }).start();
 

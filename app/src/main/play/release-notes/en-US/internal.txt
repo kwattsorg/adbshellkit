@@ -1,0 +1,1 @@
+File browser now works with root, less crashes.

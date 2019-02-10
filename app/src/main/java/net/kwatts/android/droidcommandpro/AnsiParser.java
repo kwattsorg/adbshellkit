@@ -9,11 +9,11 @@ import android.text.style.ForegroundColorSpan;
 public class AnsiParser {
 
     private int defaultTextColor = Color.GREEN;
-
+    private int defaultBackgroundColor = Color.BLACK;
 
     private ForegroundColorSpan mForegroundColorSpan = new ForegroundColorSpan(defaultTextColor);
     // do nothing right now with bg
-    //private BackgroundColorSpan mBackgroundColorSpan = new BackgroundColorSpan(Color.BLACK);
+    private BackgroundColorSpan mBackgroundColorSpan = new BackgroundColorSpan(defaultBackgroundColor);
     private int mIntensity = 0;
 
 
@@ -155,17 +155,16 @@ public class AnsiParser {
                 } else {
                     for (int i = 0; i < mMatcher.paramCount(); i++) {
                         int param = mMatcher.param(i);
-
+                        // 0 is reset/normal, 1 bold or increased intensity
                         if ((param == 0) || (param == 1)) {
                             mIntensity = param;
-                        } else
-                        if ((param > 29) && (param < 38)) {
+                        }
+                        else if ((param > 29) && (param < 38)) { //foreground colors
                             int c = getColor(param);
                             mForegroundColorSpan = new ForegroundColorSpan(c);
                         }
-                        else
-                        if ((param > 39) && (param < 48)) {
-                            // do nothing right now with bg
+                        else if ((param > 39) && (param < 48)) { //background colors, don't change
+                            mForegroundColorSpan = new ForegroundColorSpan(defaultTextColor);
                            // mBackgroundColorSpan = new BackgroundColorSpan(getColor(param));
                         }
                     }

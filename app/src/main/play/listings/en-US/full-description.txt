@@ -1,0 +1,13 @@
+ADB Shellkit gives you access to the hidden system commands that came with your phone.
+
+- Works on both rooted and non-rooted devices
+- Easy way to access and run system commands such as top, logcat, disk usage, rooted commands, pretty colors and formatted display
+- Save output to numerous sharing options (files, mail, google drive, etc)
+- Run your own system commands or select one from my library
+- User saved commands across devices with configured shell variables 
+- A good and growing list of global system commands you can use
+- Yes, there are ads, but you can easily turn them off in settings. 
+
+This application is my swiss army knife and testing grounds, so you will often see new commands, tools, etc show up from time to time. 
+
+**UPDATE** I've open-sourced this app, feel free to submit suggestions, feedback, or contribute!  https://github.com/kwattsorg/adbshellkit

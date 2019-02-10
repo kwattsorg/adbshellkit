@@ -1,0 +1,2 @@
+New features, New bugs, New fixes. And it loads faster. 
+Have ideas for new features or encountering bugs? Head to https://github.com/kwattsorg/adbshellkit and let us know :)
