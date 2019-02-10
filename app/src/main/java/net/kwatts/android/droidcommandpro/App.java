@@ -23,11 +23,13 @@ import androidx.annotation.NonNull;
  * This is a subclass of {@link Application} used to provide shared objects and superuser functionality across the full app
  */
 public class App extends ContainerApp  {
-    private static final String TAG = "Application";
     public static App INSTANCE = null;
     public App() {
         INSTANCE = this;
     }
+
+
+    public static final String FILES_PATH = "/data/data/net.kwatts.android.droidcommandpro/files";
 
 
     static {
@@ -42,8 +44,8 @@ public class App extends ContainerApp  {
         public boolean onInit(Context context, @NonNull Shell shell) {
             SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
             if (p.getBoolean("includeToolsPath", true)) {
-                String exportPath = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + App.INSTANCE.getCacheDir().getAbsolutePath() + "/lib" + ";" +
-                                 "PATH=$PATH:" + App.INSTANCE.getCacheDir().getAbsolutePath() + "/scripts:" + App.INSTANCE.getCacheDir().getAbsolutePath() + "/bin" + ";";
+                String exportPath = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + App.INSTANCE.getFilesDir().getAbsolutePath() + "/lib" + ";" +
+                                 "PATH=$PATH:" + App.INSTANCE.getFilesDir().getAbsolutePath() + "/scripts:" + App.INSTANCE.getFilesDir().getAbsolutePath() + "/bin" + ";";
                 shell.newJob()
                         //.add(bashrc)                            /* Load a script from raw resources */
                         .add("export " + exportPath)   /* Run some commands */
@@ -98,22 +100,26 @@ public class App extends ContainerApp  {
         // Prepare local file and scripts, making them executable etc
         new Thread(new Runnable() {
             public void run() {
-                int c1 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
-                int c2 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"lib");
-                int c3 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
-                int c4 = Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"share");
-                Timber.d((c1 + c2 + c3 + c4) + " asset files copied!");
+                /*
+                Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
+                Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"lib");
+                Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
+                Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"share");
 
+                String cacheDir = getCacheDir().getAbsolutePath();
+                Shell.sh("/system/bin/chmod -R 755 " + cacheDir + "/bin "
+                                + cacheDir + "/lib " + cacheDir + "/scripts "
+                                + cacheDir + "/share").exec(); */
 
-                String appCacheDir = getCacheDir().getAbsolutePath();
+                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
+                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"lib");
+                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
+                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"share");
 
-
-                Shell.sh("/system/bin/chmod -R 755 " + appCacheDir + "/bin "
-                                + appCacheDir + "/lib " + appCacheDir + "/scripts "
-                                + appCacheDir + "/share").exec();
-                Timber.d("done setting asset permissions to executable!");
-
-
+                String filesDir = getFilesDir().getAbsolutePath();
+                Shell.sh("/system/bin/chmod -R 755 " + filesDir + "/bin "
+                        + filesDir + "/lib " + filesDir + "/scripts "
+                        + filesDir + "/share").exec();
             }
         }).start();
 

@@ -40,6 +40,26 @@ public class Util {
         return count;
     }
 
+
+    public static int copyAssetsToFilesDirectory(android.content.Context ctx, boolean isDir, String file) {
+        int count = 0;
+        try {
+            if (isDir) {
+                File f = new File(ctx.getFilesDir().getAbsolutePath()+ "/" + file);
+                if (!f.exists()) {
+                    f.mkdirs();
+                    count = new AssetCopier(ctx).copy(file, f);
+                }
+            } else {
+                count = new AssetCopier(ctx).copy(file, ctx.getFilesDir());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Toast.makeText(ctx, (count==-1 ? "There was an error copying" : "files copied " + count), Toast.LENGTH_LONG).show();
+        return count;
+    }
+
     static int parseColor(String c) {
         try {
             int skipInitial, skipBetween;

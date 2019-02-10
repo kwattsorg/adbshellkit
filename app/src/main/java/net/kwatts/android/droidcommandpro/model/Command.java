@@ -139,9 +139,9 @@ public class Command {
         result.put("uid", mUid);
         result.put("email", mEmail);
         result.put("isPublic", isPublic);
-        result.put("tagList", mTagList);
-        result.put("permissionList", mTagList);
         result.put("description", mDescription);
+        result.put("tagList", mTagList);
+        result.put("permissionList", mPermissionlist);
         result.put("command", mCommand);
         result.put("runcounts", mRuncounts);
 

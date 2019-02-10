@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     static final String EXTRA_COMMAND = "net.kwatts.android.droidcommandpro.EXTRA_COMMAND";
     static final String EXTRA_COMMAND_KEY = "net.kwatts.android.droidcommandpro.EXTRA_COMMAND_KEY";
 
+
     public static final String CHANNEL_ID = "main";
     public static final int RC_SIGN_IN = 10;
 
@@ -651,7 +652,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mLines.removeAllViews();
 
         // set last command for ui selection and add command to run counts
-        mSharedPref.edit().putString("lastCommandUsedKey", c.key).commit();
+        //mSharedPref.edit().putString("lastCommandUsedKey", c.key).commit();
         lastCommandUsed = c;
         addToCommandRuncounts(c);
 
@@ -1349,8 +1350,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
 
         //Defaults
-        mUserMapVars.put("DIR_SCRIPTS",App.INSTANCE.getApplicationContext().getCacheDir().getAbsolutePath() + "/scripts");
-        mUserMapVars.put("DIR_TOOLS",App.INSTANCE.getApplicationContext().getCacheDir().getAbsolutePath() + "/bin");
+        mUserMapVars.put("DIR_SCRIPTS",App.INSTANCE.getApplicationContext().getFilesDir().getAbsolutePath() + "/scripts");
+        mUserMapVars.put("DIR_TOOLS",App.INSTANCE.getApplicationContext().getFilesDir().getAbsolutePath() + "/bin");
         mUserMapVars.put("NETWORK_INTERFACE","wlan0");
         mUserMapVars.put("APP_PACKAGE",App.INSTANCE.getApplicationContext().getPackageName());
 
