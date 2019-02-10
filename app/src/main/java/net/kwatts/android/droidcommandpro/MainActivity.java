@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public Button mRunButton;
     public static ScrollView mScrollView;
     public static LinearLayout mLines;
-    public static int mTextSize = 22;
+    public static int mTextSize = 23;
 
     public WebView mWebView;
     public String mWebViewData;
@@ -634,7 +634,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         // Create a new shell and job
         // Note default shell creation tries superuser and falls back to user
-        Shell shell = Shell.newInstance();
+        Shell shell;
+        if (mSharedPref.getBoolean("disableShellSharing",false)) {
+            shell = Shell.newInstance();
+        } else {
+            shell = Shell.getShell();
+        }
+
         mJob = shell.newJob();
 
         setTextState("Command running as " + ((shell.getStatus() > 0) ? "superuser" : "user"), "","");
@@ -645,6 +651,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mLines.removeAllViews();
 
         // set last command for ui selection and add command to run counts
+        mSharedPref.edit().putString("lastCommandUsedKey", c.key).commit();
         lastCommandUsed = c;
         addToCommandRuncounts(c);
 
@@ -654,7 +661,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         String coreCommand = c.getCommand();
         String runCommand;
 
-        mTextSize = Integer.parseInt(mSharedPref.getString("textSize","22"));
+        mTextSize = Integer.parseInt(mSharedPref.getString("textSize","23"));
 
         StringBuffer vars = new StringBuffer();
         for (Map.Entry<String, String> entry : mUserMapVars.entrySet()) {
@@ -736,12 +743,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
                 // clear the job...
                 mJob = null;
-                // ... and close the shell after a couple of seconds
-                try {
-                    shell.waitAndClose(2, TimeUnit.SECONDS);
-                } catch (Exception e)  {
-                    Timber.e(e);
+                // ... and close the shell after a couple of seconds if sharing is off
+                if (mSharedPref.getBoolean("disableShellSharing",false)) {
+                    try {
+                        shell.waitAndClose(2, TimeUnit.SECONDS);
+                    } catch (Exception e)  {
+                        Timber.e(e);
+                    }
                 }
+
             }
         };
 
@@ -836,7 +846,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         Timber.i( "onSharedPreferenceChanged callback");
         switch (key) {
             case "textSize":
-                mTextSize = Integer.parseInt(sharedPreferences.getString("textSize","22"));
+                mTextSize = Integer.parseInt(sharedPreferences.getString("textSize","23"));
                 break;
             case "runAsSuperUser":
                 mRunAsSuperUser = sharedPreferences.getBoolean(key, true);

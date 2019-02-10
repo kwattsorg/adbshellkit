@@ -4,13 +4,13 @@
         android:key="general_settings"
         android:title="General Settings">
         <ListPreference
-            android:defaultValue="22"
             android:dialogTitle="Select Text Size"
             android:entries="@array/outTextSize_array"
             android:entryValues="@array/outTextSize_array"
             android:key="textSize"
             android:summary="Set the size of the text"
-            android:title="Text Size" />
+            android:title="Text Size"
+            android:defaultValue="23"/>
         <EditTextPreference
             android:key="variablesEditText"
             android:title="Global Variables"
@@ -22,6 +22,11 @@
             android:key="includeToolsPath"
             android:summary="This option makes adbshellkit tools and scripts accessible without specifying path."
             android:title= "Add Tools To Path"/>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="disableShellSharing"
+            android:summary="Instead of sharing shell for each command spawn a new shell. Note this will use more resources."
+            android:title= "Disable Shell Sharing"/>
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="showNotifications"

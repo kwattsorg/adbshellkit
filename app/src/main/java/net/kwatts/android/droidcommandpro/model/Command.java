@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.ArrayList;
+import com.google.gson.Gson;
 
 /**
  * Created by kwatts on 11/9/17.
@@ -167,4 +168,5 @@ public class Command {
                 "\ncommand: " + this.mCommand;
 
     }
+
 }

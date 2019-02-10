@@ -24,11 +24,10 @@
     </style>
 
     <style name="MatchSpinnerStyle" parent="android:style/Widget.ListView.DropDown">
-        <item name="android:divider">#123456</item>
+        <item name="android:divider">@color/colorDividerBlack</item>
         <item name="android:dividerHeight">1dp</item>
     </style>
-
-    <style name="MatchSpinnerTheme" parent="AppTheme">
+    <style name="MatchSpinnerTheme" parent="@style/Theme.AppCompat.DayNight">
         <item name="android:dropDownListViewStyle">@style/MatchSpinnerStyle</item>
     </style>
 
