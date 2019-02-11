@@ -145,6 +145,7 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
     }
 
     public void addAllCommands(List<Command> cmds) {
+        super.addAll(cmds);
         // For now, just clear
         spinnerCmds.clear();
         for(Command c: cmds){

@@ -162,7 +162,6 @@ public class Command {
         result.put("command", mCommand);
         result.put("runcounts", mRuncounts);
         result.put("lastused", mLastused);
-        // result.put("permissions", mPermissions);
         return result;
     }
 

@@ -892,13 +892,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public void initFirebase() {
         DatabaseReference mFbaseDBCommandsRef = mFirebaseDB.getReference();
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        //DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         final FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        mUserCommands.clear();
-        mGlobalCommands.clear();
-
-
+        //mUserCommands.clear();
+        //mGlobalCommands.clear();
 
         if (mFirebaseUser != null) {
             if (!mFirebaseUser.isAnonymous()) {
@@ -959,28 +957,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                 cmd.key = cmdSnapshot.getKey();
                                 mUserCommands.add(cmd);
 
-                                // begin v2 way of building commands list
-                                //if (!mCommands.contains(cmd)) {
-                                //    mCommands.add(cmd);
-                                //}
-                                // end v2
-
-
                                 if (cmd.isPinned()) {
                                     addDynamicShortcut(cmd.key, cmd.getCommand(), cmd.getDescription());
                                 }
                             }
                         }
-
-
-                        /*
-                        if (lastCommandUsed != null) {
-                            boolean present = mUserCommands.remove(lastCommandUsed);
-                            if (present) {
-                                mUserCommands.add(0, lastCommandUsed);
-                            }
-                        } */
-
 
                         List<Command> allCommands = new ArrayList<>();
                         allCommands.addAll(mUserCommands);
@@ -988,28 +969,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         mCustomCmdsAdapter.addAllCommands(allCommands);
                         mCustomCmdsAdapter.notifyDataSetChanged();
                         mSpinnerCommands.setSelection(0);
-
-
-
-
-                        // hack, if the list gets updated and last command was not null and public
-                        //TODO: get rid of this crap, use one global list of commands (mCommands)
-                        /*
-                        if (lastPublicCommandUsed != null) {
-                            boolean present = allCommands.remove(lastPublicCommandUsed);
-                            if (present) {
-                                allCommands.add(0, lastPublicCommandUsed);
-                            }
-
-                        } */
-
-
-                        //mCustomCmdsAdapter = new CustomAdapterCommands(MainActivity.this, allCommands);
-                        //mSpinnerCommands.setAdapter(mCustomCmdsAdapter);
-
-
-
-
                     }
 
                     @Override
@@ -1027,7 +986,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mGlobalCommands.clear();
-
                 for (DataSnapshot cmdSnapshot: dataSnapshot.getChildren()) {
                     Command cmd = cmdSnapshot.getValue(Command.class);
 
@@ -1042,21 +1000,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 allCommands.addAll(mGlobalCommands);
                 mCustomCmdsAdapter.addAllCommands(allCommands);
                 mCustomCmdsAdapter.notifyDataSetChanged();
-
-                // hack, if the list gets updated and last command was not null and public
-                //TODO: get rid of this crap, use one global list of commands (mCommands)
-                /*
-                if (lastPublicCommandUsed != null) {
-                    boolean present = allCommands.remove(lastPublicCommandUsed);
-                    if (present) {
-                        allCommands.add(0, lastPublicCommandUsed);
-                    }
-
-                } */
-
-
-
-
             }
 
             @Override
@@ -1610,6 +1553,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
             if (c.key != null) {
+
+                String permString[] = c.getPermissionList().toArray(new String[0]);
+
                 tvRemoveCommandDetails.setText("key: " + c.key +
                         "\nuid: " + c.getUid() +
                         "\nuser: " + c.getEmail() +
@@ -1617,6 +1563,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         "\nisPublic: " + c.isPublic +
                         "\nisPinned: " + c.isPinned() +
                         "\nruncounts: " + c.getRuncounts() +
+                        "\nlastused: " + new Date(c.getLastused()).toString() +
+                        "\npermissions: " + Arrays.toString(permString) +
                         "\ndescription: " + c.getDescription() +
                         "\ncommand: " + c.getCommand());
 
