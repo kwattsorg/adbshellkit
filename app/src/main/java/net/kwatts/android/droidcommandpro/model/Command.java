@@ -36,6 +36,9 @@ public class Command {
     public String mCommand;
     @SerializedName("runcounts")
     public Long mRuncounts;
+    @SerializedName("lastused")
+    public Long mLastused;
+
 
 
 
@@ -92,6 +95,18 @@ public class Command {
     public void setRuncounts(Long runcounts) {
         mRuncounts = runcounts;
     }
+    public Long getLastused() {
+        if (mLastused == null) {
+            return 0L;
+        } else {
+            return mLastused;
+        }
+    }
+    public void setLastused(Long lastused) {
+        if (!isPublic) {
+            mLastused = lastused;
+        }
+    }
 
 /*
     public String getCommandName() {
@@ -109,11 +124,13 @@ public class Command {
 
 
     public void addToRuncounts() {
-        if (mRuncounts == null) {
-            mRuncounts = 1L;
+        if (!isPublic) {
+            if (mRuncounts == null) {
+                mRuncounts = 1L;
 
-        } else {
-            mRuncounts += 1L;
+            } else {
+                mRuncounts += 1L;
+            }
         }
     }
 
@@ -144,7 +161,7 @@ public class Command {
         result.put("permissionList", mPermissionlist);
         result.put("command", mCommand);
         result.put("runcounts", mRuncounts);
-
+        result.put("lastused", mLastused);
         // result.put("permissions", mPermissions);
         return result;
     }
@@ -164,6 +181,7 @@ public class Command {
                 "\nisPublic: " + this.isPublic +
                 "\nisPinned: " + isPinned() +
                 "\nruncounts: " + this.mRuncounts +
+                "\nlastused: " + this.mLastused +
                 "\ndescription: " + this.mDescription +
                 "\ncommand: " + this.mCommand;
 

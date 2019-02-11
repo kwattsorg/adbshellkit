@@ -119,6 +119,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Date;
 
 import timber.log.Timber;
 import android.util.TimingLogger;
@@ -152,6 +153,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     TextView mTextStatus;
     public static TextView mTextViewState;
     Spinner mSpinnerCommands;
+
+
     Spinner mPackagesSpinner;
     Spinner mNetworkInterfaceSpinner;
     EditText mDialogEditUserVars;
@@ -186,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public static List<Command> mGlobalCommands = new ArrayList<>();
     public static List<Command> mUserCommands = new ArrayList<>();
 
+
     private ImageButton mGoogleUserSignedInImageButton;
     private com.google.android.gms.common.SignInButton mGoogleUserSignInButton;
     GoogleSignInClient mGoogleSignInClient;
@@ -198,6 +202,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public static Map<String, String> mUserMapVars = new HashMap<String, String>();
     CustomAdapterCommands mCustomCmdsAdapter;
+
+
     CustomAdapterVars mCustomVarsAdapter;
     CustomAdapterNetworkInterfaceVars mCustomVarsNetworkInterfaceAdapter;
 
@@ -221,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     boolean isDebuggable;
 
-    public static Command lastCommandUsed;
+    public static Command lastPublicCommandUsed;
 
     public static boolean lastPermissionStatus;
 
@@ -420,6 +426,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 public void onNothingSelected(AdapterView<?> arg0) {}
             };
             mSpinnerCommands.setOnItemSelectedListener(myListener);
+            mCustomCmdsAdapter =  new CustomAdapterCommands(MainActivity.this, new ArrayList<Command>());
+            mSpinnerCommands.setAdapter(mCustomCmdsAdapter);
+
             mRunButton = findViewById(R.id.runButton);
             mRunButton.setOnClickListener(this);
 
@@ -491,7 +500,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
             //checkIfFirstTime();
-
 
 
 
@@ -651,13 +659,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mTopOutStringError.setLength(0);
         mLines.removeAllViews();
 
-        // set last command for ui selection and add command to run counts
-        //mSharedPref.edit().putString("lastCommandUsedKey", c.key).commit();
-        lastCommandUsed = c;
-        addToCommandRuncounts(c);
+        if (c.isPublic) {
+            lastPublicCommandUsed = c;
+        } else {
+            lastPublicCommandUsed = null;
+        }
 
         //Ask for permissions needed by the command to execute
         checkCommandPermissions(c);
+        // set last command for ui selection and add command to run counts
+        addToCommandRuncounts(c);
+
+
 
         String coreCommand = c.getCommand();
         String runCommand;
@@ -760,6 +773,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mJob.add(runCommand);
         mJob.to(consoleList, consoleListError);
         mJob.submit(runResultCallback);
+
+        //mSharedPref.edit().putString("lastCommandUsedKey", c.key).commit();
+
+        //lastCommandUsed = c;
+
 
     }
 
@@ -879,7 +897,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         mUserCommands.clear();
         mGlobalCommands.clear();
-        lastCommandUsed = null;
+
 
 
         if (mFirebaseUser != null) {
@@ -941,23 +959,55 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                 cmd.key = cmdSnapshot.getKey();
                                 mUserCommands.add(cmd);
 
+                                // begin v2 way of building commands list
+                                //if (!mCommands.contains(cmd)) {
+                                //    mCommands.add(cmd);
+                                //}
+                                // end v2
+
+
                                 if (cmd.isPinned()) {
                                     addDynamicShortcut(cmd.key, cmd.getCommand(), cmd.getDescription());
                                 }
                             }
                         }
 
+
+                        /*
                         if (lastCommandUsed != null) {
-                            mUserCommands.remove(lastCommandUsed);
-                            mUserCommands.add(0, lastCommandUsed);
-                        }
+                            boolean present = mUserCommands.remove(lastCommandUsed);
+                            if (present) {
+                                mUserCommands.add(0, lastCommandUsed);
+                            }
+                        } */
+
 
                         List<Command> allCommands = new ArrayList<>();
                         allCommands.addAll(mUserCommands);
                         allCommands.addAll(mGlobalCommands);
+                        mCustomCmdsAdapter.addAllCommands(allCommands);
+                        mCustomCmdsAdapter.notifyDataSetChanged();
+                        mSpinnerCommands.setSelection(0);
 
-                        mCustomCmdsAdapter = new CustomAdapterCommands(MainActivity.this, allCommands);
-                        mSpinnerCommands.setAdapter(mCustomCmdsAdapter);
+
+
+
+                        // hack, if the list gets updated and last command was not null and public
+                        //TODO: get rid of this crap, use one global list of commands (mCommands)
+                        /*
+                        if (lastPublicCommandUsed != null) {
+                            boolean present = allCommands.remove(lastPublicCommandUsed);
+                            if (present) {
+                                allCommands.add(0, lastPublicCommandUsed);
+                            }
+
+                        } */
+
+
+                        //mCustomCmdsAdapter = new CustomAdapterCommands(MainActivity.this, allCommands);
+                        //mSpinnerCommands.setAdapter(mCustomCmdsAdapter);
+
+
 
 
                     }
@@ -990,9 +1040,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 List<Command> allCommands = new ArrayList<>();
                 allCommands.addAll(mUserCommands);
                 allCommands.addAll(mGlobalCommands);
+                mCustomCmdsAdapter.addAllCommands(allCommands);
+                mCustomCmdsAdapter.notifyDataSetChanged();
 
-                mCustomCmdsAdapter = new CustomAdapterCommands(MainActivity.this, allCommands);
-                mSpinnerCommands.setAdapter(mCustomCmdsAdapter);
+                // hack, if the list gets updated and last command was not null and public
+                //TODO: get rid of this crap, use one global list of commands (mCommands)
+                /*
+                if (lastPublicCommandUsed != null) {
+                    boolean present = allCommands.remove(lastPublicCommandUsed);
+                    if (present) {
+                        allCommands.add(0, lastPublicCommandUsed);
+                    }
+
+                } */
+
+
+
+
             }
 
             @Override
@@ -1063,10 +1127,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
     }
 
-    public static void addToCommandRuncounts(Command c) {
+    public void addToCommandRuncounts(Command c) {
         DatabaseReference db = FirebaseDatabase.getInstance().getReference();
         if ((!c.isPublic) && (c.key != null)) {
             c.addToRuncounts();
+            c.setLastused(System.currentTimeMillis());
             Map<String, Object> cmdValues = c.toMap();
             Map<String, Object> childUpdates = new HashMap<>();
             childUpdates.put("/commands_v2/" + c.getUid() + "/" + c.key, cmdValues);
@@ -1611,6 +1676,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                     c.setTagList(tags);
                                     c.setDescription(dialogEditDescription.getText().toString());
                                     c.setCommand(dialogEditCommand.getText().toString());
+                                    c.setLastused(System.currentTimeMillis());
 
                                     if (isUserAdmin()) {
                                         if (tagAdminIsPublicCheckBox.isChecked()) {

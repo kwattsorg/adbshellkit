@@ -113,8 +113,12 @@ public class App extends ContainerApp  {
 
                 Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
                 Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"lib");
+                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"etc");
                 Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
                 Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"share");
+                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"etc");
+                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"tmp");
+                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"home");
 
                 String filesDir = getFilesDir().getAbsolutePath();
                 Shell.sh("/system/bin/chmod -R 755 " + filesDir + "/bin "
