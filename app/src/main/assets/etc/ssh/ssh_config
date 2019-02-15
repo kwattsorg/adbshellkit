@@ -1,0 +1,2 @@
+PubkeyAcceptedKeyTypes +ssh-dss
+SendEnv LANG

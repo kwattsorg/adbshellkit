@@ -1,0 +1,4 @@
+#!/data/data/net.kwatts.android.droidcommandpro/files/bin/sh
+
+. source-ssh-agent
+ssh $@

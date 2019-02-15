@@ -1584,7 +1584,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     }
 
-
     private TextView tvAddCommandAttributes;
     public LinearLayout addCommandLinearLayoutAdmin;
     public CheckBox tagAdminIsPublicCheckBox;
