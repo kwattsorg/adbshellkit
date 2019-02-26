@@ -95,4 +95,37 @@ public class Util {
         }
     }
 
+    public static String[] getPermissions() {
+        return new String[]{
+                "-",
+                "android.permission.WRITE_CONTACTS",
+                "android.permission.GET_ACCOUNTS",
+                "android.permission.READ_CONTACTS",
+                "android.permission.ANSWER_PHONE_CALLS",
+                "android.permission.READ_PHONE_NUMBERS",
+                "android.permission.READ_PHONE_STATE",
+                "android.permission.CALL_PHONE",
+                "android.permission.ACCEPT_HANDOVER",
+                "android.permission.USE_SIP",
+                "android.permission.READ_CALENDAR",
+                "android.permission.WRITE_CALENDAR",
+                "android.permission.READ_CALL_LOG",
+                "android.permission.WRITE_CALL_LOG",
+                "android.permission.PROCESS_OUTGOING_CALLS",
+                "android.permission.CAMERA",
+                "android.permission.BODY_SENSORS",
+                "android.permission.ACCESS_FINE_LOCATION",
+                "android.permission.ACCESS_COARSE_LOCATION",
+                "android.permission.READ_EXTERNAL_STORAGE",
+                "android.permission.WRITE_EXTERNAL_STORAGE",
+                "android.permission.RECORD_AUDIO",
+                "android.permission.READ_SMS",
+                "android.permission.RECEIVE_WAP_PUSH",
+                "android.permission.RECEIVE_MMS",
+                "android.permission.RECEIVE_SMS",
+                "android.permission.SEND_SMS",
+                "android.permission.READ_CELL_BROADCASTS"
+        };
+    }
+
 }

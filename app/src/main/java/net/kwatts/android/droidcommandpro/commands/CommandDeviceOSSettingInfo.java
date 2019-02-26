@@ -46,6 +46,14 @@ public class CommandDeviceOSSettingInfo implements Command {
             res.put("settings.global.development_settings_enabled", developer_mode_enabled);
             res.put("settings.global.adb_enabled", usb_debugging_enabled);
             res.put("settings.secure.install_non_market_apps", sideloading_enabled);
+            try {
+                res.put("settings.global", getAndroidGlobalSettings(ctx));
+            } catch (Exception e) {}
+
+            try {
+                res.put("settings.secure", getAndroidSecureSettings(ctx));
+            } catch (Exception e) {}
+
         } catch (JSONException e) {
 
         }

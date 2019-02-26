@@ -7,8 +7,11 @@ package net.kwatts.android.droidcommandpro;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import flipagram.assetcopylib.AssetCopier;
 import timber.log.Timber;
 import com.google.firebase.database.FirebaseDatabase;
 import com.topjohnwu.superuser.Shell;
@@ -16,6 +19,10 @@ import com.topjohnwu.superuser.ContainerApp;
 import com.eggheadgames.aboutbox.AboutConfig;
 import com.crashlytics.android.Crashlytics;
 import android.os.*;
+
+import org.apache.commons.io.FileUtils;
+
+import java.io.*;
 
 import androidx.annotation.NonNull;
 
@@ -43,14 +50,32 @@ public class App extends ContainerApp  {
         @Override
         public boolean onInit(Context context, @NonNull Shell shell) {
             SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
-            if (p.getBoolean("includeToolsPath", true)) {
-                String exportPath = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + App.INSTANCE.getFilesDir().getAbsolutePath() + "/lib" + ";" +
-                                 "PATH=$PATH:" + App.INSTANCE.getFilesDir().getAbsolutePath() + "/scripts:" + App.INSTANCE.getFilesDir().getAbsolutePath() + "/bin" + ";";
-                shell.newJob()
-                        //.add(bashrc)                            /* Load a script from raw resources */
-                        .add("export " + exportPath)   /* Run some commands */
-                        .exec();
+
+            InputStream bashrc;
+            String exportPath;
+
+            try {
+                //TODO: look for App.FILES_PATH/home/.bashrc first
+                //TODO: this should be able to be saved for users in cloud, a command?
+                bashrc = context.getResources().openRawResource(R.raw.bashrc);
+            }  catch (Resources.NotFoundException ne) {
+                bashrc = new ByteArrayInputStream("".getBytes());
             }
+
+
+            if (p.getBoolean("includeToolsPath", true)) {
+                exportPath = "export " +
+                        "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + App.FILES_PATH + "/lib" + ";" +
+                        "PATH=$PATH:" + App.FILES_PATH + "/scripts:" + App.FILES_PATH + "/bin" + ";";
+            } else {
+                exportPath = "";
+            }
+
+            shell.newJob()
+                    .add(bashrc)
+                    .add(exportPath)
+                    .exec();
+
             return true;
         }
     }
@@ -100,30 +125,43 @@ public class App extends ContainerApp  {
         // Prepare local file and scripts, making them executable etc
         new Thread(new Runnable() {
             public void run() {
-                /*
-                Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
-                Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"lib");
-                Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
-                Util.copyAssetsToCacheDirectory(App.INSTANCE.getApplicationContext(),true,"share");
 
-                String cacheDir = getCacheDir().getAbsolutePath();
-                Shell.sh("/system/bin/chmod -R 755 " + cacheDir + "/bin "
-                                + cacheDir + "/lib " + cacheDir + "/scripts "
-                                + cacheDir + "/share").exec(); */
+                int count = 0;
 
-                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"bin");
-                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"lib");
-                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"etc");
-                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"scripts");
-                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"share");
-                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"etc");
-                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"tmp");
-                Util.copyAssetsToFilesDirectory(App.INSTANCE.getApplicationContext(),true,"home");
+                try {
+                    int v1 = 0;
+                    int v2 = BuildConfig.VERSION_CODE;
 
-                String filesDir = getFilesDir().getAbsolutePath();
-                Shell.sh("/system/bin/chmod -R 755 " + filesDir + "/bin "
-                        + filesDir + "/lib " + filesDir + "/scripts "
-                        + filesDir + "/share").exec();
+                    File verFile = new File(App.FILES_PATH + "/files_version.txt");
+
+                    if (verFile.exists()) {
+                        v1 = Integer.parseInt(FileUtils.readFileToString(verFile));
+                    } else {
+                        Timber.d(App.FILES_PATH + "/files_version.txt" + " doesn't exist, creating");
+                    }
+
+                    Timber.d("files_version.txt exists: " + verFile.exists());
+                    Timber.d("files_version_code=" + v1 + ",app_version_code=" + v2);
+                    Timber.d("buildconfig version_code: " + v2);
+
+                    if (v1 != v2) {
+                        count = new AssetCopier(App.INSTANCE.getApplicationContext())
+                                .copy("files", App.INSTANCE.getApplicationContext().getFilesDir());
+                        FileUtils.writeStringToFile(verFile, String.valueOf(BuildConfig.VERSION_CODE));
+                    }
+
+                } catch (Exception e) {
+                    Timber.e(e);
+                    e.printStackTrace();
+                }
+
+                Timber.d("Total files copied: " + count);
+                Shell.sh("/system/bin/chmod -R 755 " + App.FILES_PATH + "/bin "
+                            + App.FILES_PATH + "/lib " + App.FILES_PATH + "/scripts "
+                            + App.FILES_PATH + "/share").exec();
+
+
+
             }
         }).start();
 
