@@ -57,6 +57,8 @@
             </intent-filter>
         </activity>
 
+        <receiver android:name="net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver"/>
+
         <activity android:name="net.kwatts.android.droidcommandpro.SettingsActivity"/>
         <activity android:name="com.github.pedrovgs.lynx.LynxActivity"/>
 

@@ -7,6 +7,8 @@
 //                                                        ${ADDITIONAL_FLAGS}
 //        where ${INPUT_SOCKET} and ${OUTPUT_SOCKET} are addresses to linux abstract namespace sockets,
 //        used to pass on stdin to the java implementation and pass back output from java to stdout.
+// https://github.com/termux/termux-api
+// https://github.com/termux/termux-api-package
 #define _POSIX_SOURCE
 #define _GNU_SOURCE
 #include <fcntl.h>
@@ -60,9 +62,9 @@ _Noreturn void exec_am_broadcast(int argc, char** argv, char* input_address_stri
     child_argv[argc + extra_args] = NULL;
 
     // Use an a executable taking care of PATH and LD_LIBRARY_PATH:
-    execv("/data/data/com.termux/files/usr/bin/am", child_argv);
+    execv("/data/data/net.kwatts.android.droidcommandpro/files/bin/am", child_argv);
 
-    perror("execv(\"/data/data/com.termux/files/usr/bin/am\")");
+    perror("execv(\"/data/data/net.kwatts.android.droidcommandpro/files/bin/am\")");
     exit(1);
 }
 
