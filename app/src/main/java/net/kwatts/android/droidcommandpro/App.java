@@ -55,10 +55,8 @@ public class App extends ContainerApp  {
             String exportPath;
 
             try {
-                //TODO: look for App.FILES_PATH/home/.bashrc first
-                //TODO: this should be able to be saved for users in cloud, a command?
-                bashrc = context.getResources().openRawResource(R.raw.bashrc);
-            }  catch (Resources.NotFoundException ne) {
+                bashrc = new FileInputStream(App.FILES_PATH + "/home/bashrc");
+            } catch (java.io.FileNotFoundException e) {
                 bashrc = new ByteArrayInputStream("".getBytes());
             }
 

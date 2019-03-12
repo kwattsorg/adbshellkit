@@ -76,6 +76,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthCredential;
@@ -89,6 +90,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import com.google.firebase.storage.*;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
@@ -105,6 +108,8 @@ import net.kwatts.android.droidcommandpro.commands.Engine;
 import net.kwatts.android.droidcommandpro.model.Command;
 import net.kwatts.android.droidcommandpro.model.GoogleUser;
 import net.kwatts.android.droidcommandpro.model.User;
+
+
 
 import java.io.File;
 import java.io.IOException;
@@ -185,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     //public android.content.Context mAppContext;
     public FirebaseDatabase mFirebaseDB;
     public FirebaseUser mFirebaseUser;
+    public FirebaseStorage mFirebaseStorage;
 
     public static List<Command> mGlobalCommands = new ArrayList<>();
     public static List<Command> mUserCommands = new ArrayList<>();
@@ -357,6 +363,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         mAuth = FirebaseAuth.getInstance();
         mFirebaseDB = FirebaseDatabase.getInstance();
+        mFirebaseStorage = FirebaseStorage.getInstance(); // gs://adb-shell.appspot.com
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
 
@@ -488,7 +495,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
             // EXPERIMENTAL: Smali Command
-            //CommandSmali.execute(getApplicationContext(), "com.bose.monet");
+
+            //Engine cmd_engine = new Engine();
+            //String smali_app = "com.eaze";
+            //cmd_engine.process(null, "cmd_smali " + smali_app);
+
+
             // END
 
             // EXPERIMENTAL: Services
@@ -903,10 +915,28 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 User user = new User();
                 user.username = mFirebaseUser.getDisplayName();
                 user.email = mFirebaseUser.getEmail();
-                //user.phone_number = mFirebaseUser.getPhoneNumber();
                 user.photo_url = mFirebaseUser.getPhotoUrl().toString();
 
                 FirebaseDatabase.getInstance().getReference().child("users").child(mFirebaseUser.getUid()).setValue(user);
+
+                StorageReference storageRef = mFirebaseStorage.getReference().child("files/" + mFirebaseUser.getUid() + "/bashrc");
+                try {
+                    File localFile = new File(App.FILES_PATH + "/home/bashrc");
+
+                    storageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Timber.d("bashrc has been downloaded to local directory");
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            Timber.d("unable to download bashrc:" + exception.getMessage());
+                        }
+                    });
+                } catch (Exception e) {
+                    Timber.e(e);
+                }
 
                 mFirebaseUser.getIdToken(false).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
                     @Override
@@ -1128,8 +1158,21 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     }
     private Intent createShareIntent() {
         Intent share = new Intent(Intent.ACTION_SEND);
+
         share.setType("text/plain");
+
         StringBuffer dataToSend = new StringBuffer();
+
+        for (int x = 0; x < mLines.getChildCount(); x++) {
+            TextView currentTextView = (TextView) mLines.getChildAt(x);
+            dataToSend.append(currentTextView.getText() + "\r\n");
+        }
+
+        share.putExtra(android.content.Intent.EXTRA_SUBJECT, "Results of ADB Toolkit");
+        share.putExtra(Intent.EXTRA_TEXT, dataToSend.toString());
+        return share;
+        /*
+
         if (mWebView.getVisibility() == View.VISIBLE) {
             if (mWebViewData != null) {
                 share.setType("text/html");
@@ -1144,6 +1187,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
         share.putExtra(Intent.EXTRA_TEXT, dataToSend.toString());
         return share;
+
+        */
     }
 
     private void openLynxActivity() {

@@ -73,3 +73,7 @@ freeline_project_description.json
 
 # MacOS
 .DS_Store
+
+# specific files 
+app/src/main/assets/files/home/
+

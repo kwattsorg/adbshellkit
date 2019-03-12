@@ -19,6 +19,7 @@ public class Engine {
         cmds.add(new CommandDeviceOSBuildInfo());
         cmds.add(new CommandDeviceOSSettingInfo());
         cmds.add(new CommandGetContacts());
+        cmds.add(new CommandUploadFile());
     }
 
 

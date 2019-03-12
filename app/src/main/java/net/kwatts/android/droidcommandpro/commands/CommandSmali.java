@@ -4,6 +4,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import net.kwatts.android.droidcommandpro.App;
+
 import org.jf.dexlib2.DexFileFactory;
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.ReferenceType;
@@ -61,6 +63,14 @@ public class CommandSmali implements Command {
     public JSONObject execute(android.content.Context ctx, List<String> args) {
 
         String appName = args.get(0);
+        boolean saveFile = false;
+
+        if (args.size() > 1) {
+            saveFile = true;
+
+        }
+
+
         String appNameSmali = appName.replace('.','/');
         String packageApkFileName = getApkFileName(ctx,appName);
 
@@ -71,6 +81,8 @@ public class CommandSmali implements Command {
         if (packageApkFileName == null) {
             return res;
         }
+
+        JSONObject dex_classes = new JSONObject();
 
 
 
@@ -103,10 +115,14 @@ public class CommandSmali implements Command {
 
 
 
-                JSONObject classes = new JSONObject();
+                //JSONObject classes = new JSONObject();
                 for (int c = 0; c < classDefs.length; c++) {
 
                     ClassDef clazz = classDefs[c];
+                    // if "sourcefile": "R.java"
+                    // and unzip apk file, get resources.arsc, then strings it or look at offset
+                    // or use aapt?
+
                     //                     if (!className.startsWith("Landroid") && !className.startsWith("Ljava") && !className.startsWith("Ldalvik")) {
                     if (clazz.getType().startsWith("L" + appNameSmali)) {
 
@@ -163,6 +179,7 @@ public class CommandSmali implements Command {
                                             MethodReference method =
                                                     (MethodReference) ((ReferenceInstruction)instruction).getReference();
 
+                                            String name = method.getName();
                                             String definingClass = method.getDefiningClass();
                                             String returnType = method.getReturnType();
 
@@ -175,7 +192,7 @@ public class CommandSmali implements Command {
                                             }
                                             returnTypes.append(")");
 
-                                            class_methods.put(returnType + returnTypes.toString());
+                                            class_methods.put(returnType + "," + name + returnTypes.toString());
                                         }
                                     }
                                 }
@@ -186,10 +203,12 @@ public class CommandSmali implements Command {
 
 
                     JSONObject f = new JSONObject();
+                    f.put("sourcefile", clazz.getSourceFile());
+                    f.put("superclass", clazz.getSuperclass());
                     f.put("fields", class_fields);
                     f.put("methods", class_methods);
 
-                    res.put(String.valueOf(c),f);
+                    dex_classes.put(clazz.getType(),f);
 
                     }
 
@@ -204,6 +223,30 @@ public class CommandSmali implements Command {
         } else
         {
             Timber.d("dex file is null");
+        }
+
+        // Combine results
+        try {
+            res.put("app_package_name", appName);
+            res.put("app_package_apk_filename", packageApkFileName);
+            res.put("dex_classes", dex_classes);
+
+            // save to file, todo make optional
+            if (saveFile) {
+                try {
+                    String output_file = App.FILES_PATH + "/home/" + appName + "_smali.json";
+                    File file = new File(output_file);
+                    java.io.FileWriter fileWriter = new java.io.FileWriter(file);
+                    fileWriter.write(res.toString(1));
+                    fileWriter.flush();
+                    fileWriter.close();
+                    res.put("output_file", output_file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            Timber.e(e);
         }
 
         return res;
