@@ -15,6 +15,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 
+import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
 import net.kwatts.android.droidcommandpro.MainActivity;
 
 import org.json.JSONArray;
@@ -39,7 +40,7 @@ import java.util.List;
 import timber.log.Timber;
 
 
-public class CommandDeviceManagerInfo implements Command {
+public class CommandDeviceManagerInfo {
 
 
     public static String cmd = "cmd_device_policy_manager_info";
@@ -51,7 +52,15 @@ public class CommandDeviceManagerInfo implements Command {
         return new String[] { "" };
     }
 
-    public JSONObject execute(android.content.Context ctx, List<String> args) {
+    public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
+        //final String application_name = intent.getStringExtra("application_name");
+        ResultReturner.returnData(apiReceiver, intent, out -> {
+            JSONObject res = run(context);
+            out.print(res.toString(1));
+        });
+    }
+
+    public static JSONObject run(android.content.Context ctx) {
         JSONObject res = new JSONObject();
         try {
             res.put("devicepolicymanager.global", getDevicePolicyManagerGlobalData(ctx));
@@ -59,11 +68,10 @@ public class CommandDeviceManagerInfo implements Command {
         } catch (JSONException e) {
 
         }
-
         return res;
     }
 
-    public JSONArray getDevicePolicyManagerData(Context ctx) {
+    public static JSONArray getDevicePolicyManagerData(Context ctx) {
         JSONArray devicePolicyManager = new JSONArray();
         Boolean isActive = false;
         if (Build.VERSION.SDK_INT >= 23) {
@@ -105,7 +113,7 @@ public class CommandDeviceManagerInfo implements Command {
                             JSONArray policiesUsedJson = new JSONArray(policiesUsed);
                             adminApps.put("policiesused", policiesUsedJson);
                         } catch (Exception e) {
-                            Timber.e("Skipping " + ri.activityInfo, e);
+                            Timber.e( e);
                         }
                         for (ComponentName admin : activeAdmins) {
                             if (admin.getPackageName().equals(ai.packageName)) {

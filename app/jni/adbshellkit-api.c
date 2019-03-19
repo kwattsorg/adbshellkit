@@ -9,6 +9,7 @@
 //        used to pass on stdin to the java implementation and pass back output from java to stdout.
 // https://github.com/termux/termux-api
 // https://github.com/termux/termux-api-package
+// https://github.com/termux/termux-api-package/tree/master/scripts
 #define _POSIX_SOURCE
 #define _GNU_SOURCE
 #include <fcntl.h>

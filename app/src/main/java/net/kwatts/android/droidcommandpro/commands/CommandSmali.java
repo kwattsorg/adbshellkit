@@ -1,9 +1,14 @@
 package net.kwatts.android.droidcommandpro.commands;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.provider.Settings;
+import android.util.JsonWriter;
 
+import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
 import net.kwatts.android.droidcommandpro.App;
 
 import org.jf.dexlib2.DexFileFactory;
@@ -41,13 +46,14 @@ import java.io.File;
 
 import timber.log.Timber;
 
-/**
- * Created by kwatts on 8/9/18.
- */
-
-// deeper dive with https://github.com/dorneanu/smalisca
+//A deeper dive with https://github.com/dorneanu/smalisca...
 //TODO: make command to parse PM and manifest https://developer.android.com/reference/android/content/pm/PackageManager#setApplicationEnabledSetting%28java.lang.String,%20int,%20int%29
-public class CommandSmali implements Command {
+/*
+am broadcast --user 0 -n net.kwatts.android.droidcommandpro/.AdbshellkitApiReceiver \
+    --es socket_input 1 --es socket_output 2 --es api_method cmd_smali --es application_name net.kwatts.android.droidcommandpro
+*/
+
+public class CommandSmali  {
 
     public static String cmd = "cmd_smali";
 
@@ -60,17 +66,21 @@ public class CommandSmali implements Command {
     private DexFileNamer dexFileNamer;
     private Opcodes opcodes;
 
-    public JSONObject execute(android.content.Context ctx, List<String> args) {
 
-        String appName = args.get(0);
-        boolean saveFile = false;
+    public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
 
-        if (args.size() > 1) {
-            saveFile = true;
+        final String application_name = intent.getStringExtra("application_name");
+        ResultReturner.returnData(apiReceiver, intent, out -> {
+            if (application_name == null) {
+                out.print("");
+            } else {
+                JSONObject res = run(context,false,application_name);
+                out.print(res.toString(1));
+            }
+        });
+    }
 
-        }
-
-
+    public static JSONObject run(android.content.Context ctx, boolean saveFile, String appName) {
         String appNameSmali = appName.replace('.','/');
         String packageApkFileName = getApkFileName(ctx,appName);
 
@@ -88,8 +98,8 @@ public class CommandSmali implements Command {
 
         DexFile dex = null;
         try {
-            dexFileNamer = new BasicDexFileNamer();
-            opcodes = Opcodes.forApi(Build.VERSION.SDK_INT);
+            DexFileNamer dexFileNamer = new BasicDexFileNamer();
+            Opcodes opcodes = Opcodes.forApi(Build.VERSION.SDK_INT);
             File apkFile = new File(packageApkFileName);
 
             dex = MultiDexIO.readDexFile(true,
@@ -202,13 +212,13 @@ public class CommandSmali implements Command {
 
 
 
-                    JSONObject f = new JSONObject();
-                    f.put("sourcefile", clazz.getSourceFile());
-                    f.put("superclass", clazz.getSuperclass());
-                    f.put("fields", class_fields);
-                    f.put("methods", class_methods);
+                        JSONObject f = new JSONObject();
+                        f.put("sourcefile", clazz.getSourceFile());
+                        f.put("superclass", clazz.getSuperclass());
+                        f.put("fields", class_fields);
+                        f.put("methods", class_methods);
 
-                    dex_classes.put(clazz.getType(),f);
+                        dex_classes.put(clazz.getType(),f);
 
                     }
 
@@ -250,7 +260,10 @@ public class CommandSmali implements Command {
         }
 
         return res;
+
     }
+
+
 
 
 

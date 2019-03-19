@@ -1,9 +1,13 @@
 package net.kwatts.android.droidcommandpro.commands;
 
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 
 //import net.kwatts.android.droidcommandpro.Manifest;
+
+import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,7 +16,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommandGetContacts implements Command {
+public class CommandGetContacts {
 
     public static String cmd = "cmd_get_contacts";
     public String getCommandName() {
@@ -20,11 +24,17 @@ public class CommandGetContacts implements Command {
     }
     public String[] getPermissions() { return new String[] {android.Manifest.permission.READ_CONTACTS }; }
 
-    public JSONObject execute(android.content.Context ctx, List<String> args) {
-        return getAllContacts(ctx.getContentResolver());
+
+    public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
+        //final String application_name = intent.getStringExtra("application_name");
+        ResultReturner.returnData(apiReceiver, intent, out -> {
+            JSONObject res = getAllContacts(context.getContentResolver());
+            out.print(res.toString(1));
+        });
     }
+
     // https://www.dev2qa.com/how-to-get-contact-list-in-android-programmatically/
-    public JSONObject getAllContacts(android.content.ContentResolver cr) {
+    public static JSONObject getAllContacts(android.content.ContentResolver cr) {
         JSONArray res_val = new JSONArray();
         JSONObject res = new JSONObject();
 

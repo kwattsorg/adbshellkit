@@ -29,7 +29,7 @@ import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
 
 import java.util.List;
 
-public class CommandDeviceOSSettingInfo implements Command {
+public class CommandDeviceOSSettingInfo  {
     public static String cmd = "cmd_device_os_setting_info";
 
     public String getCommandName() {
@@ -37,56 +37,17 @@ public class CommandDeviceOSSettingInfo implements Command {
     }
     public String[] getPermissions() { return new String[] { "" }; }
 
+    public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
 
-    public static void onReceive(final AdbshellkitApiReceiver receiver, final Context context, final Intent intent) {
-
-        ResultReturner.returnData(context, intent, new ResultReturner.ResultJsonWriter() {
-            public void writeJson(JsonWriter out) throws Exception {
-                out.beginObject();
-                boolean developer_mode_enabled = Settings.Secure.getInt(context.getContentResolver(),
-                        Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1;
-                boolean usb_debugging_enabled = Settings.Secure.getInt(context.getContentResolver(),
-                        Settings.Global.ADB_ENABLED, 0) == 1;
-                boolean sideloading_enabled = Settings.Secure.getInt(context.getContentResolver(),
-                        Settings.Secure.INSTALL_NON_MARKET_APPS, 0) == 1;
-                out.name("settings.global.development_settings_enabled").value(developer_mode_enabled);
-                out.name("settings.global.adb_enabled").value(usb_debugging_enabled);
-                out.name("settings.secure.install_non_market_apps").value(sideloading_enabled);
-                out.endObject();
-            }
+        ResultReturner.returnData(apiReceiver, intent, out -> {
+            JSONObject res = run(context);
+            out.print(res.toString(1));
         });
     }
 
-    public static JSONObject run(android.content.Context ctx, List<String> args) {
-        JSONObject res = new JSONObject();
-        boolean developer_mode_enabled = Settings.Secure.getInt(ctx.getContentResolver(),
-                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1;
-        boolean usb_debugging_enabled = Settings.Secure.getInt(ctx.getContentResolver(),
-                Settings.Global.ADB_ENABLED, 0) == 1;
-        boolean sideloading_enabled = Settings.Secure.getInt(ctx.getContentResolver(),
-                Settings.Secure.INSTALL_NON_MARKET_APPS, 0) == 1;
-        try {
-            res.put("settings.global.development_settings_enabled", developer_mode_enabled);
-            res.put("settings.global.adb_enabled", usb_debugging_enabled);
-            res.put("settings.secure.install_non_market_apps", sideloading_enabled);
-            try {
-                res.put("settings.global", getAndroidGlobalSettings(ctx));
-            } catch (Exception e) {}
-
-            try {
-                res.put("settings.secure", getAndroidSecureSettings(ctx));
-            } catch (Exception e) {}
-
-        } catch (JSONException e) {
-
-        }
-
-        return res;
-
-    }
 
 
-    public JSONObject execute(android.content.Context ctx, List<String> args) {
+    public static JSONObject run(android.content.Context ctx) {
         JSONObject res = new JSONObject();
 
         boolean developer_mode_enabled = Settings.Secure.getInt(ctx.getContentResolver(),

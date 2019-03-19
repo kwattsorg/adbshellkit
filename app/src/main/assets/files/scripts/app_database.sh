@@ -31,7 +31,7 @@ case "$PLATFORM" in
     SQLITE3="/system/xbin/sqlite3"
     ;;
   *)
-    SQLITE3="/data/data/net.kwatts.android.droidcommandpro/cache/bin/sqlite3.armv7"
+    SQLITE3="/data/data/net.kwatts.android.droidcommandpro/files/bin/sqlite3"
     ;;
 esac
 

@@ -40,10 +40,28 @@ public class AdbshellkitApiReceiver extends BroadcastReceiver {
 
         switch (apiMethod) {
             //lifted from https://raw.githubusercontent.com/termux/termux-api/master/app/src/main/java/com/termux/api/TermuxApiReceiver.java
+            //todo: check permissions before each call
+            case "cmd_device_os_build_info":
+                CommandDeviceOSBuildInfo.onReceive(this, context, intent);
+                break;
             case "cmd_device_os_setting_info":
                 CommandDeviceOSSettingInfo.onReceive(this, context, intent);
                 break;
-
+            case "cmd_device_policy_manager_info":
+                CommandDeviceManagerInfo.onReceive(this, context, intent);
+                break;
+            case "cmd_smali":
+                CommandSmali.onReceive(this, context, intent);
+                break;
+            case "cmd_upload_file":
+                CommandUploadFile.onReceive(this, context, intent);
+                break;
+            case "cmd_get_contacts":
+                CommandGetContacts.onReceive(this, context, intent);
+                break;
+            case "cmd_run_system":
+                CommandRunSystem.onReceive(this, context, intent);
+                break;
             /*
             case "AudioInfo":
                 AudioAPI.onReceive(this, context, intent);
