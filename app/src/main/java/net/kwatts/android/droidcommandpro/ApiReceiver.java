@@ -16,7 +16,7 @@ import net.kwatts.android.droidcommandpro.commands.*;
 // --es socket_input 1 --es socket_output 2 --es api_method cmd_device_os_setting_info
 
 
-public class AdbshellkitApiReceiver extends BroadcastReceiver {
+public class ApiReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -37,6 +37,7 @@ public class AdbshellkitApiReceiver extends BroadcastReceiver {
             Timber.e("Missing 'api_method' extra");
             return;
         }
+        Timber.i("apMethod= " + apiMethod + "dataString=" + intent.getDataString());
 
         switch (apiMethod) {
             //lifted from https://raw.githubusercontent.com/termux/termux-api/master/app/src/main/java/com/termux/api/TermuxApiReceiver.java
@@ -61,6 +62,35 @@ public class AdbshellkitApiReceiver extends BroadcastReceiver {
                 break;
             case "cmd_run_system":
                 CommandRunSystem.onReceive(this, context, intent);
+                break;
+            case "cmd_text_to_speech":
+                if (ApiPermissionActivity.checkAndRequestPermissions(context, intent, Manifest.permission.RECORD_AUDIO)) {
+                    CommandTextToSpeech.onReceive(context, intent);
+                }
+                break;
+            case "cmd_telephony_call":
+                if (ApiPermissionActivity.checkAndRequestPermissions(context, intent, Manifest.permission.CALL_PHONE)) {
+                    CommandTelephony.onReceiveTelephonyCall(this, context, intent);
+                }
+                break;
+            case "cmd_telephony_cell_info":
+                if (ApiPermissionActivity.checkAndRequestPermissions(context, intent, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    CommandTelephony.onReceiveTelephonyCellInfo(this, context, intent);
+                }
+                break;
+            case "cmd_telephony_device_info":
+                if (ApiPermissionActivity.checkAndRequestPermissions(context, intent, Manifest.permission.READ_PHONE_STATE)) {
+                    CommandTelephony.onReceiveTelephonyDeviceInfo(this, context, intent);
+                }
+                break;
+            case "cmd_vibrate":
+                CommandVibrate.onReceive(this,context,intent);
+                break;
+            case "cmd_torch":
+                CommandTorch.onReceive(this,context,intent);
+                break;
+            case "cmd_volume":
+                CommandVolume.onReceive(this,context,intent);
                 break;
             /*
             case "AudioInfo":

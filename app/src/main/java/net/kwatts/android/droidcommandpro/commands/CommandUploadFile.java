@@ -1,38 +1,22 @@
 package net.kwatts.android.droidcommandpro.commands;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 
 
 import android.content.*;
 import android.net.Uri;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.util.JsonWriter;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.storage.StorageException;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
+import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 import timber.log.Timber;
 //TODO: this should sync the users files/home directory
@@ -42,7 +26,7 @@ public class CommandUploadFile  {
     public static String cmd = "cmd_upload_file";
     public static String[] permissions = { "" };
 
-    public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
+    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
 
         final String filename = intent.getStringExtra("filename");
         ResultReturner.returnData(context, intent, new ResultReturner.ResultJsonWriter() {

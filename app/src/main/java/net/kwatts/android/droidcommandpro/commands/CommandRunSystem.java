@@ -4,14 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.JsonWriter;
 
-import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
+import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 public class CommandRunSystem {
 
     public static String cmd = "cmd_run_system";
     public static String[] permissions = { "" };
 
-    public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
+    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
 
         final String exec_command = intent.getStringExtra("exec_command");
         ResultReturner.returnData(context, intent, new ResultReturner.ResultJsonWriter() {

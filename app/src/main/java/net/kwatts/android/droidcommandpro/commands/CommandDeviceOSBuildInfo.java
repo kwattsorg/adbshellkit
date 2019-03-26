@@ -11,10 +11,9 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
-import android.provider.Settings;
 
 
-import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
+import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 import timber.log.Timber;
 
@@ -23,7 +22,7 @@ public class CommandDeviceOSBuildInfo  {
     public static String cmd = "cmd_device_os_build_info";
     public static String[] permissions = { "" };
 
-    public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
+    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
         ResultReturner.returnData(apiReceiver, intent, out -> {
             JSONObject res = run(context);
             out.print(res.toString(1));

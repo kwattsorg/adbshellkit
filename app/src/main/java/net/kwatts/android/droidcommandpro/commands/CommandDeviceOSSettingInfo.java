@@ -4,36 +4,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import android.provider.Settings;
 
-import android.app.KeyguardManager;
-import android.app.admin.DeviceAdminReceiver;
-import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.res.XmlResourceParser;
 import android.os.Build;
-import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
-import android.util.JsonWriter;
 
 
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
-
-import java.util.List;
+import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 public class CommandDeviceOSSettingInfo  {
     public static String cmd = "cmd_device_os_setting_info";
     public static String[] permissions = { "" };
 
-    public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
+    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
 
         ResultReturner.returnData(apiReceiver, intent, out -> {
             JSONObject res = run(context);

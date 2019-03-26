@@ -5,13 +5,10 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.provider.Settings;
-import android.util.JsonWriter;
 
-import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
+import net.kwatts.android.droidcommandpro.ApiReceiver;
 import net.kwatts.android.droidcommandpro.App;
 
-import org.jf.dexlib2.DexFileFactory;
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.ReferenceType;
 import org.jf.dexlib2.ValueType;
@@ -24,20 +21,13 @@ import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.ReferenceInstruction;
 import org.jf.dexlib2.iface.reference.MethodReference;
 import org.jf.dexlib2.iface.value.*;
-import org.jf.dexlib2.util.*;
-import org.jf.dexlib2.analysis.*;
-import org.jf.dexlib2.iface.reference.*;
-import org.jf.util.*;
-import org.jf.dexlib2.util.*;
+
 import lanchon.multidexlib2.BasicDexFileNamer;
-import lanchon.multidexlib2.DexIO;
 import lanchon.multidexlib2.DexFileNamer;
 import lanchon.multidexlib2.MultiDexIO;
-import lanchon.multidexlib2.OpcodeUtils;
-import lanchon.multidexlib2.SingletonDexContainer;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.io.Writer;
 
 import java.io.IOException;
 import java.util.List;
@@ -58,7 +48,13 @@ public class CommandSmali  {
     public static String cmd = "cmd_smali";
     public static String[] permissions = { "" };
 
-    public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
+    public static String usage() {
+        return "{\"cmd\":\"" + cmd + "\"," +
+                "\"args\":\"application_name (string)\"}";
+
+    }
+
+    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
 
         final String application_name = intent.getStringExtra("application_name");
         ResultReturner.returnData(apiReceiver, intent, out -> {

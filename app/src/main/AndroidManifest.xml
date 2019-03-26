@@ -33,6 +33,13 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 
+    <!-- NEW API PERMISSIONS -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <!--
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
@@ -80,7 +87,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver"/>
+        <receiver android:name="net.kwatts.android.droidcommandpro.ApiReceiver"/>
 
 
         <activity android:name="net.kwatts.android.droidcommandpro.SettingsActivity"/>

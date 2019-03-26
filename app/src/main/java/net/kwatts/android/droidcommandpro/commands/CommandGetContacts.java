@@ -7,10 +7,9 @@ import android.provider.ContactsContract;
 
 //import net.kwatts.android.droidcommandpro.Manifest;
 
-import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
+import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ public class CommandGetContacts {
     public static String cmd = "cmd_get_contacts";
     public static String[] permissions = {android.Manifest.permission.READ_CONTACTS};
 
-    public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
+    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
         ResultReturner.returnData(apiReceiver, intent, out -> {
             JSONObject res = getAllContacts(context.getContentResolver());
             out.print(res.toString(1));
