@@ -19,14 +19,9 @@ import java.util.List;
 public class CommandGetContacts {
 
     public static String cmd = "cmd_get_contacts";
-    public String getCommandName() {
-        return cmd;
-    }
-    public String[] getPermissions() { return new String[] {android.Manifest.permission.READ_CONTACTS }; }
-
+    public static String[] permissions = {android.Manifest.permission.READ_CONTACTS};
 
     public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
-        //final String application_name = intent.getStringExtra("application_name");
         ResultReturner.returnData(apiReceiver, intent, out -> {
             JSONObject res = getAllContacts(context.getContentResolver());
             out.print(res.toString(1));

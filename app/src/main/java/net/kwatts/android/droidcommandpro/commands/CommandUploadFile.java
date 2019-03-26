@@ -40,14 +40,7 @@ import timber.log.Timber;
 public class CommandUploadFile  {
 
     public static String cmd = "cmd_upload_file";
-
-
-    public String getCommandName() {
-        return cmd;
-    }
-    public String[] getPermissions() {
-        return new String[]{""};
-    }
+    public static String[] permissions = { "" };
 
     public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
 

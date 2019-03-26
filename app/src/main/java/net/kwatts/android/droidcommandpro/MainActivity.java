@@ -704,7 +704,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             runCommand = vars.toString() + coreCommand;
         }
 
-        //Experimental code commands
+
+
+
+        //Moved to api scripts
+        /*
         long engine_start = SystemClock.elapsedRealtime();
         Engine cmd_engine = new Engine();
         String res_cmd = cmd_engine.process(mUserMapVars, coreCommand);
@@ -720,7 +724,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             setTextState("Command done after " + engine_s + "secs... length=" + res_cmd.length(),"","");
             mJob = null;
             return;
-        }
+        } */
 
         // NOW WE RUN!!!
         Timber.d( "Running:" + runCommand);

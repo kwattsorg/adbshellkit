@@ -21,15 +21,9 @@ import timber.log.Timber;
 public class CommandDeviceOSBuildInfo  {
 
     public static String cmd = "cmd_device_os_build_info";
-
-    public String getCommandName() {
-        return cmd;
-    }
-    public String[] getPermissions() { return new String[] { "" }; }
-
+    public static String[] permissions = { "" };
 
     public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
-        //final String application_name = intent.getStringExtra("application_name");
         ResultReturner.returnData(apiReceiver, intent, out -> {
             JSONObject res = run(context);
             out.print(res.toString(1));

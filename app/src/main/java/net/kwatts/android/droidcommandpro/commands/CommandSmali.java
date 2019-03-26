@@ -56,16 +56,7 @@ am broadcast --user 0 -n net.kwatts.android.droidcommandpro/.AdbshellkitApiRecei
 public class CommandSmali  {
 
     public static String cmd = "cmd_smali";
-
-
-    public String getCommandName() {
-        return cmd;
-    }
-    public String[] getPermissions() { return new String[] { "" }; }
-
-    private DexFileNamer dexFileNamer;
-    private Opcodes opcodes;
-
+    public static String[] permissions = { "" };
 
     public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
 

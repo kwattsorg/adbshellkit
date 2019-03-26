@@ -31,11 +31,7 @@ import java.util.List;
 
 public class CommandDeviceOSSettingInfo  {
     public static String cmd = "cmd_device_os_setting_info";
-
-    public String getCommandName() {
-        return cmd;
-    }
-    public String[] getPermissions() { return new String[] { "" }; }
+    public static String[] permissions = { "" };
 
     public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
 

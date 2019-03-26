@@ -9,6 +9,7 @@ import net.kwatts.android.droidcommandpro.AdbshellkitApiReceiver;
 public class CommandRunSystem {
 
     public static String cmd = "cmd_run_system";
+    public static String[] permissions = { "" };
 
     public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
 

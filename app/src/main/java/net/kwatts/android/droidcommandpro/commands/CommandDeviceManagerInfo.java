@@ -44,13 +44,8 @@ public class CommandDeviceManagerInfo {
 
 
     public static String cmd = "cmd_device_policy_manager_info";
+    public static String[] permissions = { "" };
 
-    public String getCommandName() {
-        return cmd;
-    }
-    public String[] getPermissions() {
-        return new String[] { "" };
-    }
 
     public static void onReceive(final AdbshellkitApiReceiver apiReceiver, final Context context, final Intent intent) {
         //final String application_name = intent.getStringExtra("application_name");

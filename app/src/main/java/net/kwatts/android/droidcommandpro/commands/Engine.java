@@ -14,12 +14,7 @@ public class Engine {
     ArrayList<Command> cmds = new ArrayList<>();
 
     public Engine() {
-        cmds.add(new CommandSmali());
-        cmds.add(new CommandDeviceManagerInfo());
-        cmds.add(new CommandDeviceOSBuildInfo());
-        cmds.add(new CommandDeviceOSSettingInfo());
-        cmds.add(new CommandGetContacts());
-        cmds.add(new CommandUploadFile());
+
     }
 
 
