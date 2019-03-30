@@ -21,8 +21,8 @@ android {
         applicationId "net.kwatts.android.droidcommandpro"
         minSdkVersion 21
         targetSdkVersion 27 //26
-        versionCode 75
-        versionName "7.5"
+        versionCode 85
+        versionName "8.5"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
@@ -61,10 +61,12 @@ android {
         ext.gmsFirebaseVersionAuth = "16.1.0"
         ext.gmsFirebaseVersionPerf = "16.2.3"
         ext.gmsFirebaseVersionDatabase = "16.0.6"
+        ext.gmsFirebaseVersionStorage = "16.0.5"
         implementation "com.google.firebase:firebase-core:$gmsFirebaseVersionCore"
         implementation "com.google.firebase:firebase-ads:$gmsFirebaseVersionAds"
         implementation "com.google.firebase:firebase-auth:$gmsFirebaseVersionAuth"
         implementation "com.google.firebase:firebase-database:$gmsFirebaseVersionDatabase"
+        implementation "com.google.firebase:firebase-storage:$gmsFirebaseVersionStorage"
         //implementation "com.google.firebase:firebase-perf:$gmsFirebaseVersionPerf"
         implementation 'com.firebaseui:firebase-ui-database:3.3.1'
 

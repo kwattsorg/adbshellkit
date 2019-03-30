@@ -1,10 +1,14 @@
 package net.kwatts.android.droidcommandpro.commands;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import org.jf.dexlib2.DexFileFactory;
+import net.kwatts.android.droidcommandpro.ApiReceiver;
+import net.kwatts.android.droidcommandpro.App;
+
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.ReferenceType;
 import org.jf.dexlib2.ValueType;
@@ -17,20 +21,13 @@ import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.ReferenceInstruction;
 import org.jf.dexlib2.iface.reference.MethodReference;
 import org.jf.dexlib2.iface.value.*;
-import org.jf.dexlib2.util.*;
-import org.jf.dexlib2.analysis.*;
-import org.jf.dexlib2.iface.reference.*;
-import org.jf.util.*;
-import org.jf.dexlib2.util.*;
+
 import lanchon.multidexlib2.BasicDexFileNamer;
-import lanchon.multidexlib2.DexIO;
 import lanchon.multidexlib2.DexFileNamer;
 import lanchon.multidexlib2.MultiDexIO;
-import lanchon.multidexlib2.OpcodeUtils;
-import lanchon.multidexlib2.SingletonDexContainer;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.io.Writer;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,28 +36,38 @@ import java.io.File;
 
 import timber.log.Timber;
 
-/**
- * Created by kwatts on 8/9/18.
- */
-
-// deeper dive with https://github.com/dorneanu/smalisca
+//A deeper dive with https://github.com/dorneanu/smalisca...
 //TODO: make command to parse PM and manifest https://developer.android.com/reference/android/content/pm/PackageManager#setApplicationEnabledSetting%28java.lang.String,%20int,%20int%29
-public class CommandSmali implements Command {
+/*
+am broadcast --user 0 -n net.kwatts.android.droidcommandpro/.AdbshellkitApiReceiver \
+    --es socket_input 1 --es socket_output 2 --es api_method cmd_smali --es application_name net.kwatts.android.droidcommandpro
+*/
+
+public class CommandSmali  {
 
     public static String cmd = "cmd_smali";
+    public static String[] permissions = { "" };
 
+    public static String usage() {
+        return "{\"cmd\":\"" + cmd + "\"," +
+                "\"args\":\"application_name (string)\"}";
 
-    public String getCommandName() {
-        return cmd;
     }
-    public String[] getPermissions() { return new String[] { "" }; }
 
-    private DexFileNamer dexFileNamer;
-    private Opcodes opcodes;
+    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
 
-    public JSONObject execute(android.content.Context ctx, List<String> args) {
+        final String application_name = intent.getStringExtra("application_name");
+        ResultReturner.returnData(apiReceiver, intent, out -> {
+            if (application_name == null) {
+                out.print("");
+            } else {
+                JSONObject res = run(context,false,application_name);
+                out.print(res.toString(1));
+            }
+        });
+    }
 
-        String appName = args.get(0);
+    public static JSONObject run(android.content.Context ctx, boolean saveFile, String appName) {
         String appNameSmali = appName.replace('.','/');
         String packageApkFileName = getApkFileName(ctx,appName);
 
@@ -72,12 +79,14 @@ public class CommandSmali implements Command {
             return res;
         }
 
+        JSONObject dex_classes = new JSONObject();
+
 
 
         DexFile dex = null;
         try {
-            dexFileNamer = new BasicDexFileNamer();
-            opcodes = Opcodes.forApi(Build.VERSION.SDK_INT);
+            DexFileNamer dexFileNamer = new BasicDexFileNamer();
+            Opcodes opcodes = Opcodes.forApi(Build.VERSION.SDK_INT);
             File apkFile = new File(packageApkFileName);
 
             dex = MultiDexIO.readDexFile(true,
@@ -103,10 +112,14 @@ public class CommandSmali implements Command {
 
 
 
-                JSONObject classes = new JSONObject();
+                //JSONObject classes = new JSONObject();
                 for (int c = 0; c < classDefs.length; c++) {
 
                     ClassDef clazz = classDefs[c];
+                    // if "sourcefile": "R.java"
+                    // and unzip apk file, get resources.arsc, then strings it or look at offset
+                    // or use aapt?
+
                     //                     if (!className.startsWith("Landroid") && !className.startsWith("Ljava") && !className.startsWith("Ldalvik")) {
                     if (clazz.getType().startsWith("L" + appNameSmali)) {
 
@@ -163,6 +176,7 @@ public class CommandSmali implements Command {
                                             MethodReference method =
                                                     (MethodReference) ((ReferenceInstruction)instruction).getReference();
 
+                                            String name = method.getName();
                                             String definingClass = method.getDefiningClass();
                                             String returnType = method.getReturnType();
 
@@ -175,7 +189,7 @@ public class CommandSmali implements Command {
                                             }
                                             returnTypes.append(")");
 
-                                            class_methods.put(returnType + returnTypes.toString());
+                                            class_methods.put(returnType + "," + name + returnTypes.toString());
                                         }
                                     }
                                 }
@@ -185,11 +199,13 @@ public class CommandSmali implements Command {
 
 
 
-                    JSONObject f = new JSONObject();
-                    f.put("fields", class_fields);
-                    f.put("methods", class_methods);
+                        JSONObject f = new JSONObject();
+                        f.put("sourcefile", clazz.getSourceFile());
+                        f.put("superclass", clazz.getSuperclass());
+                        f.put("fields", class_fields);
+                        f.put("methods", class_methods);
 
-                    res.put(String.valueOf(c),f);
+                        dex_classes.put(clazz.getType(),f);
 
                     }
 
@@ -206,8 +222,35 @@ public class CommandSmali implements Command {
             Timber.d("dex file is null");
         }
 
+        // Combine results
+        try {
+            res.put("app_package_name", appName);
+            res.put("app_package_apk_filename", packageApkFileName);
+            res.put("dex_classes", dex_classes);
+
+            // save to file, todo make optional
+            if (saveFile) {
+                try {
+                    String output_file = App.FILES_PATH + "/home/" + appName + "_smali.json";
+                    File file = new File(output_file);
+                    java.io.FileWriter fileWriter = new java.io.FileWriter(file);
+                    fileWriter.write(res.toString(1));
+                    fileWriter.flush();
+                    fileWriter.close();
+                    res.put("output_file", output_file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+
         return res;
+
     }
+
+
 
 
 

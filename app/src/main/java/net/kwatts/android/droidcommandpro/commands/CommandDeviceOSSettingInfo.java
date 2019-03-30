@@ -4,41 +4,34 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import android.provider.Settings;
 
-import android.app.KeyguardManager;
-import android.app.admin.DeviceAdminReceiver;
-import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.res.XmlResourceParser;
 import android.os.Build;
-import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
 
-import java.util.List;
 
-public class CommandDeviceOSSettingInfo implements Command {
+import net.kwatts.android.droidcommandpro.ApiReceiver;
+
+public class CommandDeviceOSSettingInfo  {
     public static String cmd = "cmd_device_os_setting_info";
+    public static String[] permissions = { "" };
 
-    public String getCommandName() {
-        return cmd;
+    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
+
+        ResultReturner.returnData(apiReceiver, intent, out -> {
+            JSONObject res = run(context);
+            out.print(res.toString(1));
+        });
     }
-    public String[] getPermissions() { return new String[] { "" }; }
 
-    public JSONObject execute(android.content.Context ctx, List<String> args) {
+
+
+    public static JSONObject run(android.content.Context ctx) {
         JSONObject res = new JSONObject();
 
         boolean developer_mode_enabled = Settings.Secure.getInt(ctx.getContentResolver(),
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1;
-        // TI #224 - USB Debugging
         boolean usb_debugging_enabled = Settings.Secure.getInt(ctx.getContentResolver(),
                 Settings.Global.ADB_ENABLED, 0) == 1;
-        // TI #214 - Unknown Sources/Sideload
         boolean sideloading_enabled = Settings.Secure.getInt(ctx.getContentResolver(),
                 Settings.Secure.INSTALL_NON_MARKET_APPS, 0) == 1;
 
@@ -46,6 +39,14 @@ public class CommandDeviceOSSettingInfo implements Command {
             res.put("settings.global.development_settings_enabled", developer_mode_enabled);
             res.put("settings.global.adb_enabled", usb_debugging_enabled);
             res.put("settings.secure.install_non_market_apps", sideloading_enabled);
+            try {
+                res.put("settings.global", getAndroidGlobalSettings(ctx));
+            } catch (Exception e) {}
+
+            try {
+                res.put("settings.secure", getAndroidSecureSettings(ctx));
+            } catch (Exception e) {}
+
         } catch (JSONException e) {
 
         }

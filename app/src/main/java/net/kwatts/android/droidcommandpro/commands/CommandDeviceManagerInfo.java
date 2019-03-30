@@ -1,57 +1,44 @@
 package net.kwatts.android.droidcommandpro.commands;
-import android.app.KeyguardManager;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
-import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
 
-import net.kwatts.android.droidcommandpro.MainActivity;
+import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 
 import timber.log.Timber;
 
 
-public class CommandDeviceManagerInfo implements Command {
+public class CommandDeviceManagerInfo {
 
 
     public static String cmd = "cmd_device_policy_manager_info";
+    public static String[] permissions = { "" };
 
-    public String getCommandName() {
-        return cmd;
-    }
-    public String[] getPermissions() {
-        return new String[] { "" };
+
+    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
+        //final String application_name = intent.getStringExtra("application_name");
+        ResultReturner.returnData(apiReceiver, intent, out -> {
+            JSONObject res = run(context);
+            out.print(res.toString(1));
+        });
     }
 
-    public JSONObject execute(android.content.Context ctx, List<String> args) {
+    public static JSONObject run(android.content.Context ctx) {
         JSONObject res = new JSONObject();
         try {
             res.put("devicepolicymanager.global", getDevicePolicyManagerGlobalData(ctx));
@@ -59,11 +46,10 @@ public class CommandDeviceManagerInfo implements Command {
         } catch (JSONException e) {
 
         }
-
         return res;
     }
 
-    public JSONArray getDevicePolicyManagerData(Context ctx) {
+    public static JSONArray getDevicePolicyManagerData(Context ctx) {
         JSONArray devicePolicyManager = new JSONArray();
         Boolean isActive = false;
         if (Build.VERSION.SDK_INT >= 23) {
@@ -105,7 +91,7 @@ public class CommandDeviceManagerInfo implements Command {
                             JSONArray policiesUsedJson = new JSONArray(policiesUsed);
                             adminApps.put("policiesused", policiesUsedJson);
                         } catch (Exception e) {
-                            Timber.e("Skipping " + ri.activityInfo, e);
+                            Timber.e( e);
                         }
                         for (ComponentName admin : activeAdmins) {
                             if (admin.getPackageName().equals(ai.packageName)) {

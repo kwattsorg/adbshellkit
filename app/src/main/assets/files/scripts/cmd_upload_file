@@ -1,0 +1,26 @@
+#!/system/bin/sh
+
+SCRIPTNAME=cmd_upload_file
+show_usage () {
+    echo "Usage: $SCRIPTNAME <filename>"
+    echo "Uploads the file to google storage, if the filename is bashrc it is automatically loaded when shell is created"
+    exit 0
+}
+
+while getopts :h option
+do
+    case "$option" in
+	h) show_usage;;
+	?) echo "$SCRIPTNAME: illegal option -$OPTARG"; exit 1;
+    esac
+done
+shift $(($OPTIND-1))
+
+
+if [ $# = 1 ]; then
+	/data/data/net.kwatts.android.droidcommandpro/files/bin/adbshellkit-api cmd_upload_file --es filename "$1"
+else
+	echo "$SCRIPTNAME: No filename specified." >&2
+	exit 1
+fi
+

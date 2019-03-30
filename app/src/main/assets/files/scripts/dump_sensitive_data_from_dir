@@ -1,0 +1,71 @@
+#!/system/bin/sh
+########################
+# DESCRIPTION:
+#   Searches for files that contain sensitive data
+#
+# USAGE:
+#   app_search [--app_package=APP_PACKAGE] [--search=STRING]
+#
+base_dir="/data/data"
+app_package="net.kwatts.android.droidcommandpro"
+egrep_args="-asrnHI"
+search="PRIVATE|auth|token|password"
+
+# California Drivers License
+# 1 digit, then 3 capital letters excluding IOQ, then 3 digits
+regex_ca_drivers_license_1=".{0,50}\"[0-9][A-HJ-NPR-Z]{3}[0-9]{3}\".{0,50}"
+# 3 capital letters, then 3 digits
+regex_ca_drivers_license_2=".{0,50}\"[A-Z]{3}[0-9]{3}\".{0,50}"
+# 1 digit, then 3 capital letters excluding IOQ, then 3 digits
+regex_ca_drivers_license_3=".{0,50}\"[0-9]{3}[A-Z]{3}\".{0,50}"
+
+
+# [0-9]{3}[A-Z]{3} // 3 digits, then 3 capital letters
+for i in "$@"
+do
+  case $i in
+    --base_dir)
+	  base_dir="${i#*=}"
+	  shift
+	  ;;
+    --search)
+	  search="${i#*=}"
+	  shift
+	  ;;
+    --app_package)
+	  app_package="${i#*=}"
+	  shift
+	  ;;
+	*)
+	  # unknown option
+  esac
+done
+
+PLATFORM=$(getprop ro.product.cpu.abi)
+case "$PLATFORM" in
+  x86|x86_64)
+    SQLITE3="/system/xbin/sqlite3"
+    ;;
+  *)
+    SQLITE3="/data/data/net.kwatts.android.droidcommandpro/files/bin/sqlite3"
+    ;;
+esac
+
+# find . -type f -print0 | xargs -0 grep -I "needle text"
+# find . | xargs file {} \; |grep "ASCII text"
+echo "--- BEGIN ${app_package} search for ${search} ---"
+echo "${base_dir}/${app_package}/cache"
+egrep ${egrep_args} "${search}" ${base_dir}/${app_package}/cache
+
+
+echo "${base_dir}/${app_package}/files"
+egrep ${egrep_args} "${search}" ${base_dir}/${app_package}/files
+
+echo "${base_dir}/${app_package}/shared_prefs"
+egrep ${egrep_args} "${search}" ${base_dir}/${app_package}/shared_prefs
+
+echo "${base_dir}/${app_package}/databases"
+find ${base_dir}/${app_package}/databases -type f ! -name '*journal' -exec $SQLITE3 {} .dump \; | egrep ${egrep_args} "${search}"
+echo "--- DONE ---"
+
+#find ${search_directory} -maxdepth 2 -type d ${file_filter} -not -path "${search_directory}/com.google*/*" -not -path "${search_directory}/com.android*/*" -exec egrep ${grep_args} '.{0,50}${search_string}.{0,50}' {} \;

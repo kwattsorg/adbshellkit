@@ -60,6 +60,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import android.widget.Chronometer;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -76,6 +77,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthCredential;
@@ -89,6 +91,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import com.google.firebase.storage.*;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
@@ -105,6 +109,8 @@ import net.kwatts.android.droidcommandpro.commands.Engine;
 import net.kwatts.android.droidcommandpro.model.Command;
 import net.kwatts.android.droidcommandpro.model.GoogleUser;
 import net.kwatts.android.droidcommandpro.model.User;
+
+
 
 import java.io.File;
 import java.io.IOException;
@@ -185,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     //public android.content.Context mAppContext;
     public FirebaseDatabase mFirebaseDB;
     public FirebaseUser mFirebaseUser;
+    public FirebaseStorage mFirebaseStorage;
 
     public static List<Command> mGlobalCommands = new ArrayList<>();
     public static List<Command> mUserCommands = new ArrayList<>();
@@ -198,6 +205,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public static FirebaseAnalytics mFirebaseAnalytics;
     //com.topjohnwu.superuser.Shell mShell;
+
+    public Chronometer mChronometer;
+
 
 
     public static Map<String, String> mUserMapVars = new HashMap<String, String>();
@@ -357,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         mAuth = FirebaseAuth.getInstance();
         mFirebaseDB = FirebaseDatabase.getInstance();
+        mFirebaseStorage = FirebaseStorage.getInstance(); // gs://adb-shell.appspot.com
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
 
@@ -432,6 +443,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mRunButton = findViewById(R.id.runButton);
             mRunButton.setOnClickListener(this);
 
+            mChronometer = findViewById(R.id.chronometer);
+
 
 
             mGoogleUserSignedInImageButton.setOnClickListener(new View.OnClickListener() {
@@ -488,7 +501,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
             // EXPERIMENTAL: Smali Command
-            //CommandSmali.execute(getApplicationContext(), "com.bose.monet");
+
+            //Engine cmd_engine = new Engine();
+            //String smali_app = "com.eaze";
+            //cmd_engine.process(null, "cmd_smali " + smali_app);
+
+
             // END
 
             // EXPERIMENTAL: Services
@@ -632,27 +650,37 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
     com.topjohnwu.superuser.Shell.Job mJob;
+    com.topjohnwu.superuser.Shell mShell;
+
 
     public void runCommand(Command c) {
 
         // Are we already running a job?
         if (mJob != null) {
-            Toast.makeText(getApplicationContext(), "Past command(ID: " + mJob.hashCode() + ") running, wait until complete or timeout in 20 seconds", Toast.LENGTH_SHORT).show();
-            return;
+            Toast.makeText(getApplicationContext(), "The last command was still running and force closed!", Toast.LENGTH_SHORT).show();
+
+            if (mShell != null) {
+                try {
+                    mShell.close();
+                } catch (Exception e) {
+                    Timber.e(e);
+                }
+
+            }
+
+            //return;
         }
 
-        // Create a new shell and job
-        // Note default shell creation tries superuser and falls back to user
-        Shell shell;
         if (mSharedPref.getBoolean("disableShellSharing",false)) {
-            shell = Shell.newInstance();
+            mShell = Shell.newInstance();
         } else {
-            shell = Shell.getShell();
+            mShell = Shell.getShell();
         }
 
-        mJob = shell.newJob();
 
-        setTextState("Command running as " + ((shell.getStatus() > 0) ? "superuser" : "user"), "","");
+        mJob = mShell.newJob();
+
+        setTextState("Command started as " + ((mShell.getStatus() > 0) ? "superuser" : "normal user" + "..."), "","");
 
         //clear window...
         mTopOutString.setLength(0);
@@ -692,26 +720,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             runCommand = vars.toString() + coreCommand;
         }
 
-        //Experimental code commands
-        long engine_start = SystemClock.elapsedRealtime();
-        Engine cmd_engine = new Engine();
-        String res_cmd = cmd_engine.process(mUserMapVars, coreCommand);
-        if (res_cmd != null) {
-            Message msg = mHandler.obtainMessage(MSG_NEWLINE);
-            msg.arg1 = 0;
-            msg.obj = res_cmd;
-            mHandler.sendMessage(msg);
-
-            long engine_ms = SystemClock.elapsedRealtime() - engine_start;
-            double engine_s = engine_ms / 1000.0;
-            logEvent("command_end", coreCommand, "complete in " + engine_s + "s length=" + res_cmd.length());
-            setTextState("Command done after " + engine_s + "secs... length=" + res_cmd.length(),"","");
-            mJob = null;
-            return;
-        }
-
         // NOW WE RUN!!!
         Timber.d( "Running:" + runCommand);
+        commandTimer(true);
 
         List<String> consoleList;
         List<String> consoleListError;
@@ -738,47 +749,39 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         startTime = SystemClock.elapsedRealtime();
 
-
         //https://github.com/topjohnwu/libsu/blob/master/superuser/src/main/java/com/topjohnwu/superuser/internal/PendingJob.java
         Shell.ResultCallback runResultCallback = new Shell.ResultCallback() {
             @MainThread
             @Override
             public void onResult(Shell.Result out) {
-
+                commandTimer(false);
                 CharSequence l = "";
                 if (mLines.getChildCount() > 0) {
                     l =  ((TextView) mLines.getChildAt(mLines.getChildCount() -1 )).getText();
                 }
                 long ms = SystemClock.elapsedRealtime() - startTime;
                 double s = ms / 1000.0;
-                //logEvent("command_end", coreCommand, "complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"));
-                setTextState("Command finished after " + s + "secs... lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success") +
-                        ",shell_code=" + out.getCode(),"",l.toString());
 
+                setTextState("Command finished after " + s + "secs (lines=" + mLines.getChildCount() +
+                                ",state=" + ((out.getCode() < 0) ? "fail(" + out.getCode() + ")" : "success") + ")","",l.toString());
                 // clear the job...
                 mJob = null;
                 // ... and close the shell after a couple of seconds if sharing is off
+                /*
                 if (mSharedPref.getBoolean("disableShellSharing",false)) {
                     try {
-                        shell.waitAndClose(2, TimeUnit.SECONDS);
+                        mShell.waitAndClose(2, TimeUnit.SECONDS);
                     } catch (Exception e)  {
                         Timber.e(e);
                     }
-                }
+                } */
 
             }
         };
 
-
         mJob.add(runCommand);
         mJob.to(consoleList, consoleListError);
         mJob.submit(runResultCallback);
-
-        //mSharedPref.edit().putString("lastCommandUsedKey", c.key).commit();
-
-        //lastCommandUsed = c;
-
-
     }
 
     @Override
@@ -903,10 +906,28 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 User user = new User();
                 user.username = mFirebaseUser.getDisplayName();
                 user.email = mFirebaseUser.getEmail();
-                //user.phone_number = mFirebaseUser.getPhoneNumber();
                 user.photo_url = mFirebaseUser.getPhotoUrl().toString();
 
                 FirebaseDatabase.getInstance().getReference().child("users").child(mFirebaseUser.getUid()).setValue(user);
+
+                StorageReference storageRef = mFirebaseStorage.getReference().child("files/" + mFirebaseUser.getUid() + "/bashrc");
+                try {
+                    File localFile = new File(App.FILES_PATH + "/home/bashrc");
+
+                    storageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Timber.d("bashrc has been downloaded to local directory");
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            Timber.d("unable to download bashrc:" + exception.getMessage());
+                        }
+                    });
+                } catch (Exception e) {
+                    Timber.e(e);
+                }
 
                 mFirebaseUser.getIdToken(false).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
                     @Override
@@ -1128,8 +1149,21 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     }
     private Intent createShareIntent() {
         Intent share = new Intent(Intent.ACTION_SEND);
+
         share.setType("text/plain");
+
         StringBuffer dataToSend = new StringBuffer();
+
+        for (int x = 0; x < mLines.getChildCount(); x++) {
+            TextView currentTextView = (TextView) mLines.getChildAt(x);
+            dataToSend.append(currentTextView.getText() + "\r\n");
+        }
+
+        share.putExtra(android.content.Intent.EXTRA_SUBJECT, "Results of ADB Toolkit");
+        share.putExtra(Intent.EXTRA_TEXT, dataToSend.toString());
+        return share;
+        /*
+
         if (mWebView.getVisibility() == View.VISIBLE) {
             if (mWebViewData != null) {
                 share.setType("text/html");
@@ -1144,6 +1178,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
         share.putExtra(Intent.EXTRA_TEXT, dataToSend.toString());
         return share;
+
+        */
     }
 
     private void openLynxActivity() {
@@ -1193,6 +1229,31 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         // send analytics
     }
 
+
+    public void commandTimer(final boolean start) {
+        runOnUiThread(() -> {
+            if (start) {
+                mChronometer.setVisibility(View.VISIBLE);
+                mChronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+                    @Override
+                    public void onChronometerTick(Chronometer chronometer) {
+                        //long systemCurrTime = SystemClock.elapsedRealtime();
+                        //long chronometerBaseTime = mChronometer.getBase();
+                        //long deltaTimeSeconds = TimeUnit.MILLISECONDS.toSeconds(systemCurrTime - chronometerBaseTime);
+                        //if (deltaTimeSeconds % 15L == 0) { }
+                    }
+                });
+
+                mChronometer.setBase(SystemClock.elapsedRealtime());
+                mChronometer.start();
+            } else {
+                mChronometer.setVisibility(View.INVISIBLE);
+                mChronometer.stop();
+            }
+        });
+
+
+    }
 
     public void checkCommandPermissions(Command c) {
         // Commands requiring superuser
@@ -1659,10 +1720,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                         try {
                                             String addPermissionSelected = spinnerAddPermission.getSelectedItem().toString();
                                             String removePermissionSelected = spinnerRemovePermission.getSelectedItem().toString();
-                                            if (addPermissionSelected != "--SELECT PERMISSION--") {
+                                            if (addPermissionSelected != "-") {
                                                 currentCommand.addPermission(addPermissionSelected);
                                             }
-                                            if (removePermissionSelected != "--SELECT PERMISSION--") {
+                                            if (removePermissionSelected != "-") {
                                                 currentCommand.removePermission(removePermissionSelected);
                                             }
                                         } catch (Exception e) {
@@ -1702,36 +1763,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             addCommandLinearLayoutAdmin = dialog.getCustomView().findViewById(R.id.addCommandLinearLayoutAdmin);
             tagAdminIsPublicCheckBox = dialog.getCustomView().findViewById(R.id.tagAdminIsPublicCheckBox);
             spinnerAddPermission = dialog.getCustomView().findViewById(R.id.spinnerAddPermission);
-            String[] permAddList = new String[] {
-                    "--SELECT PERMISSION--",
-                    "android.permission.WRITE_CONTACTS",
-                    "android.permission.GET_ACCOUNTS",
-                    "android.permission.READ_CONTACTS",
-                    "android.permission.ANSWER_PHONE_CALLS",
-                    "android.permission.READ_PHONE_NUMBERS",
-                    "android.permission.READ_PHONE_STATE",
-                    "android.permission.CALL_PHONE",
-                    "android.permission.ACCEPT_HANDOVER",
-                    "android.permission.USE_SIP",
-                    "android.permission.READ_CALENDAR",
-                    "android.permission.WRITE_CALENDAR",
-                    "android.permission.READ_CALL_LOG",
-                    "android.permission.WRITE_CALL_LOG",
-                    "android.permission.PROCESS_OUTGOING_CALLS",
-                    "android.permission.CAMERA",
-                    "android.permission.BODY_SENSORS",
-                    "android.permission.ACCESS_FINE_LOCATION",
-                    "android.permission.ACCESS_COARSE_LOCATION",
-                    "android.permission.READ_EXTERNAL_STORAGE",
-                    "android.permission.WRITE_EXTERNAL_STORAGE",
-                    "android.permission.RECORD_AUDIO",
-                    "android.permission.READ_SMS",
-                    "android.permission.RECEIVE_WAP_PUSH",
-                    "android.permission.RECEIVE_MMS",
-                    "android.permission.RECEIVE_SMS",
-                    "android.permission.SEND_SMS",
-                    "android.permission.READ_CELL_BROADCASTS"
-            };
+            //TODO: get this server side
+            String[] permAddList = Util.getPermissions();
 
 
             final List<String> permsAddStringList = new ArrayList<>(Arrays.asList(permAddList));
@@ -1743,7 +1776,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             spinnerRemovePermission = dialog.getCustomView().findViewById(R.id.spinnerRemovePermission);
 
             List<String> removePermissionList = new ArrayList<String>(currentCommand.getPermissionList());
-            removePermissionList.add(0,"--SELECT PERMISSION--");
+            removePermissionList.add(0,"-");
 
             final ArrayAdapter<String> spinnerArrayPermsRemoveAdapter = new ArrayAdapter<String>(
                     this,android.R.layout.simple_spinner_item,removePermissionList);

@@ -1,6 +1,8 @@
 package net.kwatts.android.droidcommandpro.commands;
 
 //https://github.com/kwattsorg/android-nativecommander/blob/master/app/src/main/java/net/kwatts/android/droidcommandpro/commands/CommandDeviceInfo.java
+import android.content.Context;
+import android.content.Intent;
 import android.os.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,21 +11,26 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
-import android.provider.Settings;
 
+
+import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 import timber.log.Timber;
 
-public class CommandDeviceOSBuildInfo implements Command {
+public class CommandDeviceOSBuildInfo  {
 
     public static String cmd = "cmd_device_os_build_info";
+    public static String[] permissions = { "" };
 
-    public String getCommandName() {
-        return cmd;
+    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
+        ResultReturner.returnData(apiReceiver, intent, out -> {
+            JSONObject res = run(context);
+            out.print(res.toString(1));
+        });
     }
-    public String[] getPermissions() { return new String[] { "" }; }
 
-    public JSONObject execute(android.content.Context ctx, List<String> args) {
+
+    public static JSONObject run(android.content.Context ctx) {
         return getOSBuildData();
     }
 
