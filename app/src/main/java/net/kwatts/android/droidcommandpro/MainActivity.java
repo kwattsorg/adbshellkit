@@ -60,6 +60,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import android.widget.Chronometer;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -204,6 +205,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public static FirebaseAnalytics mFirebaseAnalytics;
     //com.topjohnwu.superuser.Shell mShell;
+
+    public Chronometer mChronometer;
+
 
 
     public static Map<String, String> mUserMapVars = new HashMap<String, String>();
@@ -439,6 +443,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mRunButton = findViewById(R.id.runButton);
             mRunButton.setOnClickListener(this);
 
+            mChronometer = findViewById(R.id.chronometer);
+
 
 
             mGoogleUserSignedInImageButton.setOnClickListener(new View.OnClickListener() {
@@ -644,27 +650,37 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
     com.topjohnwu.superuser.Shell.Job mJob;
+    com.topjohnwu.superuser.Shell mShell;
+
 
     public void runCommand(Command c) {
 
         // Are we already running a job?
         if (mJob != null) {
-            Toast.makeText(getApplicationContext(), "Past command(ID: " + mJob.hashCode() + ") running, wait until complete or timeout in 20 seconds", Toast.LENGTH_SHORT).show();
-            return;
+            Toast.makeText(getApplicationContext(), "The last command was still running and force closed!", Toast.LENGTH_SHORT).show();
+
+            if (mShell != null) {
+                try {
+                    mShell.close();
+                } catch (Exception e) {
+                    Timber.e(e);
+                }
+
+            }
+
+            //return;
         }
 
-        // Create a new shell and job
-        // Note default shell creation tries superuser and falls back to user
-        Shell shell;
         if (mSharedPref.getBoolean("disableShellSharing",false)) {
-            shell = Shell.newInstance();
+            mShell = Shell.newInstance();
         } else {
-            shell = Shell.getShell();
+            mShell = Shell.getShell();
         }
 
-        mJob = shell.newJob();
 
-        setTextState("Command running as " + ((shell.getStatus() > 0) ? "superuser" : "user"), "","");
+        mJob = mShell.newJob();
+
+        setTextState("Command started as " + ((mShell.getStatus() > 0) ? "superuser" : "normal user" + "..."), "","");
 
         //clear window...
         mTopOutString.setLength(0);
@@ -704,30 +720,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             runCommand = vars.toString() + coreCommand;
         }
 
-
-
-
-        //Moved to api scripts
-        /*
-        long engine_start = SystemClock.elapsedRealtime();
-        Engine cmd_engine = new Engine();
-        String res_cmd = cmd_engine.process(mUserMapVars, coreCommand);
-        if (res_cmd != null) {
-            Message msg = mHandler.obtainMessage(MSG_NEWLINE);
-            msg.arg1 = 0;
-            msg.obj = res_cmd;
-            mHandler.sendMessage(msg);
-
-            long engine_ms = SystemClock.elapsedRealtime() - engine_start;
-            double engine_s = engine_ms / 1000.0;
-            logEvent("command_end", coreCommand, "complete in " + engine_s + "s length=" + res_cmd.length());
-            setTextState("Command done after " + engine_s + "secs... length=" + res_cmd.length(),"","");
-            mJob = null;
-            return;
-        } */
-
         // NOW WE RUN!!!
         Timber.d( "Running:" + runCommand);
+        commandTimer(true);
 
         List<String> consoleList;
         List<String> consoleListError;
@@ -754,47 +749,39 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         startTime = SystemClock.elapsedRealtime();
 
-
         //https://github.com/topjohnwu/libsu/blob/master/superuser/src/main/java/com/topjohnwu/superuser/internal/PendingJob.java
         Shell.ResultCallback runResultCallback = new Shell.ResultCallback() {
             @MainThread
             @Override
             public void onResult(Shell.Result out) {
-
+                commandTimer(false);
                 CharSequence l = "";
                 if (mLines.getChildCount() > 0) {
                     l =  ((TextView) mLines.getChildAt(mLines.getChildCount() -1 )).getText();
                 }
                 long ms = SystemClock.elapsedRealtime() - startTime;
                 double s = ms / 1000.0;
-                //logEvent("command_end", coreCommand, "complete in " + s + "s lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success"));
-                setTextState("Command finished after " + s + "secs... lines=" + mLines.getChildCount() + ",state=" + ((mExecState < 0) ? "fail" : "success") +
-                        ",shell_code=" + out.getCode(),"",l.toString());
 
+                setTextState("Command finished after " + s + "secs (lines=" + mLines.getChildCount() +
+                                ",state=" + ((out.getCode() < 0) ? "fail(" + out.getCode() + ")" : "success") + ")","",l.toString());
                 // clear the job...
                 mJob = null;
                 // ... and close the shell after a couple of seconds if sharing is off
+                /*
                 if (mSharedPref.getBoolean("disableShellSharing",false)) {
                     try {
-                        shell.waitAndClose(2, TimeUnit.SECONDS);
+                        mShell.waitAndClose(2, TimeUnit.SECONDS);
                     } catch (Exception e)  {
                         Timber.e(e);
                     }
-                }
+                } */
 
             }
         };
 
-
         mJob.add(runCommand);
         mJob.to(consoleList, consoleListError);
         mJob.submit(runResultCallback);
-
-        //mSharedPref.edit().putString("lastCommandUsedKey", c.key).commit();
-
-        //lastCommandUsed = c;
-
-
     }
 
     @Override
@@ -1242,6 +1229,31 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         // send analytics
     }
 
+
+    public void commandTimer(final boolean start) {
+        runOnUiThread(() -> {
+            if (start) {
+                mChronometer.setVisibility(View.VISIBLE);
+                mChronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+                    @Override
+                    public void onChronometerTick(Chronometer chronometer) {
+                        //long systemCurrTime = SystemClock.elapsedRealtime();
+                        //long chronometerBaseTime = mChronometer.getBase();
+                        //long deltaTimeSeconds = TimeUnit.MILLISECONDS.toSeconds(systemCurrTime - chronometerBaseTime);
+                        //if (deltaTimeSeconds % 15L == 0) { }
+                    }
+                });
+
+                mChronometer.setBase(SystemClock.elapsedRealtime());
+                mChronometer.start();
+            } else {
+                mChronometer.setVisibility(View.INVISIBLE);
+                mChronometer.stop();
+            }
+        });
+
+
+    }
 
     public void checkCommandPermissions(Command c) {
         // Commands requiring superuser

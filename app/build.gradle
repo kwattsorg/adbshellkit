@@ -21,8 +21,8 @@ android {
         applicationId "net.kwatts.android.droidcommandpro"
         minSdkVersion 21
         targetSdkVersion 27 //26
-        versionCode 84
-        versionName "8.4"
+        versionCode 85
+        versionName "8.5"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {

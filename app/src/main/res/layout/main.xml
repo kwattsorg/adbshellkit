@@ -69,6 +69,18 @@
             tools:text="Last Command State: Fail"
             android:layout_below="@+id/textViewStatus"
             android:layout_alignLeft="@+id/textViewStatus"/>
+
+        <Chronometer
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textViewStatus"
+            android:layout_toRightOf="@+id/textViewState"
+            android:paddingLeft="5dp"
+            android:textColor="@color/colorAccentDark"
+            android:textSize="9dp"
+            android:textStyle="bold"
+            android:visibility="invisible" />
     </RelativeLayout>
 
 

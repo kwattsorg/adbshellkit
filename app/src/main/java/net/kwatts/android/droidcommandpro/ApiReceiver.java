@@ -15,6 +15,9 @@ import net.kwatts.android.droidcommandpro.commands.*;
 // am broadcast --user 0 -n net.kwatts.android.droidcommandpro/.AdbshellkitApiReceiver \
 // --es socket_input 1 --es socket_output 2 --es api_method cmd_device_os_setting_info
 
+// https://github.com/termux/termux-api-package/blob/master/termux-api.c
+// https://github.com/termux/termux-api/blob/master/app/src/main/java/com/termux/api/ShareAPI.java
+// https://github.com/termux/termux-api-package/tree/master/scripts
 
 public class ApiReceiver extends BroadcastReceiver {
 
@@ -91,6 +94,10 @@ public class ApiReceiver extends BroadcastReceiver {
                 break;
             case "cmd_volume":
                 CommandVolume.onReceive(this,context,intent);
+                break;
+            case "cmd_dialog":
+            case "Dialog":
+                context.startActivity(new Intent(context, CommandDialog.class).putExtras(intent.getExtras()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 break;
             /*
             case "AudioInfo":

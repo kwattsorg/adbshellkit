@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-SCRIPTNAME=api-cmd_run_system
+SCRIPTNAME=cmd_run_system
 show_usage () {
     echo "Usage: $SCRIPTNAME <system cmd>"
     echo "Runs system command returning the stdout"

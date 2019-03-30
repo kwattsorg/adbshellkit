@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-SCRIPTNAME=api-smali
+SCRIPTNAME=cmd_smali
 show_usage () {
     echo "Usage: $SCRIPTNAME <application_name>"
     echo "Dump smali from specified app"

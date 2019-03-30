@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 
-SCRIPTNAME=api-cmd_get_contacts
+SCRIPTNAME=cmd_get_contacts
 show_usage () {
     echo "Usage: $SCRIPTNAME"
     echo "Dumps contacts on device"
