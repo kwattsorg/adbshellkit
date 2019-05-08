@@ -2,12 +2,9 @@ package net.kwatts.android.droidcommandpro;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-import android.provider.Settings;
-import android.widget.Toast;
+
 import timber.log.Timber;
 
 import net.kwatts.android.droidcommandpro.commands.*;
@@ -19,12 +16,19 @@ import net.kwatts.android.droidcommandpro.commands.*;
 // https://github.com/termux/termux-api/blob/master/app/src/main/java/com/termux/api/ShareAPI.java
 // https://github.com/termux/termux-api-package/tree/master/scripts
 
+
+//TODO:
+// - command that automatically takes pictures every x seconds for y amount of times w/out showing camera UI.
+//  + drops them in the media folder
+// - command that automatically scans network, finding all services, and makes a clean report
+// - command that automatically runs bettercap, does mitm, and shows all intercepted packets
+
+
 public class ApiReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
         try {
-
             Timber.i("Got the api command in onReceive() ");
             doWork(context, intent);
         } catch (Exception e) {
@@ -40,19 +44,13 @@ public class ApiReceiver extends BroadcastReceiver {
             Timber.e("Missing 'api_method' extra");
             return;
         }
-        Timber.i("apMethod= " + apiMethod + "dataString=" + intent.getDataString());
+        Timber.i("apMethod= " + apiMethod);
 
         switch (apiMethod) {
             //lifted from https://raw.githubusercontent.com/termux/termux-api/master/app/src/main/java/com/termux/api/TermuxApiReceiver.java
             //todo: check permissions before each call
-            case "cmd_device_os_build_info":
-                CommandDeviceOSBuildInfo.onReceive(this, context, intent);
-                break;
-            case "cmd_device_os_setting_info":
-                CommandDeviceOSSettingInfo.onReceive(this, context, intent);
-                break;
-            case "cmd_device_policy_manager_info":
-                CommandDeviceManagerInfo.onReceive(this, context, intent);
+            case "cmd_device_dump":
+                CommandDeviceDump.onReceive(this, context, intent);
                 break;
             case "cmd_smali":
                 CommandSmali.onReceive(this, context, intent);
@@ -67,9 +65,9 @@ public class ApiReceiver extends BroadcastReceiver {
                 CommandRunSystem.onReceive(this, context, intent);
                 break;
             case "cmd_text_to_speech":
-                if (ApiPermissionActivity.checkAndRequestPermissions(context, intent, Manifest.permission.RECORD_AUDIO)) {
-                    CommandTextToSpeech.onReceive(context, intent);
-                }
+                //if (ApiPermissionActivity.checkAndRequestPermissions(context, intent, Manifest.permission.RECORD_AUDIO)) {
+                CommandTextToSpeech.onReceive(context, intent);
+                //}
                 break;
             case "cmd_telephony_call":
                 if (ApiPermissionActivity.checkAndRequestPermissions(context, intent, Manifest.permission.CALL_PHONE)) {
@@ -96,8 +94,17 @@ public class ApiReceiver extends BroadcastReceiver {
                 CommandVolume.onReceive(this,context,intent);
                 break;
             case "cmd_dialog":
-            case "Dialog":
                 context.startActivity(new Intent(context, CommandDialog.class).putExtras(intent.getExtras()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                break;
+            case "cmd_microphone_recorder":
+                if (ApiPermissionActivity.checkAndRequestPermissions(context, intent, Manifest.permission.RECORD_AUDIO)) {
+                    CommandMicrophoneRecorder.onReceive(context, intent);
+                }
+                break;
+            case "cmd_camera":
+                if (ApiPermissionActivity.checkAndRequestPermissions(context, intent, Manifest.permission.CAMERA)) {
+                    CommandCamera.onReceive(context, intent);
+                }
                 break;
             /*
             case "AudioInfo":

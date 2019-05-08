@@ -40,8 +40,8 @@ public class Engine {
         for (Command c : cmds) {
             if (c.getCommandName().equals(cmd)) {
                 try {
-                    JSONObject res = c.execute(App.INSTANCE.getApplicationContext(), argList);
-                    return res.toString(1);
+                    //JSONObject res = c.execute(App.INSTANCE.getApplicationContext(), argList);
+                    //return res.toString(1);
                 } catch (Exception e) {
                     return "{\"exception\":\"" + e.getMessage() + "\"}";
                 }

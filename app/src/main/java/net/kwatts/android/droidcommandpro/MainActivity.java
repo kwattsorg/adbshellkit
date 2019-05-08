@@ -104,6 +104,7 @@ import com.topjohnwu.superuser.CallbackList;
 import com.topjohnwu.superuser.Shell;
 import com.topjohnwu.superuser.io.*;
 
+import net.kwatts.android.droidcommandpro.commands.CommandCamera;
 import net.kwatts.android.droidcommandpro.commands.CommandGetContacts;
 import net.kwatts.android.droidcommandpro.commands.Engine;
 import net.kwatts.android.droidcommandpro.model.Command;
@@ -142,7 +143,9 @@ import java.util.concurrent.TimeUnit;
 //TODO:
 // Package support - https://github.com/termux/termux-packages
 // notasecret
-
+// https://greenify.uservoice.com/knowledgebase/articles/749142-how-to-grant-permissions-required-by-some-features
+// adb -d shell pm grant net.kwatts.android.droidcommandpro android.permission.DUMP
+// adb -d shell pm grant net.kwatts.android.droidcommandpro android.permission.WRITE_SECURE_SETTINGS
 
 public class MainActivity extends AppCompatActivity implements OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
     public static SharedPreferences mSharedPref;
@@ -395,6 +398,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         try {
         	setContentView(R.layout.main);
 
+
             LinearLayout topLinearLayout = findViewById(R.id.topLinearLayout);
             mTextStatus = findViewById(R.id.textViewStatus);
             mTextViewState = findViewById(R.id.textViewState);
@@ -514,9 +518,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             //i.putExtra("cmd_request", "id");
             //startService(i);
             // END
-
-
-
             //checkIfFirstTime();
 
 
