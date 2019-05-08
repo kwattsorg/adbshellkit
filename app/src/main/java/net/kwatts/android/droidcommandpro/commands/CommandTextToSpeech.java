@@ -45,6 +45,8 @@ public class CommandTextToSpeech {
 
         @Override
         protected void onHandleIntent(final Intent intent) {
+            Timber.d("Made it on the text to speech intent handler!");
+
             final String speechLanguage = intent.getStringExtra("language");
             final String speechRegion = intent.getStringExtra("region");
             final String speechVariant = intent.getStringExtra("variant");
