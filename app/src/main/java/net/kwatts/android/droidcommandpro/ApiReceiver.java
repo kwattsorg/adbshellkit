@@ -4,6 +4,11 @@ import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
+import android.util.JsonWriter;
+import android.widget.Toast;
+
+import com.androidhiddencamera.HiddenCameraUtils;
 
 import timber.log.Timber;
 
@@ -103,7 +108,20 @@ public class ApiReceiver extends BroadcastReceiver {
                 break;
             case "cmd_camera":
                 if (ApiPermissionActivity.checkAndRequestPermissions(context, intent, Manifest.permission.CAMERA)) {
-                    CommandCamera.onReceive(context, intent);
+                    if (HiddenCameraUtils.canOverDrawOtherApps(context)) {
+                        CommandCamera.onReceive(context, intent);
+                    } else {
+                        ResultReturner.returnData(context, intent, new ResultReturner.ResultJsonWriter() {
+                            @Override
+                            public void writeJson(JsonWriter out) throws Exception {
+                                String errorMessage = "Please allow this app to draw over apps by going to 'Settings -> Apps -> ADB Shellkit -> Advanced' and allowing 'Display over other apps' and run this command again.";
+                                out.beginObject().name("error").value(errorMessage).endObject();
+                            }
+                        });
+                        Toast.makeText(context, "To take pictures silently you need to select 'ADB Shellkit' allowing draw over apps and run the command again",
+                             Toast.LENGTH_LONG).show();
+                        HiddenCameraUtils.openDrawOverPermissionSetting(context);
+                    }
                 }
                 break;
             /*

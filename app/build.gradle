@@ -15,14 +15,14 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdkVersion 27
+    compileSdkVersion 28
     buildToolsVersion '28.0.2'
     defaultConfig {
         applicationId "net.kwatts.android.droidcommandpro"
         minSdkVersion 21
         targetSdkVersion 27 //26
-        versionCode 91
-        versionName "9.1"
+        versionCode 92
+        versionName "9.2"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
@@ -100,6 +100,7 @@ android {
         implementation 'com.crashlytics.sdk.android:crashlytics:2.9.8'
         implementation 'com.box:box-java-sdk:2.31.0'
         implementation 'com.kevalpatel2106:hiddencamera:1.3.5'
+
         //implementation 'com.box:box-android-browse-sdk:2.0.0'
         //implementation 'com.box:box-android-sdk:3.0.2'
         //OLD, DEPRECATED, EXPERIMENTAL

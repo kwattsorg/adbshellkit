@@ -31,7 +31,12 @@
             android:defaultValue="false"
             android:key="showNotifications"
             android:summary="This option will show the current command status and last line of results in the notification panel."
-            android:title="Enable Notificaitons" />
+            android:title="Enable Notifications" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hideSuperUserCommands"
+            android:summary="Hide commands requiring superuser if superuser isn't detected."
+            android:title="Hide SuperUser Commands" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="disableAds"

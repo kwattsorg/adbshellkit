@@ -5,7 +5,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -977,18 +979,24 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                             Command cmd = cmdSnapshot.getValue(Command.class);
                             if (cmd != null) {
                                 cmd.key = cmdSnapshot.getKey();
-                                mUserCommands.add(cmd);
+                                //mUserCommands.add(cmd);
 
-                                if (cmd.isPinned()) {
+                               if (cmd.isPinned()) {
                                     addDynamicShortcut(cmd.key, cmd.getCommand(), cmd.getDescription());
-                                }
+                               }
+
+                               mUserCommands.add(cmd);
+
                             }
                         }
 
                         List<Command> allCommands = new ArrayList<>();
                         allCommands.addAll(mUserCommands);
                         allCommands.addAll(mGlobalCommands);
-                        mCustomCmdsAdapter.addAllCommands(allCommands);
+
+
+                        mCustomCmdsAdapter.addAllCommands(allCommands,
+                                mSharedPref.getBoolean("hideSuperUserCommands",false));
                         mCustomCmdsAdapter.notifyDataSetChanged();
                         mSpinnerCommands.setSelection(0);
                     }
@@ -1008,6 +1016,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mGlobalCommands.clear();
+
                 for (DataSnapshot cmdSnapshot: dataSnapshot.getChildren()) {
                     Command cmd = cmdSnapshot.getValue(Command.class);
 
@@ -1020,7 +1029,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 List<Command> allCommands = new ArrayList<>();
                 allCommands.addAll(mUserCommands);
                 allCommands.addAll(mGlobalCommands);
-                mCustomCmdsAdapter.addAllCommands(allCommands);
+                mCustomCmdsAdapter.addAllCommands(allCommands,
+                        mSharedPref.getBoolean("hideSuperUserCommands",false));
                 mCustomCmdsAdapter.notifyDataSetChanged();
             }
 
@@ -1267,7 +1277,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         // Command defined permissions
         // full list: adb shell pm list permissions -d -g
         // app state: adb shell dumpsys package net.kwatts.android.droidcommandpro
-        // grant/revoke: adb shell pm (grant|revoke) net.kwatts.android.droidcommandpro
+        // grant/revoke: adb shell pm (grant|revoke) net.kwatts.android.droidcommandpro <permission>
         //TODO: this is user defined data, need to sanitize/make sure it doesn't lead to crashes. For now wrapping in try/catch block
         try {
             for (String p : c.getPermissionList()) {
@@ -1291,19 +1301,29 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         result = ContextCompat.checkSelfPermission(MainActivity.this,permission);
         if (result != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-                Toast.makeText(getApplicationContext(), "This command needs permission " + permission + " and may not run properly without it granted", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(this, new String[]{permission}, COMMAND_PERMISSION);
+                //Toast.makeText(getApplicationContext(), "This command needs permission " + permission + " and may not run properly without it granted",
+                   //     Toast.LENGTH_LONG).show();
+                showPermissionExplanation("Permission Needed", "This command needs " + permission + " and may not run properly without it granted", permission, COMMAND_PERMISSION);
             } else {
-                ActivityCompat.requestPermissions(this, new String[]{permission}, COMMAND_PERMISSION);
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, COMMAND_PERMISSION);
             }
 
             return false;
         }
 
         return true;
+    }
+
+    private void showPermissionExplanation(String title, String message, final String permission, final int permissionRequestCode) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, COMMAND_PERMISSION);
+                    }
+                });
+        builder.create().show();
     }
 
     private boolean checkPermissions() {
@@ -1344,6 +1364,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     // permissions granted.
                     lastPermissionStatus = true;
+                    Toast.makeText(MainActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
 
                 } else {
                     String permsNoGrant = "";
@@ -1351,6 +1372,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         permsNoGrant += "\n" + per;
                     }
                     lastPermissionStatus = false;
+                    Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
                     // permissions list of don't granted permission
                 }
                 return;

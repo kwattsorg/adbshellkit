@@ -1,64 +1,23 @@
 #!/system/bin/sh
-
-
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib
-export PATH=$PATH:/data/data/net.kwatts.android.droidcommandpro/files/bin
-export PATH=$PATH:/data/data/net.kwatts.android.droidcommandpro/files/scripts
+export PATH="/data/data/net.kwatts.android.droidcommandpro/files/bin:/data/data/net.kwatts.android.droidcommandpro/files/scripts:$PATH"
+export PREFIX='/data/data/net.kwatts.android.droidcommandpro/files'
+export HOME='/data/data/net.kwatts.android.droidcommandpro/files/home'
+export LANG='en_US.UTF-8'
+# export SHELL='/data/data/net.kwatts.android.droidcommandpro/files/bin/bash'
+export SHELL='/system/bin/sh'
 
-grep_prop() {
-  REGEX="s/^$1=//p"
-  shift
-  FILES=$@#!/system/bin/sh
 
-
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib
-          export PATH=$PATH:/data/data/net.kwatts.android.droidcommandpro/files/bin
-          export PATH=$PATH:/data/data/net.kwatts.android.droidcommandpro/files/scripts
-
-          grep_prop() {
-            REGEX="s/^$1=//p"
-            shift
-            FILES=$@
-            [ -z "$FILES" ] && FILES='/system/build.prop'
-            sed -n "$REGEX" $FILES 2>/dev/null | head -n 1
-          }
-
-          api_level_arch_detect() {
-            API=`grep_prop ro.build.version.sdk`
-            ABI=`grep_prop ro.product.cpu.abi | cut -c-3`
-            ABI2=`grep_prop ro.product.cpu.abi2 | cut -c-3`
-            ABILONG=`grep_prop ro.product.cpu.abi`
-
-            ARCH=arm
-            IS64BIT=false
-            if [ "$ABI" = "x86" ]; then ARCH=x86; fi;
-            if [ "$ABI2" = "x86" ]; then ARCH=x86; fi;
-            if [ "$ABILONG" = "arm64-v8a" ]; then ARCH=arm64; IS64BIT=true; fi;
-            if [ "$ABILONG" = "x86_64" ]; then ARCH=x64; IS64BIT=true; fi;
-          }
-
-          function spyware_detection {
-            if [ -d "/data/misc/adn" ]; then
-              echo "Flexispy detected!"
-            fi
-
-            # look for "com.android.systemupdate"
-
-          }
-
-          #api_level_arch_detect
-
-          #echo "Device API: $API"
-          #echo "Device ABI: $ARCH"
-  [ -z "$FILES" ] && FILES='/system/build.prop'
-  sed -n "$REGEX" $FILES 2>/dev/null | head -n 1
-}
-
+# TODO: use findings to run commands based off platform (support 32bit, x86, etc)
+#Usage:
+# api_level_arch_detect
+# echo "Device API: $API"
+# echo "Device ABI: $ARCH"
 api_level_arch_detect() {
-  API=`grep_prop ro.build.version.sdk`
-  ABI=`grep_prop ro.product.cpu.abi | cut -c-3`
-  ABI2=`grep_prop ro.product.cpu.abi2 | cut -c-3`
-  ABILONG=`grep_prop ro.product.cpu.abi`
+  API=`getprop ro.build.version.sdk`
+  ABI=`getprop ro.product.cpu.abi | cut -c-3`
+  ABI2=`getprop ro.product.cpu.abi2 | cut -c-3`
+  ABILONG=`getprop ro.product.cpu.abi`
 
   ARCH=arm
   IS64BIT=false
@@ -68,16 +27,19 @@ api_level_arch_detect() {
   if [ "$ABILONG" = "x86_64" ]; then ARCH=x64; IS64BIT=true; fi;
 }
 
+# JSON helpers
+function flatten_json_strings_key () { jq '.. | keys? | flatten[] | strings' $1 ;}
+function flatten_json_strings_value () { jq 'recurse|strings' $1 ;}
+function flatten_json () { jq -cr 'def kv: to_entries | map(\"\(.key)=\(.value|tostring)\");walk(if type == 'object' then kv else . end) | flatten[]' $1 ;}
+function jq_dump_struct() { jq -c 'path(..)|[.[]|tostring]|join("/")' $1 ;}
+function jq_dump_struct_with_values() { jq -c 'paths(scalars) as $p | [$p, getpath($p)]' $1 ;}
+function jq_dump_unique_keys() { jq -c 'reduce (.. | objects | keys[]) as $k ({}; .[$k] = true) | keys | map(select(. | test("\\D+";"i")))' $1 ;}
+function jq_dump_full_csv() { jq -r -c 'paths(strings) as $p | getpath($p) as $pathvalue|$p + [$pathvalue]|@csv' $1 ;}
+function jq_dump_all_paths() { jq -c 'path(..)' $1 ;}
+# Detection helpers
 function spyware_detection {
   if [ -d "/data/misc/adn" ]; then
     echo "Flexispy detected!"
   fi
-
   # look for "com.android.systemupdate"
-
 }
-
-#api_level_arch_detect
-
-#echo "Device API: $API"
-#echo "Device ABI: $ARCH"

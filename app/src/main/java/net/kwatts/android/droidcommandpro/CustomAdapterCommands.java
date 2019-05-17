@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.topjohnwu.superuser.Shell;
+
 import net.kwatts.android.droidcommandpro.model.Command;
 
 import java.util.Collections;
@@ -144,18 +146,21 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
 
     }
 
-    public void addAllCommands(List<Command> cmds) {
+    public void addAllCommands(List<Command> cmds, boolean hideSuperUser) {
         super.addAll(cmds);
         // For now, just clear
         spinnerCmds.clear();
-        for(Command c: cmds){
-            //super.add(item);
-            spinnerCmds.add(c);
-        }
 
-        //if (!mCommands.contains(cmd)) {
-        //    mCommands.add(cmd);
-        //}
+        boolean haveRoot = Shell.rootAccess();
+        for(Command c: cmds){
+            if (c.isSuperUser() && hideSuperUser) {
+              if (haveRoot) {
+                  spinnerCmds.add(c);
+              }
+            } else {
+                spinnerCmds.add(c);
+            }
+        }
         notifyDataSetChanged();
 
     }
@@ -178,7 +183,6 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         //TODO: replace with last time used order
         Collections.sort(spinnerCmds, new java.util.Comparator<Command>() {
             public int compare(Command c1, Command c2) {
-                //return c1==null?0L:c2==null?0L:c2.compareTo(c1);
                 java.util.Date c1Date = new Date(c1.getLastused());
                 java.util.Date c2Date = new Date(c2.getLastused());
                 return c1Date.compareTo(c2Date);

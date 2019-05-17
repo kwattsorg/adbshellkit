@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.nio.file.FileSystemException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 // https://github.com/kevalpatel2106/android-hidden-camera
@@ -95,7 +96,7 @@ public class CommandCamera {
                 if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
                     Timber.i("Setting up picture from options...");
 
-                    int camerafacing = intent.getIntExtra("camerafacing", CameraFacing.FRONT_FACING_CAMERA);
+                    int camerafacing = intent.getIntExtra("camerafacing", CameraFacing.REAR_FACING_CAMERA); // 0 = rear, 1 = front
                     int cameraresolution = intent.getIntExtra("cameraresolution", CameraResolution.MEDIUM_RESOLUTION);
                     int camerafocus = intent.getIntExtra("camerafocus", CameraFocus.AUTO);
                     int imageformat = intent.getIntExtra("imageformat", CameraImageFormat.FORMAT_JPEG);
@@ -137,12 +138,14 @@ public class CommandCamera {
                             .setImageRotation(imagerotation)
                             .build();
 
-                    result.message = String.format("Image capture started: %s \n" +
-                                                   "camerafacing: %d\ncameraresolution: %d\ncamerafocus: %d" +
-                                                   "imageformat: %d\nimagerotation: %d\nstoregallery: %b",
-                                                    storageFileFull.getAbsolutePath(),
-                                                    camerafacing,cameraresolution,camerafocus,
-                                                    imageformat,imagerotation,storegallery);
+                    result.message = "Image capture started: " + storageFileFull.getAbsolutePath() +
+                            "\ncamerafacing: " + camerafacing +
+                            "\ncameraresolution: " + cameraresolution +
+                            "\ncamerafocus: " + camerafocus +
+                            "\nimageformat: " + imageformat +
+                            "\nimagerotation: " + imagerotation +
+                            "\nstoregallery: " + storegallery;
+
                     startCamera(cameraConfig);
 
                     new android.os.Handler().postDelayed(new Runnable() {
