@@ -1,10 +1,12 @@
 package net.kwatts.android.droidcommandpro;
 
 import android.Manifest;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.text.TextUtils;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.util.JsonWriter;
 import android.widget.Toast;
 
@@ -123,6 +125,56 @@ public class ApiReceiver extends BroadcastReceiver {
                         HiddenCameraUtils.openDrawOverPermissionSetting(context);
                     }
                 }
+                break;
+            case "cmd_process_usage_stats":
+                try {
+                    PackageManager packageManager = context.getPackageManager();
+                    ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
+                    AppOpsManager appOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+                    int mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, applicationInfo.uid, applicationInfo.packageName);
+                    if (mode != AppOpsManager.MODE_ALLOWED) {
+                        ResultReturner.returnData(context, intent, new ResultReturner.ResultJsonWriter() {
+                            @Override
+                            public void writeJson(JsonWriter out) throws Exception {
+                                String errorMessage = "Please allow this app to access the foreground task by going to Settings -> Security -> 'App With Usage Access'.";
+                                out.beginObject().name("error").value(errorMessage).endObject();
+                            }
+                        });
+                    } else {
+                        CommandProcessTools.onReceiveUsageStats(this,context,intent);
+
+                    }
+
+                } catch (PackageManager.NameNotFoundException e) {
+                    //
+                }
+
+                break;
+            case "cmd_process_tools":
+                final String dumpType = intent.hasExtra("dump") ? intent.getStringExtra("dump") : "";
+                if (dumpType.equals("usage_stats")) {
+                    try {
+                        PackageManager packageManager = context.getPackageManager();
+                        ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
+                        AppOpsManager appOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+                        int mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, applicationInfo.uid, applicationInfo.packageName);
+                        if (mode != AppOpsManager.MODE_ALLOWED) {
+                            ResultReturner.returnData(context, intent, new ResultReturner.ResultJsonWriter() {
+                                @Override
+                                public void writeJson(JsonWriter out) throws Exception {
+                                    String errorMessage = "Please allow this app to access the foreground task by going to Settings -> Security -> 'App With Usage Access'.";
+                                    out.beginObject().name("error").value(errorMessage).endObject();
+                                }
+                            });
+                        }
+
+                    } catch (PackageManager.NameNotFoundException e) {
+                        //
+                    }
+                }
+
+
+                CommandProcessTools.onReceive(this,context,intent);
                 break;
             /*
             case "AudioInfo":

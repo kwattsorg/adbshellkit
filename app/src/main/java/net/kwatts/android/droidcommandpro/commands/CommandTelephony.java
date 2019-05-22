@@ -10,10 +10,20 @@ import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
+import android.telephony.cdma.CdmaCellLocation;
 import android.util.JsonWriter;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
+import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.LatLng;
+
 import net.kwatts.android.droidcommandpro.ApiReceiver;
+
+import timber.log.Timber;
 
 /**
  * Exposing {@link android.telephony.TelephonyManager}.
@@ -23,8 +33,28 @@ public class CommandTelephony {
     public static String cmd = "cmd_telephony";
     public static String[] permissions = {};
 
+    //public static String google_maps_key="AIzaSyB7rPpk3hzX5_IekScolHQNtpgxjwFFFOo";
+
     private static void writeIfKnown(JsonWriter out, String name, int value) throws java.io.IOException {
         if (value != Integer.MAX_VALUE) out.name(name).value(value);
+    }
+
+    //todo: restrict to only this app https://console.cloud.google.com/apis/credentials/key/eac1723f-8c5f-4a05-8388-fe560e165bb9?project=api-7203743493139905511-377866&consoleReturnUrl=https:%2F%2Fcloud.google.com%2Fmaps-platform%2F%3Fapis%3Dmaps%26project%3Dadb-shell&consoleUI=CLOUD
+    public static String getAddressFromGeo(double latitude, double longitude) {
+        String res = "n/a";
+        try {
+            LatLng loc = new LatLng(latitude, longitude);
+            GeoApiContext geoApiContext = new GeoApiContext.Builder()
+                    .apiKey("AIzaSyCzr5mPCjrmxtor-RpEPWJLCuZ4P-xhqEs")
+                    .build();
+            GeocodingResult[] results = GeocodingApi.reverseGeocode(geoApiContext, loc).await();
+            //LatLng coords = (results[0].geometry.location);
+            return results[0].formattedAddress + " (" + results[0].geometry.locationType + ")";
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+
+        return res;
     }
 
     @SuppressWarnings({"MissingPermission"})
@@ -82,8 +112,14 @@ public class CommandTelephony {
                         out.name("evdo_snr").value(cdmaInfo.getCellSignalStrength().getEvdoSnr());
 
                         out.name("basestation").value(cdmaInfo.getCellIdentity().getBasestationId());
-                        out.name("latitude").value(cdmaInfo.getCellIdentity().getLatitude());
-                        out.name("longitude").value(cdmaInfo.getCellIdentity().getLongitude());
+                        double cellLatitude = CdmaCellLocation.convertQuartSecToDecDegrees(cdmaInfo.getCellIdentity().getLatitude());
+                        double cellLongitude = CdmaCellLocation.convertQuartSecToDecDegrees(cdmaInfo.getCellIdentity().getLongitude());
+                        out.name("basestation_address").value(getAddressFromGeo(cellLatitude, cellLongitude));
+                        out.name("basestation_latitude").value(cellLatitude);
+                        out.name("basestation_longitude").value(cellLongitude);
+
+
+
                         out.name("network").value(cdmaInfo.getCellIdentity().getNetworkId());
                         out.name("system").value(cdmaInfo.getCellIdentity().getSystemId());
                     } else if (cellInfo instanceof CellInfoWcdma) {

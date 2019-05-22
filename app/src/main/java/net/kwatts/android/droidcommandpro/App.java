@@ -37,7 +37,7 @@ public class App extends ContainerApp  {
 
 
     public static final String FILES_PATH = "/data/data/net.kwatts.android.droidcommandpro/files";
-
+    public static final String GOOGLE_GEOCODE_API_KEY="AIzaSyCzr5mPCjrmxtor-RpEPWJLCuZ4P-xhqEs";
 
     static {
         Shell.Config.setTimeout(20); //20 second timeout
@@ -60,18 +60,19 @@ public class App extends ContainerApp  {
                 bashrc = new ByteArrayInputStream("".getBytes());
             }
 
-
+            //TODO: take this out, nobody asked for it and it has been cleanly implemented by bashrc
+            /*
             if (p.getBoolean("includeToolsPath", true)) {
                 exportPath = "export " +
                         "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + App.FILES_PATH + "/lib" + ";" +
                         "PATH=$PATH:" + App.FILES_PATH + "/scripts:" + App.FILES_PATH + "/bin" + ";";
             } else {
                 exportPath = "";
-            }
+            } */
 
             shell.newJob()
                     .add(bashrc)
-                    .add(exportPath)
+                    //.add(exportPath)
                     .exec();
 
             return true;
@@ -154,8 +155,8 @@ public class App extends ContainerApp  {
                 }
 
                 Timber.d("Total files copied: " + count);
-                Shell.sh("/system/bin/chmod -R 755 " + App.FILES_PATH + "/bin "
-                            + App.FILES_PATH + "/lib " + App.FILES_PATH + "/scripts "
+                Shell.sh("/system/bin/chmod -R 755 " + App.FILES_PATH + "/bin* "
+                            + App.FILES_PATH + "/lib* " + App.FILES_PATH + "/scripts "
                             + App.FILES_PATH + "/share").exec();
 
 

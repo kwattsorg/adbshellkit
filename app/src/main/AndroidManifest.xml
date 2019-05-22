@@ -88,14 +88,6 @@
 
 
 
-
-
-
-
-
-
-
-
     <application android:name=".App" android:supportsRtl="true" android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"  android:icon="@mipmap/ic_launcher" android:label="@string/app_name">
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"

@@ -18,7 +18,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -37,13 +36,10 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
 import android.text.style.TabStopSpan;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -106,9 +102,8 @@ import com.topjohnwu.superuser.CallbackList;
 import com.topjohnwu.superuser.Shell;
 import com.topjohnwu.superuser.io.*;
 
-import net.kwatts.android.droidcommandpro.commands.CommandCamera;
-import net.kwatts.android.droidcommandpro.commands.CommandGetContacts;
-import net.kwatts.android.droidcommandpro.commands.Engine;
+import net.kwatts.android.droidcommandpro.commands.CommandProcessTools;
+import net.kwatts.android.droidcommandpro.commands.CommandTelephony;
 import net.kwatts.android.droidcommandpro.model.Command;
 import net.kwatts.android.droidcommandpro.model.GoogleUser;
 import net.kwatts.android.droidcommandpro.model.User;
@@ -116,7 +111,6 @@ import net.kwatts.android.droidcommandpro.model.User;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -131,16 +125,12 @@ import java.util.Set;
 import java.util.Date;
 
 import timber.log.Timber;
-import android.util.TimingLogger;
 
 
 import android.widget.ArrayAdapter;
 
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 //TODO:
 // Package support - https://github.com/termux/termux-packages
@@ -521,10 +511,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             //startService(i);
             // END
             //checkIfFirstTime();
+            /*
+            try {
+                org.json.JSONObject res =  CommandProcessTools.getAllRunningProcesses(this);
+                org.json.JSONObject res2 = CommandProcessTools.getAllRunningServices(this);
+                Timber.d(res.toString(1));
+                        // CommandProcessTools.killPackageProcesses(this, "net.kwatts.android.droidcommandpro");
+
+            } catch (Exception e) {
+
+            }
+
+            String addr = CommandTelephony.getAddressFromGeo(37.794722222222222, -122.4);
+            */
 
 
 
-        } catch (Exception e) { 
+        } catch (Exception e) {
          	Timber.e(e,"MainActivity onCreate() failed:" + e.getMessage());
         }
 
@@ -1271,7 +1274,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         if (c.isSuperUser()) {
             // Check if we are superuser
             if (!Shell.rootAccess()) {
-                Toast.makeText(getApplicationContext(), "Superuser/root access not detected! This command needs it and may not run properly", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Superuser/root access not detected and required to run this command. You can hide superuser commands in settings", Toast.LENGTH_LONG).show();
             }
         }
         // Command defined permissions
@@ -1443,6 +1446,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         //Defaults
         mUserMapVars.put("DIR_SCRIPTS",App.INSTANCE.getApplicationContext().getFilesDir().getAbsolutePath() + "/scripts");
+        //TODO: remove this
         mUserMapVars.put("DIR_TOOLS",App.INSTANCE.getApplicationContext().getFilesDir().getAbsolutePath() + "/bin");
         mUserMapVars.put("NETWORK_INTERFACE","wlan0");
         mUserMapVars.put("APP_PACKAGE",App.INSTANCE.getApplicationContext().getPackageName());
