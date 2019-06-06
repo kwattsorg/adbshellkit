@@ -46,7 +46,9 @@
     <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
 
     <!-- Some of the used permissions imply uses-feature, so we need to make it optional.
        See http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions -->

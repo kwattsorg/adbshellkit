@@ -227,10 +227,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public static NotificationCompat.Builder mNotificationBuilder;
     public static NotificationManagerCompat mNotificationManager;
-    public String mLastOutputLine = "";
     int mApplicationId;
-
-    boolean isDebuggable;
 
     public static Command lastPublicCommandUsed;
 
@@ -478,7 +475,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
             loadVariables();
 
-
+ 
             mFirebaseUser = mAuth.getCurrentUser();
 
             if (mFirebaseUser != null) {
@@ -491,9 +488,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             } else {
                 refreshUserUI(false );
             }
-
-
-            //timingLogger.dumpToLog();
 
 
             // EXPERIMENTAL: Smali Command
@@ -755,7 +749,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         startTime = SystemClock.elapsedRealtime();
 
-        //https://github.com/topjohnwu/libsu/blob/master/superuser/src/main/java/com/topjohnwu/superuser/internal/PendingJob.java
         Shell.ResultCallback runResultCallback = new Shell.ResultCallback() {
             @MainThread
             @Override
@@ -901,11 +894,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public void initFirebase() {
         DatabaseReference mFbaseDBCommandsRef = mFirebaseDB.getReference();
-        //DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         final FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        //mUserCommands.clear();
-        //mGlobalCommands.clear();
 
         if (mFirebaseUser != null) {
             if (!mFirebaseUser.isAnonymous()) {
@@ -916,6 +905,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
                 FirebaseDatabase.getInstance().getReference().child("users").child(mFirebaseUser.getUid()).setValue(user);
 
+
+                /*  Decent idea, but no one asked for it. Remove for now.
                 StorageReference storageRef = mFirebaseStorage.getReference().child("files/" + mFirebaseUser.getUid() + "/bashrc");
                 try {
                     File localFile = new File(App.FILES_PATH + "/home/bashrc");
@@ -933,7 +924,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     });
                 } catch (Exception e) {
                     Timber.e(e);
-                }
+                } */
 
                 mFirebaseUser.getIdToken(false).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
                     @Override
@@ -1176,24 +1167,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         share.putExtra(android.content.Intent.EXTRA_SUBJECT, "Results of ADB Toolkit");
         share.putExtra(Intent.EXTRA_TEXT, dataToSend.toString());
         return share;
-        /*
-
-        if (mWebView.getVisibility() == View.VISIBLE) {
-            if (mWebViewData != null) {
-                share.setType("text/html");
-                share.putExtra(android.content.Intent.EXTRA_SUBJECT, "Results of ADB Toolkit");
-                dataToSend.append(mWebViewData);
-            }
-        } else {
-            for (int x = 0; x < mLines.getChildCount(); x++) {
-                TextView currentTextView = (TextView) mLines.getChildAt(x);
-                dataToSend.append(currentTextView.getText() + "\r\n");
-            }
-        }
-        share.putExtra(Intent.EXTRA_TEXT, dataToSend.toString());
-        return share;
-
-        */
     }
 
     private void openLynxActivity() {
@@ -1444,13 +1417,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             Timber.e(e,"Unable to get list of network interfaces!");
         }
 
-        //Defaults
-        mUserMapVars.put("DIR_SCRIPTS",App.INSTANCE.getApplicationContext().getFilesDir().getAbsolutePath() + "/scripts");
-        //TODO: remove this
-        mUserMapVars.put("DIR_TOOLS",App.INSTANCE.getApplicationContext().getFilesDir().getAbsolutePath() + "/bin");
+        //Defaults to helper variables avail to commands
         mUserMapVars.put("NETWORK_INTERFACE","wlan0");
         mUserMapVars.put("APP_PACKAGE",App.INSTANCE.getApplicationContext().getPackageName());
-
         String v = mSharedPref.getString("variablesEditText", "");
         Map<String, String> m = splitVariables(v);
         if (m != null) {
@@ -1876,16 +1845,4 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
 
     }
-
-    public void checkIfFirstTime() {
-        boolean displayWelcome = mSharedPref.getBoolean("displayWelcomeScreen", true);
-        if (displayWelcome) {
-            com.eggheadgames.aboutbox.activity.AboutActivity.launch(this);
-        }
-        SharedPreferences.Editor editor = mSharedPref.edit().putBoolean("displayWelcomeScreen", false);
-        editor.commit();
-
-    }
-
-
 }

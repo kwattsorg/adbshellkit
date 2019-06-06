@@ -15,13 +15,7 @@
             android:key="variablesEditText"
             android:title="Global Variables"
             android:summary="Global user variables passed to all commands. Format is VAR1=x,VAR2=y, etc..."
-            android:dialogTitle="Variables"
-            />
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="includeToolsPath"
-            android:summary="This option makes adbshellkit tools and scripts accessible without specifying path."
-            android:title= "Add Tools To Path"/>
+            android:dialogTitle="Variables" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="disableShellSharing"

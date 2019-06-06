@@ -40,7 +40,7 @@ public class ApiPermissionActivity extends Activity {
                     public void writeJson(JsonWriter out) throws Exception {
                         String errorMessage = "Please grant the following permission"
                                 + (permissionsToRequest.size() > 1 ? "s" : "")
-                                + " to use this command: "
+                                + " to use this command and run it again: "
                                 + TextUtils.join(" ,", permissionsToRequest);
                         out.beginObject().name("error").value(errorMessage).endObject();
                     }

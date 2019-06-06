@@ -669,7 +669,7 @@ public class CommandDialog extends AppCompatActivity {
         }
 
         /**
-         * Checks to see if foreground application is Termux
+         * Checks to see if foreground application is adbshellkit
          */
         protected boolean isCurrentAppAdbShellkit() {
             final ActivityManager activityManager = (ActivityManager) Objects.requireNonNull(getContext()).getSystemService(Context.ACTIVITY_SERVICE);

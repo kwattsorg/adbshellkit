@@ -1,28 +1,17 @@
 package net.kwatts.android.droidcommandpro.commands;
 import android.app.ActivityManager;
-import android.app.admin.DeviceAdminReceiver;
-import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.res.XmlResourceParser;
 import android.app.ActivityManager.RunningAppProcessInfo;
-import android.os.Binder;
-import android.os.Build;
-import android.provider.Settings;
-import android.util.Log;
+
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,12 +47,32 @@ public class CommandProcessTools implements Command {
         });
     }
 
-    public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
-
+    public static void onReceiveDumpProcesses(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
         JSONObject res = new JSONObject();
+        try {
+            res.put("dump_processes", getAllRunningProcesses(context));
+        } catch (Exception e) {
+            Timber.e("Exception trying to dump information");
+        }
+        ResultReturner.returnData(apiReceiver, intent, out -> {
+            out.print(res.toString(1));
+        });
+    }
 
-        String action = intent.getAction();
+    public static void onReceiveDumpServices(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
+        JSONObject res = new JSONObject();
+        try {
+            res.put("dump_service", getAllRunningServices(context));
+        } catch (Exception e) {
+            Timber.e("Exception trying to dump information");
+        }
+        ResultReturner.returnData(apiReceiver, intent, out -> {
+            out.print(res.toString(1));
+        });
+    }
 
+    public static void onReceiveKillProcess(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
+        JSONObject res = new JSONObject();
         final String packageName = intent.hasExtra("kill") ? intent.getStringExtra("kill") : "";
         try {
             res.put("kill", killPackageProcesses(context, packageName));
@@ -71,23 +80,7 @@ public class CommandProcessTools implements Command {
             Timber.e("Exception trying to kill process for package");
         }
 
-        final String dumpType = intent.hasExtra("dump") ? intent.getStringExtra("dump") : "";
-        try {
-            if (dumpType.equals("process")) {
-                res.put("dump_process", getAllRunningProcesses(context));
-            } else if (dumpType.equals("service")) {
-                res.put("dump_service", getAllRunningServices(context));
-            }
-        } catch (Exception e) {
-            Timber.e("Exception trying to dump information");
-        }
-
-
-        ResultReturner.returnData(apiReceiver, intent, out -> {
-            out.print(res.toString(1));
-        });
     }
-
 
     // helpers
 
@@ -297,7 +290,7 @@ public class CommandProcessTools implements Command {
 
     }
 
-
+    // https://blog.usejournal.com/building-an-app-usage-tracker-in-android-fe79e959ab26
     public static JSONObject getUsageStats(Context context) {
         JSONObject res = new JSONObject();
 
@@ -310,16 +303,21 @@ public class CommandProcessTools implements Command {
                 UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
 
                 long time = System.currentTimeMillis();
-                List<UsageStats> appStatsList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - DAY, time);
+                List<UsageStats> appStatsList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - DAY * 128, time);
                 for(UsageStats ustats:appStatsList) {
                     //if (appStatsList != null && !appStatsList.isEmpty()) {
                     JSONObject r = new JSONObject();
                     try {
                         r.put("describeContents", ustats.describeContents());
                         r.put("getFirstTimeStamp", ustats.getFirstTimeStamp());
+                        r.put("getFirstTimeStampDate", new java.util.Date(ustats.getFirstTimeStamp()).toString());
                         r.put("getLastTimeStamp", ustats.getLastTimeStamp());
+                        r.put("getLastTimeStampDate", new java.util.Date(ustats.getLastTimeStamp()).toString());
                         r.put("getLastTimeUsed", ustats.getLastTimeUsed());
+                        r.put("getLastTimeUsedStampDate", new java.util.Date(ustats.getLastTimeUsed()).toString());
                         r.put("getPackageName", ustats.getPackageName());
+                        r.put("getTotalTimeInForeground", ustats.getTotalTimeInForeground());
+                        r.put("getTotalTimeInForegroundDate", new java.util.Date(ustats.getTotalTimeInForeground()).toString());
                     } catch (Exception pe) {
                         r.put("exception", pe.getMessage());
                     }

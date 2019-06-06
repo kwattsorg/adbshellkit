@@ -1,11 +1,10 @@
 #!/system/bin/sh
-set -e -u
 
 SCRIPTNAME=cmd_text_to_speech
 show_usage () {
     echo "Usage: $SCRIPTNAME [-e engine] [-l language] [-n region] [-v variant] [-p pitch] [-r rate] [-s stream] [text-to-speak]"
     echo "Speak text with a system text-to-speech (TTS) engine. The text to speak is either supplied as arguments or read from stdin if no arguments are given."
-    echo "  -e engine    TTS engine to use (see termux-tts-engines)"
+    echo "  -e engine    TTS engine to use "
     echo "  -l language  language to speak in (may be unsupported by the engine)"
     echo "  -n region    region of language to speak in"
     echo "  -v variant   variant of the language to speak in"
@@ -42,6 +41,8 @@ shift $(($OPTIND-1))
 
 CMD="/data/data/net.kwatts.android.droidcommandpro/files/bin/adbshellkit-api cmd_text_to_speech $PARAMS"
 if [ $# = 0 ]; then
+    #echo "listing available engines..."
+    #/data/data/net.kwatts.android.droidcommandpro/files/bin/adbshellkit-api cmd_text_to_speech --es engine LIST_AVAILABLE
     $CMD
 else
     echo $@ | $CMD

@@ -4,7 +4,8 @@ apply plugin: 'com.android.library'
 android {
     //compileSdkVersion 22
     //buildToolsVersion "23.0.0 rc2"
-    compileSdkVersion 27
+    compileSdkVersion 28
+    buildToolsVersion '28.0.2'
     //buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
     resourcePrefix "obsez_fc__"
 
@@ -45,14 +46,14 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:27.1.1'
+    //ext.googleSupportVersion = "28.0.0"
+    ext.googleSupportVersion = "27.1.1"
+    implementation "com.android.support:appcompat-v7:$googleSupportVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.60"
     def libsuVersion = '2.2.0'
     implementation "com.github.topjohnwu.libsu:core:${libsuVersion}"
-    /* Optional: For using com.topjohnwu.superuser.io classes */
     implementation "com.github.topjohnwu.libsu:io:${libsuVersion}"
-    /* Optional: For including a prebuild busybox */
-    implementation "com.github.topjohnwu.libsu:busybox:${libsuVersion}"
+    //implementation "com.github.topjohnwu.libsu:busybox:${libsuVersion}"
 
 }
 

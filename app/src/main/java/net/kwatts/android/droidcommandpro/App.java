@@ -49,10 +49,7 @@ public class App extends ContainerApp  {
     static class ADBShellInitializer extends Shell.Initializer {
         @Override
         public boolean onInit(Context context, @NonNull Shell shell) {
-            SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
-
             InputStream bashrc;
-            String exportPath;
 
             try {
                 bashrc = new FileInputStream(App.FILES_PATH + "/home/bashrc");
@@ -60,20 +57,7 @@ public class App extends ContainerApp  {
                 bashrc = new ByteArrayInputStream("".getBytes());
             }
 
-            //TODO: take this out, nobody asked for it and it has been cleanly implemented by bashrc
-            /*
-            if (p.getBoolean("includeToolsPath", true)) {
-                exportPath = "export " +
-                        "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + App.FILES_PATH + "/lib" + ";" +
-                        "PATH=$PATH:" + App.FILES_PATH + "/scripts:" + App.FILES_PATH + "/bin" + ";";
-            } else {
-                exportPath = "";
-            } */
-
-            shell.newJob()
-                    .add(bashrc)
-                    //.add(exportPath)
-                    .exec();
+            shell.newJob().add(bashrc).exec();
 
             return true;
         }
@@ -87,8 +71,6 @@ public class App extends ContainerApp  {
         } else {
             Timber.plant(new ReleaseTree());
         }
-
-
 
         AboutConfig aboutConfig = AboutConfig.getInstance();
         aboutConfig.appName = getString(R.string.app_name);
