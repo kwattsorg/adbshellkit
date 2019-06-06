@@ -100,11 +100,9 @@
         <receiver android:name="net.kwatts.android.droidcommandpro.ApiReceiver"/>
         <activity android:name="net.kwatts.android.droidcommandpro.commands.CommandDialog" android:theme="@style/DialogTheme" android:noHistory="true" android:excludeFromRecents="true" android:exported="false"/>
         <activity android:name="net.kwatts.android.droidcommandpro.ApiPermissionActivity" android:theme="@android:style/Theme.NoDisplay" android:noHistory="true" android:excludeFromRecents="true" android:exported="false"/>
-        <service android:name=".commands.CommandTextToSpeech$TextToSpeechService" android:exported="false"/>
         <service android:name=".commands.CommandMicrophoneRecorder$MicRecorderService" android:exported="false"/>
         <service android:name=".commands.CommandCamera$HiddenCameraCommandService" android:exported="false"/>
         <activity android:name="net.kwatts.android.droidcommandpro.SettingsActivity"/>
-        <activity android:name="com.github.pedrovgs.lynx.LynxActivity"/>
     </application>
 
 </manifest>

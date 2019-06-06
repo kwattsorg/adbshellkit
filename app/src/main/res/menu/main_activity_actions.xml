@@ -19,10 +19,6 @@
         android:icon="@drawable/ic_action_sharing"
         android:title="Share"
         app:showAsAction="ifRoom" />
-    <item android:id="@+id/action_logs"
-        android:icon="@drawable/ic_action_log_bug"
-        android:title="@string/action_logs"
-        app:showAsAction="never" />
     <item android:id="@+id/action_setting"
         android:icon="@drawable/ic_action_settings"
         android:title="@string/action_setting"

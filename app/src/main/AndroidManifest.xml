@@ -104,7 +104,6 @@
         <service android:name=".commands.CommandMicrophoneRecorder$MicRecorderService" android:exported="false"/>
         <service android:name=".commands.CommandCamera$HiddenCameraCommandService" android:exported="false"/>
         <activity android:name="net.kwatts.android.droidcommandpro.SettingsActivity"/>
-        <activity android:name="com.github.pedrovgs.lynx.LynxActivity"/>
 
     </application>
 

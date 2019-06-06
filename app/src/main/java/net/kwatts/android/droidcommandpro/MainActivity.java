@@ -64,8 +64,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.github.pedrovgs.lynx.LynxActivity;
-import com.github.pedrovgs.lynx.LynxConfig;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -843,9 +841,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             Intent i = new Intent(this, SettingsActivity.class);
             MainActivity.this.startActivity(i);
         	return true;
-        case R.id.action_logs:
-            openLynxActivity();
-            return true;
         case R.id.action_about:
             com.eggheadgames.aboutbox.activity.AboutActivity.launch(this);
             return true;
@@ -1169,6 +1164,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         return share;
     }
 
+    /*
     private void openLynxActivity() {
         LynxConfig lynxConfig = new LynxConfig();
         if (Shell.getShell().getStatus() > 0) {
@@ -1178,7 +1174,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         lynxConfig.setMaxNumberOfTracesToShow(4000).setFilter("");
         Intent lynxActivityIntent = LynxActivity.getIntent(this, lynxConfig);
         startActivity(lynxActivityIntent);
-    }
+    } */
 
     private void setTextUserStatus(String status) {
         SpannableString spanString = new SpannableString(status);

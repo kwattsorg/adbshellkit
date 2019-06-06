@@ -1,3 +1,3 @@
-include ':app', ':lynx',  ':android-file-chooser'
+include ':app',  ':android-file-chooser'
 //project(':library').projectDir = new File('android-file-chooser/library')
 //project(':android-file-chooser').projectDir = new File('android-file-chooser')

@@ -81,7 +81,7 @@ android {
         }
         implementation 'com.github.lanchon.dexpatcher:multidexlib2:2.2.4'
         implementation 'org.smali:dexlib2:2.2.4'
-        implementation project(":lynx")
+        //implementation project(":lynx")
         implementation project(":android-file-chooser")
         implementation 'com.jakewharton.timber:timber:4.7.1'
         implementation 'com.github.flipagram:android-assetcopier:0.1.1'

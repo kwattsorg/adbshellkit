@@ -16,22 +16,22 @@ case $ARCH in
   arm)
     export PATH="$PATH:/data/data/net.kwatts.android.droidcommandpro/files/bin.arm"
     export DIR_TOOLS="/data/data/net.kwatts.android.droidcommandpro/files/bin.arm"
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib.arm
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib.arm"
     ;;
   arm64)
     export PATH="$PATH:/data/data/net.kwatts.android.droidcommandpro/files/bin.aarch64"
     export DIR_TOOLS="/data/data/net.kwatts.android.droidcommandpro/files/bin.aarch64"
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib.aarch64
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib.aarch64"
     ;;
   x86)
     export PATH="$PATH:/data/data/net.kwatts.android.droidcommandpro/files/bin.x86"
     export DIR_TOOLS="/data/data/net.kwatts.android.droidcommandpro/files/bin.x86"
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib.x86
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib.x86"
     ;;
   x86_64)
     export PATH="$PATH:/data/data/net.kwatts.android.droidcommandpro/files/bin.x86_64"
     export DIR_TOOLS="/data/data/net.kwatts.android.droidcommandpro/files/bin.x86_64"
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib.x86_64
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib.x86_64"
     ;;
 esac
 
