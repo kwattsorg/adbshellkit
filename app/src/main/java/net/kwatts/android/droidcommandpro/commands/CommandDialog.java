@@ -40,6 +40,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import android.webkit.WebView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,12 +55,20 @@ import net.kwatts.android.droidcommandpro.ApiPermissionActivity;
 /**
  * API that allows receiving user input interactively in a variety of different ways
  */
+
+// https://alvinalexander.com/android/how-to-show-html-webview-in-alertdialog-android
 public class CommandDialog extends AppCompatActivity {
 
     private boolean resultReturned = false;
-
-    public static String cmd = "cmd_dialog";
+    public static String cmd = "dialog";
+    public static String descr = "Displays a dialog with inputs and views";
+    public static String args = "--es input_method=[text|webview|confirm|checkbox|date|radio|sheet] \n" +
+                                "METHOD OPTIONS:\n" +
+                                "\ttext: --ez multiple_lines [true|false]" + "\n" +
+                                "\twebview: --es web_url [url to show] OR --es web_text [html text]";
     public static String[] permissions = {};
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,6 +185,8 @@ public class CommandDialog extends AppCompatActivity {
                     return new TextInputMethod(activity);
                 case "time":
                     return new TimeInputMethod(activity);
+                case "webview":
+                    return new WebInputMethod(activity);
                 default:
                     return (activity1, resultListener) -> {
                         InputResult result = new InputResult();
@@ -500,7 +511,39 @@ public class CommandDialog extends AppCompatActivity {
         }
     }
 
+    static class WebInputMethod extends InputDialog<WebView> {
 
+
+        WebView webView;
+        WebInputMethod(AppCompatActivity activity) { super(activity); }
+
+        @Override
+        WebView createWidgetView(AppCompatActivity activity) {
+            final Intent intent = activity.getIntent();
+            webView = new WebView(activity);
+
+            webView.setVerticalScrollBarEnabled(intent.getBooleanExtra("scrollbar",true));
+
+            if (intent.hasExtra("web_url")) {
+                webView.loadUrl(intent.getStringExtra("web_url"));
+                return webView;
+            }
+
+            if (intent.hasExtra("web_text")) {
+                webView.loadData(intent.getStringExtra("web_text"), "text/html", "utf-8");
+
+            } else {
+                // return empty webview
+                webView.loadData("<b>NO TEXT ENTERED</b>", "text/html", "utf-8");
+            }
+            return webView;
+        }
+
+        @Override
+        String getResult() {
+            return webView.toString();
+        }
+    }
     /**
      * Time InputMethod
      * Allow users to pick a specific time

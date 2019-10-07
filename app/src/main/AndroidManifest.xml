@@ -91,13 +91,21 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-2189980367471582~1443964910"/>
+        <!--
         <activity android:name=".MainActivity" android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity> -->
 
+
+        <activity android:name=".WelcomeActivity" android:supportsRtl="true" android:theme="@style/AppTheme" android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <receiver android:name="net.kwatts.android.droidcommandpro.ApiReceiver"/>
         <activity android:name="net.kwatts.android.droidcommandpro.commands.CommandDialog" android:theme="@style/DialogTheme" android:noHistory="true" android:excludeFromRecents="true" android:exported="false"/>
         <activity android:name="net.kwatts.android.droidcommandpro.ApiPermissionActivity" android:theme="@android:style/Theme.NoDisplay" android:noHistory="true" android:excludeFromRecents="true" android:exported="false"/>

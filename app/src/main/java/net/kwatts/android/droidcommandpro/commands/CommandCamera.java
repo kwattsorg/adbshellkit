@@ -6,6 +6,12 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.ImageFormat;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
@@ -14,6 +20,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.util.JsonWriter;
+import android.util.Size;
+import android.util.SizeF;
 import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraService;
@@ -42,6 +51,7 @@ import com.androidhiddencamera.config.CameraRotation;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.file.FileSystemException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -55,7 +65,14 @@ import java.util.Date;
 //            /CameraCommandResult result1 = handler.handle(context, intent);
 public class CommandCamera {
 
-    public static String cmd = "cmd_camera";
+    public static String cmd = "camera";
+    public static String descr = "Silent camera storing pictures in gallery by default";
+    public static String args = "--ei camerafacing [0 back, 1 for front]\n" +
+                                "\t--ei cameraresolution [7821(LOW)|7895(MED)|2006(HIGH)]\n" +
+                                "\t--ei camerafocus [0 (AUTO)]\n" +
+                                "\t--ei imageformat [849 (JPEG) | 545 (PNG)]\n" +
+                                "\t--ei imagerotation [] \n" +
+                                "\t--ez storegallery [true to add picture to gallery]";
     public static String[] permissions = {android.Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
 
@@ -254,7 +271,102 @@ public class CommandCamera {
             public String error;
         }
 
+        public static String getCameraInfo(Context context) throws CameraAccessException, IOException {
+            final CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter out = new JsonWriter(stringWriter);
 
+            out.beginObject();
+            out.beginArray();
+            for (String cameraId : manager.getCameraIdList()) {
+                out.beginObject();
+                out.name("id").value(cameraId);
+
+                CameraCharacteristics camera = manager.getCameraCharacteristics(cameraId);
+
+                out.name("facing");
+                int lensFacing = camera.get(CameraCharacteristics.LENS_FACING);
+                switch (lensFacing) {
+                    case CameraMetadata.LENS_FACING_FRONT:
+                        out.value("front");
+                        break;
+                    case CameraMetadata.LENS_FACING_BACK:
+                        out.value("back");
+                        break;
+                    default:
+                        out.value(lensFacing);
+                }
+
+                StreamConfigurationMap map = camera.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+                out.name("jpeg_output_sizes").beginArray();
+                for (Size size : map.getOutputSizes(ImageFormat.JPEG)) {
+                    out.beginObject().name("width").value(size.getWidth()).name("height").value(size.getHeight()).endObject();
+                }
+                out.endArray();
+
+                out.name("focal_lengths").beginArray();
+                for (float f : camera.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS))
+                    out.value(f);
+                out.endArray();
+
+                out.name("auto_exposure_modes").beginArray();
+                int[] flashModeValues = camera.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES);
+                for (int flashMode : flashModeValues) {
+                    switch (flashMode) {
+                        case CameraMetadata.CONTROL_AE_MODE_OFF:
+                            out.value("CONTROL_AE_MODE_OFF");
+                            break;
+                        case CameraMetadata.CONTROL_AE_MODE_ON:
+                            out.value("CONTROL_AE_MODE_ON");
+                            break;
+                        case CameraMetadata.CONTROL_AE_MODE_ON_ALWAYS_FLASH:
+                            out.value("CONTROL_AE_MODE_ON_ALWAYS_FLASH");
+                            break;
+                        case CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH:
+                            out.value("CONTROL_AE_MODE_ON_AUTO_FLASH");
+                            break;
+                        case CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE:
+                            out.value("CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE");
+                            break;
+                        default:
+                            out.value(flashMode);
+                    }
+                }
+                out.endArray();
+
+                SizeF physicalSize = camera.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+                out.name("physical_size").beginObject().name("width").value(physicalSize.getWidth()).name("height")
+                        .value(physicalSize.getHeight()).endObject();
+
+                out.name("capabilities").beginArray();
+                for (int capability : camera.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)) {
+                    switch (capability) {
+                        case CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR:
+                            out.value("manual_sensor");
+                            break;
+                        case CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING:
+                            out.value("manual_post_processing");
+                            break;
+                        case CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE:
+                            out.value("backward_compatible");
+                            break;
+                        case CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_RAW:
+                            out.value("raw");
+                            break;
+                        default:
+                            out.value(capability);
+                    }
+                }
+                out.endArray();
+
+                out.endObject();
+            }
+            out.endArray();
+            out.endObject();
+
+
+            return out.toString();
+        }
 
     }
 }

@@ -7,7 +7,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create/Update a shell 'command' from your private list - if adding from public global, it will be copied, or simply modify to save new command below"
+        android:text="Add or Modify private commands. Note modifying public commands will save to your private commands."
         android:textSize="12dp"
         android:textColor="@color/colorAccentDark"
         android:textAppearance="?android:attr/textAppearanceSmall" />
@@ -100,6 +100,16 @@
                 android:textSize="12dp"
                 android:textStyle="normal"
                 android:text="isPublic"/>
+            <CheckBox
+                android:id="@+id/tagAdminOnboardingCheckBox"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/colorAccent"
+                android:textSize="12dp"
+                android:textStyle="normal"
+                android:text="onboarding"/>
         </LinearLayout>
     </LinearLayout>
 

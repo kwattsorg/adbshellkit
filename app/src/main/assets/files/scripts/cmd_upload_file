@@ -18,7 +18,7 @@ shift $(($OPTIND-1))
 
 
 if [ $# = 1 ]; then
-	/data/data/net.kwatts.android.droidcommandpro/files/bin/adbshellkit-api cmd_upload_file --es filename "$1"
+	adbshellkit cmd_upload_file --es filename "$1"
 else
 	echo "$SCRIPTNAME: No filename specified." >&2
 	exit 1

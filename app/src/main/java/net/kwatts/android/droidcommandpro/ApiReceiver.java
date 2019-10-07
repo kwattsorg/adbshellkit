@@ -17,6 +17,9 @@ import timber.log.Timber;
 
 import net.kwatts.android.droidcommandpro.commands.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 // am broadcast --user 0 -n net.kwatts.android.droidcommandpro/.AdbshellkitApiReceiver \
 // --es socket_input 1 --es socket_output 2 --es api_method cmd_device_os_setting_info
 
@@ -31,6 +34,16 @@ import net.kwatts.android.droidcommandpro.commands.*;
 
 
 public class ApiReceiver extends BroadcastReceiver {
+
+    ArrayList<Class> mCmds = new ArrayList<>(
+            Arrays.asList(CommandCamera.class,
+                    CommandDeviceDump.class,
+                    CommandTorch.class,
+                    CommandVibrate.class,
+                    CommandTelephony.class,
+                    CommandSmali.class,
+                    CommandDialog.class)
+    );
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -159,6 +172,39 @@ public class ApiReceiver extends BroadcastReceiver {
                 break;
             default:
                 Timber.e("Unrecognized 'api_method' extra: '" + apiMethod + "'");
+                ResultReturner.returnData(context, intent, out -> {
+                    //out.append("unknown command: " + apiMethod).append("\n");
+                    out.append(getCommandApiUsage());
+                    out.flush();
+                    out.close();
+                });
         }
+    }
+
+    public String getCommandApiUsage() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("usage:\t adbshellkit <command> <options>\n");
+        sb.append("options:\t --es <string> <value>, --ei <number> <value>, --ez <true|false>, --ef <float> <value>\n");
+        sb.append("\nExamples:\n");
+        sb.append("Silent selfie from the front camera\n");
+        sb.append("\tadbshellkit camera --ei camerafacing 1\n");
+        sb.append("Show a dialog window containing a web page\n");
+        sb.append("\tadbshellkit dialog --es input_method webview --es web_url https://www.google.com\n");
+        sb.append("\nAvailable commands:\n");
+        for (Class c : mCmds) {
+            try {
+                sb.append("\n");
+                sb.append(c.getField("cmd").get(null).toString());
+                sb.append(": ");
+                sb.append(c.getField("descr").get(null).toString());
+                sb.append("\n\t");
+                sb.append(c.getField("args").get(null).toString());
+                if (!(mCmds.indexOf(c) == mCmds.size() - 1)) {
+                    sb.append("\n");
+                }
+            } catch (Exception e) { }
+        }
+
+        return sb.toString();
     }
 }

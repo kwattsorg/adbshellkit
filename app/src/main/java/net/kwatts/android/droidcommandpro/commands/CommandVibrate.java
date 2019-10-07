@@ -10,17 +10,13 @@ import net.kwatts.android.droidcommandpro.ApiReceiver;
 // Painfully lifted from https://github.com/termux/termux-api-package/blob/master/scripts/termux-vibrate
 // adbshellkit-api cmd_vibrate --ei duration_ms 2000 --ez force true
 public class CommandVibrate {
-    public static String cmd = "cmd_vibrate";
-    public static String[] permissions = { "" };
-
+    public static String cmd = "vibrate";
+    public static String descr = "Vibrates the phone for a duration of time";
+    public static String args = "--ei duration_ms <time to vibrate, 2000 for 2 seconds>, --ez force <true|false>";
+    public static String[] permissions = {""};
     public static String usage() {
         return "{\"cmd\":\"" + cmd + "\"," +
                 "\"args\":\"duration_ms (int), force (bool)\"}";
-        //    echo "Usage: $SCRIPTNAME [-d duration] [-f]"
-        //    echo "Vibrate the device."
-        //    echo "  -d duration  the duration to vibrate in ms (default:1000)"
-        //    echo "  -f           force vibration even in silent mode"
-
     }
     public static void onReceive(ApiReceiver apiReceiver, Context context, Intent intent) {
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);

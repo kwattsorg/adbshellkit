@@ -1,4 +1,5 @@
 package net.kwatts.android.droidcommandpro.commands;
+import android.Manifest;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -25,11 +26,12 @@ import java.util.List;
 
 import timber.log.Timber;
 
-public class CommandDeviceDump implements Command {
+public class CommandDeviceDump {
 
-
-    public String getCommandName() { return "cmd_device_dump"; }
-    public String[] getPermissions() { return new String[] {}; }
+    public static String cmd = "device_dump";
+    public static String descr = "Dumps device information";
+    public static String args = "";
+    public static String[] permissions = {};
 
     public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
         //final String application_name = intent.getStringExtra("application_name");

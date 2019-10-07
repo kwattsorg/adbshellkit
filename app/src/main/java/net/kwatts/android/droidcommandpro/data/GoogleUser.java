@@ -1,4 +1,4 @@
-package net.kwatts.android.droidcommandpro.model;
+package net.kwatts.android.droidcommandpro.data;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -35,9 +35,26 @@ public class App extends ContainerApp  {
         INSTANCE = this;
     }
 
+    public static SharedPreferences mSharedPref;
 
+    public static final String PREFS_NAME = "AppPrefs";
+    public static final String USER_IS_ONBOARD_PREF_NAME = "user_is_onboard";
     public static final String FILES_PATH = "/data/data/net.kwatts.android.droidcommandpro/files";
     public static final String GOOGLE_GEOCODE_API_KEY="AIzaSyCzr5mPCjrmxtor-RpEPWJLCuZ4P-xhqEs";
+
+    public static final String APP_NAME = "ADB Shellkit";
+    public static final String APP_DESCRIPTION_HTML = "Welcome to <b>"+APP_NAME+"!</b><br><br><b>"+APP_NAME+"</b>" +
+            "The journey to discover the hidden commands that came with your phone starts now! <br><br>" +
+            "<b> Hints to help guide you along the path:</b><br>" +
+            "<ul>" +
+            "<li> Explore and run my public commands available from the dropdown menu</li>" +
+            "<li> Once you get the hang of it, login to create/edit or run your own commands that automatically get saved privately in the cloud</li>" +
+            "<li> Commands tagged <b>superuser</b> may require root</li>" +
+            "<li> Commands tagged <b>pinned</b> are added to dynamic shortcuts (Android Nougat/7.1 or higher)</li>" +
+            "<li> Ads are included to cover hosting costs, time, etc but feel free to turn them off in settings</li>" +
+            "</ul>" +
+            "<br>ADB Shellkit is fully open source! <a href=\"https://github.com/kwattsorg/adbshellkit\">https://github.com/kwattsorg/adbshellkit</a>" +
+            " for feedback, support, or to dust off those coding skills :)";
 
     static {
         Shell.Config.setTimeout(20); //20 second timeout
@@ -78,18 +95,7 @@ public class App extends ContainerApp  {
         aboutConfig.version = BuildConfig.VERSION_NAME;
         aboutConfig.aboutLabelTitle = "About App";
         aboutConfig.extraTitle = "Description";
-        aboutConfig.extra =
-                "You now have access to the hidden system commands that came with your phone! <br><br>" +
-                "<b> Hints to help guide your journey:</b><br>" +
-                "<ul>" +
-                "<li> Start with running my public commands available from the dropdown menu</li>" +
-                "<li> Once you get the hang of it, login to create/edit/run your own private commands that automatically get saved to the cloud</li>" +
-                "<li> Commands tagged <b>superuser</b> may require root</li>" +
-                "<li> Commands tagged <b>pinned</b> get added to dynamic shortcuts (Android Nougat/7.1 or higher)</li>" +
-                "<li> Ads are included to cover hosting costs, time, etc but feel free to turn them off in settings</li>" +
-                "</ul>" +
-                "<br>ADB Shellkit is fully open source! <a href=\"https://github.com/kwattsorg/adbshellkit\">https://github.com/kwattsorg/adbshellkit</a>" +
-                " for feedback, support, or to dust off those coding skills :)";
+        aboutConfig.extra = APP_DESCRIPTION_HTML;
         aboutConfig.packageName = getApplicationContext().getPackageName();
         aboutConfig.buildType = AboutConfig.BuildType.GOOGLE;
         aboutConfig.facebookUserName = null;
@@ -148,7 +154,6 @@ public class App extends ContainerApp  {
 
 
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-
 
     }
 

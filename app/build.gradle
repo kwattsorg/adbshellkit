@@ -20,8 +20,8 @@ android {
         applicationId "net.kwatts.android.droidcommandpro"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 99
-        versionName "9.9"
+        versionCode 108
+        versionName "10.8"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
@@ -54,6 +54,7 @@ android {
         implementation "com.android.support:design:$googleSupportVersion"
         implementation "com.android.support:customtabs:$googleSupportVersion"
         implementation "com.android.support:cardview-v7:$googleSupportVersion"
+        implementation 'com.android.support.constraint:constraint-layout:1.1.3'
         ext.gmsFirebaseVersionCore = "16.0.7"
         ext.gmsFirebaseVersionAds = "17.1.3"
         ext.gmsFirebaseVersionAuth = "16.1.0"
@@ -81,7 +82,6 @@ android {
         }
         implementation 'com.github.lanchon.dexpatcher:multidexlib2:2.2.4'
         implementation 'org.smali:dexlib2:2.2.4'
-        //implementation project(":lynx")
         implementation project(":android-file-chooser")
         implementation 'com.jakewharton.timber:timber:4.7.1'
         implementation 'com.github.flipagram:android-assetcopier:0.1.1'
@@ -95,12 +95,17 @@ android {
 
         implementation 'com.github.eggheadgames:android-about-box:1.3.2'
         implementation 'com.crashlytics.sdk.android:crashlytics:2.9.8'
-        implementation 'com.box:box-java-sdk:2.31.0'
+
         implementation 'com.kevalpatel2106:hiddencamera:1.3.5'
 
         implementation 'com.google.maps:google-maps-services:0.9.3'
         implementation 'org.slf4j:slf4j-simple:1.7.25'
 
+
+        def lifecycle_version = "1.1.1"
+        implementation    "android.arch.lifecycle:extensions:$lifecycle_version"
+        implementation    "android.arch.lifecycle:compiler:$lifecycle_version"
+        //implementation 'com.box:box-java-sdk:2.31.0'
         //implementation 'com.box:box-android-browse-sdk:2.0.0'
         //implementation 'com.box:box-android-sdk:3.0.2'
         //implementation 'com.google.cloud:google-cloud-dlp:0.32.0-beta'

@@ -16,25 +16,39 @@ import android.util.JsonWriter;
 import android.widget.Toast;
 import android.util.Size;
 import android.util.SizeF;
+import java.io.StringWriter;
 
 import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 
+import org.json.JSONObject;
+
 import java.io.IOException;
+
 
 import timber.log.Timber;
 
 public class CommandTorch {
     private static Camera legacyCamera;
 
-    public static String cmd = "cmd_torch";
+    public static String cmd = "torch";
+    public static String descr = "Turns the camera flash on/off by default";
+    public static String args = "--ez camerainfo [true|false] --ez enabled [true|false]";
     public static String[] permissions = { "Manifest.permission.CAMERA" };
 
     public static boolean flashState;
+    public static boolean camerainfo;
 
     @TargetApi(Build.VERSION_CODES.M)
     public static void onReceive(ApiReceiver apiReceiver, final Context context, final Intent intent) {
 
+
+        if (intent.hasExtra("camerainfo")) {
+            camerainfo = intent.getBooleanExtra("camerainfo", false);
+        } else {
+            camerainfo = false;
+
+        }
         // if enabled isn't sent just turn on/off, still need to update to work w/ pre-marshmallow
         if (!intent.hasExtra("enabled")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -82,16 +96,18 @@ public class CommandTorch {
             public void writeJson(JsonWriter out) throws Exception {
                 out.beginObject();
                 out.name("flashState").value(flashState);
-                out.endObject();
-/*
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    getCameraInfo((CameraManager) context.getSystemService(Context.CAMERA_SERVICE), out);
+                if (camerainfo) {
+                    try {
+                        out.name("camerainfo").value(getCameraInfo(context));
+                    } catch (Exception e) {
+                        Timber.e(e);
+                        out.name("camerainfo").value(e.getMessage());
+                    }
                 }
-*/
+                out.endObject();
                 out.close();
             }
         });
-           // ResultReturner.noteDone(apiReceiver, intent);
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -144,8 +160,12 @@ public class CommandTorch {
         return result;
     }
 
-    public static void getCameraInfo(CameraManager manager, JsonWriter out) throws CameraAccessException, IOException {
+    public static String getCameraInfo(Context context) throws CameraAccessException, IOException {
+        final CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter out = new JsonWriter(stringWriter);
 
+        out.beginObject();
         out.beginArray();
         for (String cameraId : manager.getCameraIdList()) {
             out.beginObject();
@@ -231,9 +251,10 @@ public class CommandTorch {
             out.endObject();
         }
         out.endArray();
+        out.endObject();
 
 
-
+        return out.toString();
     }
 
 }

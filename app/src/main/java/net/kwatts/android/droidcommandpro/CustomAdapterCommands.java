@@ -1,6 +1,8 @@
 package net.kwatts.android.droidcommandpro;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -12,12 +14,12 @@ import android.widget.TextView;
 
 import com.topjohnwu.superuser.Shell;
 
-import net.kwatts.android.droidcommandpro.model.Command;
+import net.kwatts.android.droidcommandpro.data.Command;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Collection;
+import java.util.ListIterator;
 
 /**
  * Created by kwatts on 4/2/18.
@@ -102,7 +104,7 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
                     TextUtils.join(",",c.getTagList())
             );
         } else {
-            mViewHolder.mCommandTags.setText("no_tags");
+            mViewHolder.mCommandTags.setText("");
         }
 
         if (c.getDescription() != null) {
@@ -123,27 +125,10 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         return getView(position, convertView, parent);
     }
 
-    // https://stackoverflow.com/questions/9906464/sort-listview-with-array-adapter
-
     @Override
     public void add(Command c) {
-        //this.sort(ListThing.sComparator);
-        //TODO: replace with last time used order
         super.add(c);
         this.spinnerCmds.add(c);
-        //notifyDataSetChanged();
-        /*
-        Collections.sort(this.spinnerCmds, new java.util.Comparator<Command>() {
-            public int compare(Command c1, Command c2) {
-                //return c1==null?0L:c2==null?0L:c2.compareTo(c1);
-                java.util.Date c1Date = new Date(c1.getLastused());
-                java.util.Date c2Date = new Date(c2.getLastused());
-                return c1Date.compareTo(c2Date);
-            }
-        }); */
-
-
-
     }
 
     public void addAllCommands(List<Command> cmds, boolean hideSuperUser) {
@@ -163,6 +148,18 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         }
         notifyDataSetChanged();
 
+    }
+
+    public void removeUserCommands() {
+        //spinnerCmds.removeIf(c -> !c.isPublic);
+        ListIterator<Command> iter = spinnerCmds.listIterator();
+        while(iter.hasNext()){
+            if(!iter.next().isPublic){
+                iter.remove();
+            }
+        }
+
+        notifyDataSetChanged();
     }
 
     @Override
@@ -190,6 +187,17 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         });
         // reverse to display at top
         Collections.reverse(spinnerCmds);
+        //TODO: only do this if the command is public
+        /*
+        for (Command c : spinnerCmds) {
+            if (c.isOnboardingUser()) {
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+                if (sp.getBoolean(App.COMPLETED_ONBOARDING_PREF_NAME, false) == false) {
+                        spinnerCmds.remove(c);
+                        spinnerCmds.add(c);
+                }
+            }
+        } */
 
         this.setNotifyOnChange(true);
     }

@@ -1,16 +1,13 @@
 
-package net.kwatts.android.droidcommandpro.model;
+package net.kwatts.android.droidcommandpro.data;
 
 import com.google.gson.annotations.SerializedName;
-
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.ArrayList;
-import com.google.gson.Gson;
 
 /**
  * Created by kwatts on 11/9/17.
@@ -34,6 +31,14 @@ public class Command {
     private String mDescription;
     @SerializedName("command")
     public String mCommand;
+    @SerializedName("localbinary")
+    public String mLocalBinary;
+    @SerializedName("remotebinary")
+    public String mRemoteBinary;
+
+    @SerializedName("minappversion")
+    public Long mMinAppVersion;
+
     @SerializedName("runcounts")
     public Long mRuncounts;
     @SerializedName("lastused")
@@ -80,15 +85,23 @@ public class Command {
     }
 
     public String getDescription() {
+        if (mDescription == null) {
+            mDescription = "";
+        }
         return mDescription;
     }
     public void setDescription(String description) { mDescription = description; }
+
     public String getCommand() {
+        if (mCommand == null) {
+            mCommand = "";
+        }
         return mCommand;
     }
     public void setCommand(String command) {
         mCommand = command;
     }
+
     public Long getRuncounts() {
         return mRuncounts;
     }
@@ -106,6 +119,33 @@ public class Command {
         if (!isPublic) {
             mLastused = lastused;
         }
+    }
+
+    public Long getMinAppVersion() {
+        return mMinAppVersion;
+    }
+    public void setMinAppVersion(Long appversion) {
+        mMinAppVersion = appversion;
+    }
+
+
+    public String getLocalBinary() {
+        if (mLocalBinary == null) {
+            mLocalBinary = "";
+        }
+        return mLocalBinary;
+    }
+    public void setLocalBinary(String localBinary) {
+        mLocalBinary = localBinary;
+    }
+    public String getRemoteBinary() {
+        if (mRemoteBinary == null) {
+            mRemoteBinary = "";
+        }
+        return mRemoteBinary;
+    }
+    public void setRemoteBinary(String remoteBinary) {
+        mRemoteBinary = remoteBinary;
     }
 
 /*
@@ -145,6 +185,14 @@ public class Command {
     public boolean isSuperUser() {
         if (mTagList != null) {
             return mTagList.contains("superuser");
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isOnboarding() {
+        if (mTagList != null) {
+            return mTagList.contains("onboarding");
         } else {
             return false;
         }

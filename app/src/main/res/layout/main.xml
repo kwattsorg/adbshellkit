@@ -106,25 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.50"/>
         </LinearLayout>
-<!--
-        <LinearLayout
-            android:id="@+id/linearLayout2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="0dp"
-            android:paddingRight="10dp"
-            android:paddingLeft="200dp"
-            android:layout_alignLeft="@+id/linearLayout1"
-            android:layout_alignRight="@+id/linearLayout1"
-            android:layout_below="@+id/linearLayout1">
-            <Button
-                android:layout_width="fill_parent"
-                android:layout_height="30dp"
-                android:background="@color/colorAccentDark"
-                android:text="VARIABLES"
-                android:textColor="#e8e9e9" />
-        </LinearLayout>
--->
+
         <LinearLayout
             android:id="@+id/linearLayout5"
             android:layout_width="wrap_content"
@@ -167,25 +149,6 @@
                 android:textColor="@color/white"
                 android:text="STOP" />
 
-<!--
-            <view
-                android:id="@+id/fabRunButton"
-                class="mbanje.kurt.fabbutton.FabButton"
-                android:layout_width="fill_parent"
-                android:layout_height="70dp"
-                android:clickable="true"
-                android:color="@color/colorAccentDark"
-                android:indeterminate="true"
-                android:max="100"
-                android:src="@drawable/ic_fab_play"
-                app:fbb_autoStart="true"
-                app:fbb_endBitmap="@drawable/ic_fab_complete"
-                app:fbb_hideProgressOnComplete="true"
-                app:fbb_progressColor="?attr/colorAccent"
-                app:fbb_progressWidthRatio="0.1"
-                app:fbb_showEndBitmap="false"
-                app:fbb_showShadow="false"
-                android:layout_weight="0.80"/> -->
 
         </LinearLayout>
 
@@ -220,78 +183,3 @@
         </LinearLayout>
     </RelativeLayout>
 </LinearLayout>
-
-    <!--
-            <LinearLayout
-                android:id="@+id/linearLayout4_old"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone">
-                <Spinner
-                    android:id="@+id/toolsSpinner"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.50"/>
-
-                <Spinner
-                    android:id="@+id/topSpinnerPackages"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.50"/>
-            </LinearLayout>
-    -->
-
-    <!-- LINE 2 -->
-    <!--
-            <LinearLayout
-                android:id="@+id/linearLayout3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="10dp"
-                android:layout_alignLeft="@+id/linearLayout2"
-                android:layout_alignRight="@+id/linearLayout2"
-                android:layout_below="@+id/linearLayout2">
-
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.50"
-                    android:text="Scripts"
-                    android:textAllCaps="true"
-                    android:fontFamily="sans-serif-condensed"
-                    android:textColor="@color/colorAccentDark"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                <TextView
-                    android:id="@+id/textView3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.50"
-                    android:text="$app_package ="
-                    android:textAllCaps="true"
-                    android:fontFamily="sans-serif-condensed"
-                    android:textColor="@color/colorAccentDark"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-            </LinearLayout>
-            <LinearLayout
-                android:id="@+id/linearLayout4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@+id/linearLayout3"
-                android:layout_alignRight="@+id/linearLayout3"
-                android:layout_below="@+id/linearLayout3">
-                <Spinner
-                    android:id="@+id/toolsSpinner"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.50"/>
-
-                <Spinner
-                    android:id="@+id/topSpinnerPackages"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.50"/>
-            </LinearLayout>
-
-    -->

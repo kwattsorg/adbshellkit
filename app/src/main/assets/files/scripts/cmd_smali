@@ -18,7 +18,7 @@ shift $(($OPTIND-1))
 
 
 if [ $# = 1 ]; then
-	/data/data/net.kwatts.android.droidcommandpro/files/bin/adbshellkit-api cmd_smali --es application_name "$1"
+	adbshellkit cmd_smali --es application_name "$1"
 else
 	echo "$SCRIPTNAME: No application name specified." >&2
 	exit 1

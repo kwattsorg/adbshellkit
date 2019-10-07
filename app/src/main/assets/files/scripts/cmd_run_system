@@ -19,7 +19,7 @@ shift $(($OPTIND-1))
 
 
 if [ $# = 1 ]; then
-	/data/data/net.kwatts.android.droidcommandpro/files/bin/adbshellkit-api cmd_run_system --es exec_command "$1"
+	adbshellkit cmd_run_system --es exec_command "$1"
 else
 	echo "$SCRIPTNAME: No system command specified." >&2
 	exit 1

@@ -23,8 +23,15 @@ import timber.log.Timber;
 // https://github.com/firebase/snippets-android/blob/7d03e65500cd63a26e5bf9b8b6e4d3ab9479806a/storage/app/src/main/java/com/google/firebase/referencecode/storage/StorageActivity.java#L194-L208
 public class CommandUploadFile  {
 
-    public static String cmd = "cmd_upload_file";
-    public static String[] permissions = { "" };
+
+    public static String cmd = "upload_file";
+    public static String descr = "Sets or Retrieves a file from remote storage";
+    public static String args = "--es input_method=[text|webview|confirm|checkbox|date|radio|sheet] \n" +
+            "METHOD OPTIONS:\n" +
+            "\ttext: --ez multiple_lines [true|false]" + "\n" +
+            "\twebview: --es web_url [url to show] OR --es web_text [html text]";
+    public static String[] permissions = {};
+
 
     public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
 

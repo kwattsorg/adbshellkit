@@ -6,6 +6,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.app.AlertDialog;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -73,7 +76,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthCredential;
@@ -100,11 +102,9 @@ import com.topjohnwu.superuser.CallbackList;
 import com.topjohnwu.superuser.Shell;
 import com.topjohnwu.superuser.io.*;
 
-import net.kwatts.android.droidcommandpro.commands.CommandProcessTools;
-import net.kwatts.android.droidcommandpro.commands.CommandTelephony;
-import net.kwatts.android.droidcommandpro.model.Command;
-import net.kwatts.android.droidcommandpro.model.GoogleUser;
-import net.kwatts.android.droidcommandpro.model.User;
+import net.kwatts.android.droidcommandpro.data.Command;
+import net.kwatts.android.droidcommandpro.data.GoogleUser;
+import net.kwatts.android.droidcommandpro.data.User;
 
 
 
@@ -130,6 +130,8 @@ import android.widget.ArrayAdapter;
 
 import java.util.Arrays;
 
+import android.support.annotation.Nullable;
+
 //TODO:
 // Package support - https://github.com/termux/termux-packages
 // notasecret
@@ -137,6 +139,9 @@ import java.util.Arrays;
 // adb -d shell pm grant net.kwatts.android.droidcommandpro android.permission.DUMP
 // adb -d shell pm grant net.kwatts.android.droidcommandpro android.permission.WRITE_SECURE_SETTINGS
 
+
+//TODO: FIX
+// CANNOT LINK EXECUTABLE "./aapt": "/data/data/net.kwatts.android.droidcommandpro/files/lib.aarch64/libc++_shared.so" is 32-bit instead of 64-bit
 public class MainActivity extends AppCompatActivity implements OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
     public static SharedPreferences mSharedPref;
     private ShareActionProvider shareActionProvider;
@@ -148,11 +153,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public static final String CHANNEL_ID = "main";
     public static final int RC_SIGN_IN = 10;
 
+    MenuItem shareMenuItem;
+    MenuItem addCommandMenuItem;
+    MenuItem changeCommandMenuItem;
+    MenuItem removeCommandMenuItem;
+
+    Boolean isAdmin = Boolean.FALSE;
+
     public static List<Command> mCommandQueue = new LinkedList<Command>();
     TextView mTextStatus;
     public static TextView mTextViewState;
     Spinner mSpinnerCommands;
-
 
     Spinner mPackagesSpinner;
     Spinner mNetworkInterfaceSpinner;
@@ -164,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public ProgressDialog mProgressDialog;
 
 	public static EditText mTopCommandView;
+
     View mAdmobAds;
     AdView mAdView;
     public static StringBuffer mTopOutString = new StringBuffer();
@@ -179,9 +191,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public static int mTextSize = 23;
 
     public WebView mWebView;
-    public String mWebViewData;
 
-    //public android.content.Context mAppContext;
     public FirebaseDatabase mFirebaseDB;
     public FirebaseUser mFirebaseUser;
     public FirebaseStorage mFirebaseStorage;
@@ -326,27 +336,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         MobileAds.initialize(this, "ca-app-pub-2189980367471582~1443964910");
 
-        //TODO: get trace times
-        // adb shell setprop log.tag.droidcommander VERBOSE
-        //isDebuggable =  ( 0 != ( getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
-        //TimingLogger timingLogger = new TimingLogger("droidcommander", "onCreate");
+        /* To get trace times:
+            // $ adb shell setprop log.tag.droidcommander VERBOSE
+            isDebuggable =  ( 0 != ( getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
+            TimingLogger timingLogger = new TimingLogger("droidcommander", "onCreate");
+        */
+
 
 
         // Support for running commands from intents:
         // 'am start -n "net.kwatts.android.droidcommandpro/net.kwatts.android.droidcommandpro.MainActivity"
         //          -a "android.intent.action.MAIN" --es net.kwatts.android.droidcommandpro.EXTRA_COMMAND id'
-        try {
-            String extra_cmd_key = getIntent().getStringExtra(EXTRA_COMMAND_KEY);
-            if (extra_cmd_key != null) {
-                Timber.d("Intent.getStringExtra(" + EXTRA_COMMAND_KEY + "):" + extra_cmd_key);
-                Command c = getUserCommandByKey(extra_cmd_key);
-                mCommandQueue.add(c);
-                Timber.d("Added command " + c.key + " to queue from intent");
-            }
-        } catch (Exception e) {
-            Timber.e(e);
-        }
-
 
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         mSharedPref.registerOnSharedPreferenceChangeListener(this);
@@ -406,7 +406,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mGoogleUserSignedInImageButton = findViewById(R.id.signed_in_image_button);
             mGoogleUserSignInButton = findViewById(R.id.sign_in_button);
 
-            android.widget.AdapterView.OnItemSelectedListener myListener = new android.widget.AdapterView.OnItemSelectedListener() {
+            AdapterView.OnItemSelectedListener myListener = new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     switch (parent.getId()) {
@@ -423,6 +423,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         default:
                             break;
                     }
+                    invalidateOptionsMenu();
                 }
                 @Override
                 public void onNothingSelected(AdapterView<?> arg0) {}
@@ -438,7 +439,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
 
-            mGoogleUserSignedInImageButton.setOnClickListener(new View.OnClickListener() {
+            mGoogleUserSignedInImageButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mFirebaseUser != null) {
@@ -447,7 +448,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     }
                 }
             });
-            mGoogleUserSignInButton.setOnClickListener(new View.OnClickListener() {
+            mGoogleUserSignInButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent signInIntent = mGoogleSignInClient.getSignInIntent();
@@ -487,37 +488,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 refreshUserUI(false );
             }
 
-
-            // EXPERIMENTAL: Smali Command
-
-            //Engine cmd_engine = new Engine();
-            //String smali_app = "com.eaze";
-            //cmd_engine.process(null, "cmd_smali " + smali_app);
-
-
-            // END
-
-            // EXPERIMENTAL: Services
-            //Intent i = new Intent(this, CommandIntentService.class);
-            //i.putExtra("cmd_request", "id");
-            //startService(i);
-            // END
-            //checkIfFirstTime();
-            /*
             try {
-                org.json.JSONObject res =  CommandProcessTools.getAllRunningProcesses(this);
-                org.json.JSONObject res2 = CommandProcessTools.getAllRunningServices(this);
-                Timber.d(res.toString(1));
-                        // CommandProcessTools.killPackageProcesses(this, "net.kwatts.android.droidcommandpro");
-
+                String extra_cmd_key = getIntent().getStringExtra(EXTRA_COMMAND_KEY);
+                if (extra_cmd_key != null) {
+                    Timber.d("Intent.getStringExtra(" + EXTRA_COMMAND_KEY + "):" + extra_cmd_key);
+                    Command c = getUserCommandByKey(extra_cmd_key);
+                    if (c != null) {
+                        mCommandQueue.add(c);
+                        Timber.d("Added command " + c.key + " to queue from intent");
+                    } else {
+                        Timber.d("Command from intent not found!");
+                        Toast.makeText(getApplicationContext(), "Pinned command not found! command key requested:" + extra_cmd_key, Toast.LENGTH_SHORT).show();
+                    }
+                }
             } catch (Exception e) {
-
+                Timber.e(e);
             }
-
-            String addr = CommandTelephony.getAddressFromGeo(37.794722222222222, -122.4);
-            */
-
-
 
         } catch (Exception e) {
          	Timber.e(e,"MainActivity onCreate() failed:" + e.getMessage());
@@ -571,7 +557,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public void onClick(View v) {
         try {
-
             //TODO: Check permissions needed by command. Right now just request
             Command c = mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
 
@@ -752,17 +737,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             @Override
             public void onResult(Shell.Result out) {
                 commandTimer(false);
-                CharSequence l = "";
+                CharSequence last_line = "";
                 if (mLines.getChildCount() > 0) {
-                    l =  ((TextView) mLines.getChildAt(mLines.getChildCount() -1 )).getText();
+                    last_line =  ((TextView) mLines.getChildAt(mLines.getChildCount() -1 )).getText();
                 }
                 long ms = SystemClock.elapsedRealtime() - startTime;
                 double s = ms / 1000.0;
 
-                setTextState("Command finished after " + s + "secs (lines=" + mLines.getChildCount() +
-                                ",state=" + ((out.getCode() < 0) ? "fail(" + out.getCode() + ")" : "success") + ")","",l.toString());
+                String state = "Command finished after " + s + "secs (lines=" + mLines.getChildCount() +
+                        ",state=" + ((out.getCode() < 0) ? "fail(" + out.getCode() + ")" : "success") + ")";
+
+                setTextState(state,"",last_line.toString());
                 // clear the job...
                 mJob = null;
+
+                setShareData(state,runCommand);
+
                 // ... and close the shell after a couple of seconds if sharing is off
                 /*
                 if (mSharedPref.getBoolean("disableShellSharing",false)) {
@@ -779,20 +769,26 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mJob.add(runCommand);
         mJob.to(consoleList, consoleListError);
         mJob.submit(runResultCallback);
+
+        invalidateOptionsMenu();
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_actions, menu);
-        MenuItem actionItem = menu.findItem(R.id.action_share);
-
-        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(actionItem);
+        shareMenuItem = menu.findItem(R.id.action_share);
+        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareMenuItem);
         if (shareActionProvider == null) {
             shareActionProvider = new ShareActionProvider(this);
-            MenuItemCompat.setActionProvider(actionItem, shareActionProvider);
+            MenuItemCompat.setActionProvider(shareMenuItem, shareActionProvider);
         }
         shareActionProvider.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
-        refreshData();
+
+        addCommandMenuItem    = menu.findItem(R.id.user_add_command);
+        changeCommandMenuItem = menu.findItem(R.id.user_change_command);
+        removeCommandMenuItem = menu.findItem(R.id.user_remove_command);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -800,18 +796,40 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public boolean onPrepareOptionsMenu(Menu menu) {
         if(Build.VERSION.SDK_INT > 11) {
             invalidateOptionsMenu();
+
+            shareMenuItem.setVisible(true);
+
+            // User is logged in!
             if ((FirebaseAuth.getInstance().getCurrentUser() != null)) {
-                menu.findItem(R.id.user_saved_command).setVisible(true);
-                menu.findItem(R.id.user_remove_command).setVisible(true);
-                menu.findItem(R.id.action_logout).setVisible(true);
                 menu.findItem(R.id.action_login).setVisible(false);
+                menu.findItem(R.id.action_logout).setVisible(true);
+                addCommandMenuItem.setVisible(true);
+
+                if (mCustomCmdsAdapter.getCount() > 0) {
+
+                    Command c = mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
+                    if (c != null) {
+                        if (c.isPublic && isAdmin == false) {
+                            changeCommandMenuItem.setVisible(false);
+                            removeCommandMenuItem.setVisible(false);
+                        } else {
+                            changeCommandMenuItem.setVisible(true);
+                            removeCommandMenuItem.setVisible(true);
+                        }
+                    }
+                } else {
+                    changeCommandMenuItem.setVisible(false);
+                    removeCommandMenuItem.setVisible(false);
+                }
+
             } else {
                 menu.findItem(R.id.action_login).setVisible(true);
-                menu.findItem(R.id.user_saved_command).setVisible(false);
-                menu.findItem(R.id.user_remove_command).setVisible(false);
                 menu.findItem(R.id.action_logout).setVisible(false);
-                menu.findItem(R.id.action_about).setVisible(true);
+                addCommandMenuItem.setVisible(false);
+                changeCommandMenuItem.setVisible(false);
+                removeCommandMenuItem.setVisible(false);
             }
+
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -819,8 +837,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     /* Handles item selections */
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.user_saved_command:
-            showAddCommandView();
+        case R.id.user_add_command:
+            showCommandView(FirebaseAuth.getInstance().getCurrentUser(),new Command());
+            return true;
+        case R.id.user_change_command:
+            showCommandView(FirebaseAuth.getInstance().getCurrentUser(),
+                    mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition()));
             return true;
         case R.id.user_remove_command:
             showRemoveCommandView();
@@ -831,6 +853,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         case R.id.action_logout:
             FirebaseAuth.getInstance().signOut();
             mGoogleSignInClient.signOut();
+            mUserCommands.clear();
+            //mCustomCmdsAdapter.removeUserCommands();
             refreshUserUI(false);
             return true;
         case R.id.action_login:
@@ -901,31 +925,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 FirebaseDatabase.getInstance().getReference().child("users").child(mFirebaseUser.getUid()).setValue(user);
 
 
-                /*  Decent idea, but no one asked for it. Remove for now.
-                StorageReference storageRef = mFirebaseStorage.getReference().child("files/" + mFirebaseUser.getUid() + "/bashrc");
-                try {
-                    File localFile = new File(App.FILES_PATH + "/home/bashrc");
-
-                    storageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            Timber.d("bashrc has been downloaded to local directory");
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            Timber.d("unable to download bashrc:" + exception.getMessage());
-                        }
-                    });
-                } catch (Exception e) {
-                    Timber.e(e);
-                } */
-
                 mFirebaseUser.getIdToken(false).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
                     @Override
                     public void onSuccess(GetTokenResult result) {
                         //Map<String, Object> res_claims = result.getClaims();
-                        Boolean isAdmin = Boolean.FALSE;
+                        isAdmin = Boolean.FALSE;
                         try {
 
                             //Object obj = result.getClaims().getOrDefault("admin", Boolean.FALSE);
@@ -999,8 +1003,39 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         } else {
             // setTextUserStatus("Logged in as anonymous");
         }
+/* BEGIN NEW
+        // https://firebase.googleblog.com/2017/12/using-android-architecture-components.html
+        // https://firebase.googleblog.com/2017/12/using-android-architecture-components_20.html
 
-        /* global commands */
+        // https://android.jlelse.eu/android-architecture-components-with-firebase-907b7699f6a0
+
+        CommandGlobalModel commandGlobalModel = ViewModelProviders.of(this).get(CommandGlobalModel.class);
+        LiveData<DataSnapshot> liveGlobalCommandData = commandGlobalModel.getDataSnapshotLiveData();
+        liveGlobalCommandData.observe(this, new Observer<DataSnapshot>() {
+            @Override
+            public void onChanged(@Nullable DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null) {
+                    mGlobalCommands.clear();
+                    for (DataSnapshot cmdSnapshot: dataSnapshot.getChildren()) {
+                        Command cmd = cmdSnapshot.getValue(Command.class);
+                        if (cmd != null) {
+                            cmd.key = cmdSnapshot.getKey();
+                            mGlobalCommands.add(cmd);
+                        }
+                    }
+                    List<Command> allCommands = new ArrayList<>();
+                    allCommands.addAll(mUserCommands);
+                    allCommands.addAll(mGlobalCommands);
+
+                    boolean hideSuperCommands = mSharedPref.getBoolean("hideSuperUserCommands",false);
+                    mCustomCmdsAdapter.addAllCommands(allCommands,hideSuperCommands);
+                    mCustomCmdsAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+*/
+
+        //global commands
         mFbaseDBCommandsRef.child("commands_v2").child("global").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -1021,6 +1056,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 mCustomCmdsAdapter.addAllCommands(allCommands,
                         mSharedPref.getBoolean("hideSuperUserCommands",false));
                 mCustomCmdsAdapter.notifyDataSetChanged();
+
+                onBoarding();
+
             }
 
             @Override
@@ -1032,8 +1070,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     }
 
-    
-    private static Command getUserCommandByKey(String key) {
+    //Onboarding steps...
+    private void onBoarding() {
+        for(Command c : mCustomCmdsAdapter.spinnerCmds) {
+            if(c != null && c.isOnboarding()) {
+                String onboardingPrefName = App.USER_IS_ONBOARD_PREF_NAME + "_" + c.key.toLowerCase();
+                if (!mSharedPref.getBoolean(onboardingPrefName, false)) {
+                    SharedPreferences.Editor sharedPreferencesEditor = mSharedPref.edit();
+                    sharedPreferencesEditor.putBoolean(onboardingPrefName, true);
+                    sharedPreferencesEditor.apply();
+                    runCommand(c);
+                }
+            }
+        }
+    }
+
+    private Command getUserCommandByKey(String key) {
         for(Command c : mUserCommands){
             if(c.key != null && c.key.equalsIgnoreCase(key)) {
                 return c;
@@ -1141,40 +1193,26 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
     }
 
-    private void refreshData() {
+    private void setShareData(String state, String cmd) {
         if (shareActionProvider != null) {
-            Intent share = createShareIntent();
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("text/plain");
+            StringBuffer cmdOut = new StringBuffer();
+            cmdOut.append(state + "\n\n");
+            cmdOut.append("=== COMMAND ===" + "\n");
+            cmdOut.append(cmd + "\n");
+            cmdOut.append("===============" + "\n\n");
+
+            for (int x = 0; x < mLines.getChildCount(); x++) {
+                TextView currentTextView = (TextView) mLines.getChildAt(x);
+                cmdOut.append(currentTextView.getText() + "\r\n");
+            }
+            share.putExtra(android.content.Intent.EXTRA_SUBJECT, "ADB Shellkit Command Results");
+            share.putExtra(Intent.EXTRA_TEXT, cmdOut.toString());
+
             shareActionProvider.setShareIntent(share);
         }
     }
-    private Intent createShareIntent() {
-        Intent share = new Intent(Intent.ACTION_SEND);
-
-        share.setType("text/plain");
-
-        StringBuffer dataToSend = new StringBuffer();
-
-        for (int x = 0; x < mLines.getChildCount(); x++) {
-            TextView currentTextView = (TextView) mLines.getChildAt(x);
-            dataToSend.append(currentTextView.getText() + "\r\n");
-        }
-
-        share.putExtra(android.content.Intent.EXTRA_SUBJECT, "Results of ADB Toolkit");
-        share.putExtra(Intent.EXTRA_TEXT, dataToSend.toString());
-        return share;
-    }
-
-    /*
-    private void openLynxActivity() {
-        LynxConfig lynxConfig = new LynxConfig();
-        if (Shell.getShell().getStatus() > 0) {
-            lynxConfig.setRunAsSuperUser(true);
-        } else { lynxConfig.setRunAsSuperUser(false); }
-        lynxConfig.setTextSizeInPx(9);
-        lynxConfig.setMaxNumberOfTracesToShow(4000).setFilter("");
-        Intent lynxActivityIntent = LynxActivity.getIntent(this, lynxConfig);
-        startActivity(lynxActivityIntent);
-    } */
 
     private void setTextUserStatus(String status) {
         SpannableString spanString = new SpannableString(status);
@@ -1344,7 +1382,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         permsNoGrant += "\n" + per;
                     }
                     lastPermissionStatus = false;
-                    Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
                     // permissions list of don't granted permission
                 }
                 return;
@@ -1640,51 +1678,71 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     private TextView tvAddCommandAttributes;
     public LinearLayout addCommandLinearLayoutAdmin;
     public CheckBox tagAdminIsPublicCheckBox;
-    public View updateAction;
-    public View createNewAction;
+    public CheckBox tagAdminOnboardingCheckBox;
 
+
+    //public View updateAction;
+    //public View createNewAction;
     public Spinner spinnerAddPermission;
     public Spinner spinnerRemovePermission;
 
-    public void showAddCommandView() {
-        final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+    public void showCommandView(FirebaseUser user, Command c) {
+        //If command is empty, we are creating a new one.
+        final boolean isNewCommand = (c.getCommand().isEmpty()) ? true : false;
 
-        Command currentCommand =  mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
-        String currentTextCommand = mTopCommandView.getText().toString();
 
         MaterialDialog dialog =
                 new MaterialDialog.Builder(this)
                         .title("Command editor")
                         .customView(R.layout.custom_addcommand_dialog, true)
-                        .neutralText("UPDATE")
-                        .positiveText("CREATE NEW")
+                        .negativeText(android.R.string.cancel)
+                        .positiveText("DONE")
                         .onPositive(
                                 (dialog1, which) ->
                                 {
 
-                                if (firebaseUser != null && mFullCommand != null) {
-                                    Command c = new Command();
+                                if (user != null) {
+
                                     List<String> tags = new ArrayList<>();
+                                    if (isUserAdmin()) {
+                                        try {
+                                            String addPermissionSelected = spinnerAddPermission.getSelectedItem().toString();
+                                            String removePermissionSelected = spinnerRemovePermission.getSelectedItem().toString();
+                                            if (addPermissionSelected != "-") {
+                                                c.addPermission(addPermissionSelected);
+                                            }
+                                            if (removePermissionSelected != "-") {
+                                                c.removePermission(removePermissionSelected);
+                                            }
+                                        } catch (Exception e) {
+                                            Timber.e(e);
+                                        }
+
+                                        if (tagAdminIsPublicCheckBox.isChecked()) {
+                                            c.isPublic = true;
+                                        } else {
+                                            c.isPublic = false;
+                                        }
+                                        if (tagAdminOnboardingCheckBox.isChecked()) {
+                                            tags.add("onboarding");
+                                        }
+
+
+                                    }
+
+
                                     if (tagSuperUserCheckBox.isChecked()) {
                                         tags.add("superuser");
                                     }
                                     if (tagPinnedCheckBox.isChecked()) {
                                         tags.add("pinned");
                                     }
-                                    c.setUid(firebaseUser.getUid());
-                                    c.setEmail(firebaseUser.getEmail());
+                                    c.setUid(user.getUid());
+                                    c.setEmail(user.getEmail());
                                     c.setTagList(tags);
                                     c.setDescription(dialogEditDescription.getText().toString());
                                     c.setCommand(dialogEditCommand.getText().toString());
                                     c.setLastused(System.currentTimeMillis());
-
-                                    if (isUserAdmin()) {
-                                        if (tagAdminIsPublicCheckBox.isChecked()) {
-                                            c.isPublic = true;
-                                        } else {
-                                            c.isPublic = false;
-                                        }
-                                    }
 
                                     try {
                                         writeCommand(c);
@@ -1694,7 +1752,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                                     }
 
 
-                                    Toast.makeText(getApplicationContext(), "New command created for " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "Command saved for " + user.getEmail() + ", isNewCommand=" + isNewCommand, Toast.LENGTH_SHORT).show();
 
                                 } else {
                                     Toast.makeText(getApplicationContext(), "Please Login to create commands!", Toast.LENGTH_SHORT).show();
@@ -1702,72 +1760,27 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
                                 })
-                        .onNeutral(
-                                (dialog1, which) ->
-                                {
-
-                                if (firebaseUser != null && mFullCommand != null) {
-
-                                    if (isUserAdmin()) {
-                                        try {
-                                            String addPermissionSelected = spinnerAddPermission.getSelectedItem().toString();
-                                            String removePermissionSelected = spinnerRemovePermission.getSelectedItem().toString();
-                                            if (addPermissionSelected != "-") {
-                                                currentCommand.addPermission(addPermissionSelected);
-                                            }
-                                            if (removePermissionSelected != "-") {
-                                                currentCommand.removePermission(removePermissionSelected);
-                                            }
-                                        } catch (Exception e) {
-                                            Timber.e(e);
-                                        }
-                                    }
-
-
-                                    List<String> tags = new ArrayList<>();
-                                    if (tagSuperUserCheckBox.isChecked()) {
-                                        tags.add("superuser");
-                                    }
-                                    if (tagPinnedCheckBox.isChecked()) {
-                                        tags.add("pinned");
-                                    }
-                                    currentCommand.setTagList(tags);
-                                    currentCommand.setDescription(dialogEditDescription.getText().toString());
-                                    currentCommand.setCommand(dialogEditCommand.getText().toString());
-                                    try {
-                                        writeCommand(currentCommand);
-                                    }
-                                    catch (Exception e) {
-                                        Timber.e(e);
-                                    }
-                                    Toast.makeText(getApplicationContext(), "Command updated for " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
-
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "Please Login to update commands!", Toast.LENGTH_SHORT).show();
-                                }
-
-
-                        })
                         .build();
 
-
+        // Custom options only available for admins
         if (isUserAdmin()) {
             addCommandLinearLayoutAdmin = dialog.getCustomView().findViewById(R.id.addCommandLinearLayoutAdmin);
+
             tagAdminIsPublicCheckBox = dialog.getCustomView().findViewById(R.id.tagAdminIsPublicCheckBox);
+            tagAdminIsPublicCheckBox.setChecked(c.isPublic);
+            tagAdminOnboardingCheckBox = dialog.getCustomView().findViewById(R.id.tagAdminOnboardingCheckBox);
+            tagAdminOnboardingCheckBox.setChecked(c.isOnboarding());
+
             spinnerAddPermission = dialog.getCustomView().findViewById(R.id.spinnerAddPermission);
-            //TODO: get this server side
-            String[] permAddList = Util.getPermissions();
-
-
+            String[] permAddList = Util.getPermissions();  //TODO: get perms server side
             final List<String> permsAddStringList = new ArrayList<>(Arrays.asList(permAddList));
             final ArrayAdapter<String> spinnerArrayPermsAddAdapter = new ArrayAdapter<String>(
                     this,android.R.layout.simple_spinner_item,permsAddStringList);
             spinnerArrayPermsAddAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerAddPermission.setAdapter(spinnerArrayPermsAddAdapter);
-
             spinnerRemovePermission = dialog.getCustomView().findViewById(R.id.spinnerRemovePermission);
 
-            List<String> removePermissionList = new ArrayList<String>(currentCommand.getPermissionList());
+            List<String> removePermissionList = new ArrayList<String>(c.getPermissionList());
             removePermissionList.add(0,"-");
 
             final ArrayAdapter<String> spinnerArrayPermsRemoveAdapter = new ArrayAdapter<String>(
@@ -1775,13 +1788,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             spinnerArrayPermsRemoveAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerRemovePermission.setAdapter(spinnerArrayPermsRemoveAdapter);
 
+
             addCommandLinearLayoutAdmin.setVisibility(View.VISIBLE);
         }
 
 
         String[] showPermissionsArray;
         String showPermissionsString;
-        List<String> showPermissions = currentCommand.getPermissionList();
+        List<String> showPermissions = c.getPermissionList();
         if (showPermissions != null) {
             showPermissionsArray = showPermissions.toArray(new String[0]);
             showPermissionsString = Arrays.toString(showPermissionsArray);
@@ -1791,32 +1805,33 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
         tvAddCommandAttributes = dialog.getCustomView().findViewById(R.id.tvAddCommandAttributes);
-        tvAddCommandAttributes.setText("key: " + currentCommand.key +
-               // "\nuid: " + currentCommand.getUid() +
-                "\nuser: " + currentCommand.getEmail() +
-                "\nisAdmin:" + isUserAdmin() +
-                "\nruncounts: " + currentCommand.getRuncounts() +
-                "\nisPublic=" + currentCommand.isPublic +
-                "\nneeds_superuser=" + currentCommand.isSuperUser() +
-                "\nneeds_permissions=" + showPermissionsString
-            );
 
-        createNewAction = dialog.getActionButton(DialogAction.POSITIVE);
-        updateAction = dialog.getActionButton(DialogAction.NEUTRAL);
+
+        if (isNewCommand) {
+            tvAddCommandAttributes.setVisibility(View.GONE);
+        } else {
+            tvAddCommandAttributes.setText("key: " + c.key +
+                    "\nuser: " + c.getEmail() +
+                    "\nisAdmin:" + isUserAdmin() +
+                    "\nruncounts: " + c.getRuncounts() +
+                    "\nisPublic=" + c.isPublic +
+                    "\nneeds_superuser=" + c.isSuperUser() +
+                    "\nneeds_permissions=" + showPermissionsString
+            );
+        }
+
+
 
         tagSuperUserCheckBox = dialog.getCustomView().findViewById(R.id.tagSuperUserCheckBox);
         tagPinnedCheckBox = dialog.getCustomView().findViewById(R.id.tagPinnedCheckBox);
-
         dialogEditDescription = dialog.getCustomView().findViewById(R.id.dialogEditDescription);
         dialogEditCommand = dialog.getCustomView().findViewById(R.id.dialogEditCommand);
+        dialogEditCommand.setText(c.getCommand());
 
-
-        dialogEditCommand.setText(currentTextCommand);
-
-        if (currentCommand.key != null) {
-            dialogEditDescription.setText(currentCommand.getDescription());
-            if (currentCommand.getTagList() != null) {
-                for (String tag : currentCommand.getTagList()) {
+        if (c.key != null) {
+            dialogEditDescription.setText(c.getDescription());
+            if (c.getTagList() != null) {
+                for (String tag : c.getTagList()) {
                     if (tag.equals("superuser")) {
                         tagSuperUserCheckBox.setChecked(true);
                     } else if (tag.equals("pinned")) {
@@ -1829,16 +1844,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         dialog.show();
 
-        createNewAction.setEnabled(true);  //default to false if there are watchers
-        if (currentCommand.isPublic) {
-            if (isUserAdmin()) {
-                updateAction.setEnabled(true);
-            } else {
-                updateAction.setEnabled(false);
-            }
-        } else {
-            updateAction.setEnabled(true);
-        }
+
 
     }
 }

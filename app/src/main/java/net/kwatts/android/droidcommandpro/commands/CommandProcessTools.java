@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import net.kwatts.android.droidcommandpro.ApiReceiver;
 import timber.log.Timber;
 
-public class CommandProcessTools implements Command {
+public class CommandProcessTools  {
 
     public static String cmd = "cmd_package_tools";
     public String getCommandName() { return cmd; }

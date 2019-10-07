@@ -1,4 +1,5 @@
 package net.kwatts.android.droidcommandpro.commands;
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -30,8 +31,12 @@ import timber.log.Timber;
  */
 public class CommandTelephony {
 
-    public static String cmd = "cmd_telephony";
-    public static String[] permissions = {};
+    public static String cmd = "telephony";
+    public static String descr = "Telephony information";
+    public static String args = "";
+    public static String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CALL_PHONE};
+
+
 
     //public static String google_maps_key="AIzaSyB7rPpk3hzX5_IekScolHQNtpgxjwFFFOo";
 
@@ -336,7 +341,6 @@ public class CommandTelephony {
     public static void onReceiveTelephonyCall(ApiReceiver apiReceiver, final Context context, final Intent intent) {
         String numberExtra = intent.getStringExtra("number");
         if (numberExtra == null) {
-            Log.e("termux-api", "No 'number extra");
             ResultReturner.noteDone(apiReceiver, intent);
         }
 
@@ -349,7 +353,7 @@ public class CommandTelephony {
         try {
             context.startActivity(callIntent);
         } catch (SecurityException e) {
-            Log.e("termux-api", "Exception in phone call", e);
+            Timber.e( "Exception in phone call");
         }
 
         ResultReturner.noteDone(apiReceiver, intent);

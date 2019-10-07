@@ -44,24 +44,20 @@ am broadcast --user 0 -n net.kwatts.android.droidcommandpro/.AdbshellkitApiRecei
 */
 
 public class CommandSmali  {
-
-    public static String cmd = "cmd_smali";
-    public static String[] permissions = { "" };
-
-    public static String usage() {
-        return "{\"cmd\":\"" + cmd + "\"," +
-                "\"args\":\"application_name (string)\"}";
-
-    }
+    public static String cmd = "smali";
+    public static String descr = "Disassembles an application, outputs a json to home directory";
+    public static String args = "--es application_name <package name> --ez savetofile <true or false>";
+    public static String[] permissions = {""};
 
     public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
 
         final String application_name = intent.getStringExtra("application_name");
+        boolean saveFile = intent.getBooleanExtra("savetofile", false);
         ResultReturner.returnData(apiReceiver, intent, out -> {
             if (application_name == null) {
                 out.print("");
             } else {
-                JSONObject res = run(context,false,application_name);
+                JSONObject res = run(context,saveFile,application_name);
                 out.print(res.toString(1));
             }
         });
@@ -70,8 +66,6 @@ public class CommandSmali  {
     public static JSONObject run(android.content.Context ctx, boolean saveFile, String appName) {
         String appNameSmali = appName.replace('.','/');
         String packageApkFileName = getApkFileName(ctx,appName);
-
-
 
         JSONObject res = new JSONObject();
 
@@ -82,13 +76,14 @@ public class CommandSmali  {
         JSONObject dex_classes = new JSONObject();
 
 
-
         DexFile dex = null;
         try {
             DexFileNamer dexFileNamer = new BasicDexFileNamer();
             Opcodes opcodes = Opcodes.forApi(Build.VERSION.SDK_INT);
             File apkFile = new File(packageApkFileName);
 
+            //dexFile = DexFileFactory.loadDexFile(packageApkFileName, Opcodes.getDefault());
+            //TODO: process multiple dex files, see: https://github.com/Sable/soot/blob/develop/src/main/java/soot/dexpler/DexFileProvider.java
             dex = MultiDexIO.readDexFile(true,
                     apkFile,
                     dexFileNamer,
@@ -96,8 +91,6 @@ public class CommandSmali  {
                     null);
 
 
-            //dexFile = DexFileFactory.loadDexFile(packageApkFileName, Opcodes.getDefault());
-            //TODO: process multiple dex files, see: https://github.com/Sable/soot/blob/develop/src/main/java/soot/dexpler/DexFileProvider.java
 
         } catch (IOException ioe) {
             Timber.e(ioe,"Unable to load APK");
@@ -161,9 +154,6 @@ public class CommandSmali  {
                         }
 
 
-
-
-
                         // CLASS METHODS
                         JSONArray class_methods = new JSONArray();
 
@@ -196,22 +186,16 @@ public class CommandSmali  {
                             }
                         }
 
-
-
-
                         JSONObject f = new JSONObject();
                         f.put("sourcefile", clazz.getSourceFile());
                         f.put("superclass", clazz.getSuperclass());
                         f.put("fields", class_fields);
                         f.put("methods", class_methods);
-
                         dex_classes.put(clazz.getType(),f);
 
                     }
 
                 }
-
-
 
             } catch (Exception e) {
                 Timber.e(e);
@@ -224,23 +208,25 @@ public class CommandSmali  {
 
         // Combine results
         try {
-            res.put("app_package_name", appName);
-            res.put("app_package_apk_filename", packageApkFileName);
-            res.put("dex_classes", dex_classes);
+            JSONObject smali = new JSONObject();
+            smali.put("app_package_name", appName);
+            smali.put("app_package_apk_filename", packageApkFileName);
+            smali.put("dex_classes", dex_classes);
 
-            // save to file, todo make optional
             if (saveFile) {
                 try {
                     String output_file = App.FILES_PATH + "/home/" + appName + "_smali.json";
                     File file = new File(output_file);
                     java.io.FileWriter fileWriter = new java.io.FileWriter(file);
-                    fileWriter.write(res.toString(1));
+                    fileWriter.write(smali.toString(1));
                     fileWriter.flush();
                     fileWriter.close();
                     res.put("output_file", output_file);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            } else {
+                res = smali;
             }
         } catch (Exception e) {
             Timber.e(e);
