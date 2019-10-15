@@ -1,6 +1,13 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
+
+configurations {
+    all {
+        exclude module: 'httpclient'
+    }
+}
+
 //For CircleCi:
 // base64 the keystore and keystore.properties file:
 //  openssl base64 -A -in keystore.properties
@@ -42,6 +49,7 @@ android {
     }
     lintOptions {
         checkReleaseBuilds false
+        abortOnError false
     }
     buildTypes {
         release {
@@ -100,7 +108,8 @@ android {
         implementation 'com.github.bumptech.glide:glide:4.7.1'
         annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
 
-        ext.libsuVersion = '2.2.0'
+        //ext.libsuVersion = '2.2.0'
+        ext.libsuVersion = '2.5.1'
         implementation "com.github.topjohnwu.libsu:core:$libsuVersion"
         implementation "com.github.topjohnwu.libsu:io:$libsuVersion"
 
@@ -116,6 +125,8 @@ android {
         def lifecycle_version = "1.1.1"
         implementation    "android.arch.lifecycle:extensions:$lifecycle_version"
         implementation    "android.arch.lifecycle:compiler:$lifecycle_version"
+
+        implementation    "org.jetbrains.kotlin:kotlin-stdlib:1.2.60"
         //implementation 'com.box:box-java-sdk:2.31.0'
         //implementation 'com.box:box-android-browse-sdk:2.0.0'
         //implementation 'com.box:box-android-sdk:3.0.2'

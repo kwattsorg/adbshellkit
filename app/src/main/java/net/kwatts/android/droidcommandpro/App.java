@@ -15,7 +15,7 @@ import flipagram.assetcopylib.AssetCopier;
 import timber.log.Timber;
 import com.google.firebase.database.FirebaseDatabase;
 import com.topjohnwu.superuser.Shell;
-import com.topjohnwu.superuser.ContainerApp;
+//import com.topjohnwu.superuser.ContainerApp;
 import com.eggheadgames.aboutbox.AboutConfig;
 import com.crashlytics.android.Crashlytics;
 import android.os.*;
@@ -29,7 +29,8 @@ import androidx.annotation.NonNull;
 /**
  * This is a subclass of {@link Application} used to provide shared objects and superuser functionality across the full app
  */
-public class App extends ContainerApp  {
+//public class App extends ContainerApp  {
+public class App extends Application  {
     public static App INSTANCE = null;
     public App() {
         INSTANCE = this;

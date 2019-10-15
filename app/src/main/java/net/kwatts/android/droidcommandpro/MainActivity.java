@@ -710,6 +710,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         List<String> consoleList;
         List<String> consoleListError;
         consoleList = new CallbackList<String>() {
+            //@MainThread
             @Override
             public void onAddElement(String s) {
                 Message msg = mHandler.obtainMessage(MSG_NEWLINE);
