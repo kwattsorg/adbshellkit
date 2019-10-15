@@ -10,6 +10,19 @@ jobs:
       - checkout
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+          name: Configure Gradle
+          command: |
+#            cd android
+            echo $KEYSTORE_B64 | base64 -d > ./adbshellkit.keystore
+            echo $KEYSTORE_PROPERTIES_B64 | base64 -d > keystore.properties
+#            if [[ $KEYSTORE ]]; then
+#              echo $KEYSTORE_BASE64 | base64 --decode > ./app/$KEYSTORE
+#              echo -e "KEYSTORE=$KEYSTORE" >> ./gradle.properties
+#              echo -e "KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> ./gradle.properties
+#              echo -e "KEY_ALIAS=$KEY_ALIAS" >> ./gradle.properties
+#              echo -e "KEY_PASSWORD=$KEYSTORE_PASSWORD" >> ./gradle.properties
+#            fi
 #      - run:
 #         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
 #         command: sudo chmod +x ./gradlew
