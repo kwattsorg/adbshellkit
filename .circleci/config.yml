@@ -13,7 +13,6 @@ jobs:
       - run:
           name: Configure Gradle
           command: |
-#            cd android
             echo $KEYSTORE_B64 | base64 -d > ./adbshellkit.keystore
             echo $KEYSTORE_PROPERTIES_B64 | base64 -d > keystore.properties
 #            if [[ $KEYSTORE ]]; then
