@@ -1,7 +1,14 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
-
+//For CircleCi:
+// base64 the keystore and keystore.properties file:
+//  openssl base64 -A -in keystore.properties
+//  openssl base64 -A -in adbshellkit.keystore
+// add to https://circleci.com/gh/kwattsorg/adbshellkit/edit#env-vars:
+//  KEYSTORE_PROPERTIES_B64 = ...  && KEYSTORE_B64 = ...
+// add to circleci config.yml
+//  - run: echo KEYSTORE_PROPERTIES_B64 | base64 -d > keystore.properties
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))

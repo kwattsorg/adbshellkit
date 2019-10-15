@@ -15,6 +15,7 @@ jobs:
           command: |
             echo $KEYSTORE_B64 | base64 -d > ./adbshellkit.keystore
             echo $KEYSTORE_PROPERTIES_B64 | base64 -d > keystore.properties
+            echo $GOOGLE_SERVICES_B64 | base64 -d > app/google_services.json
 #            if [[ $KEYSTORE ]]; then
 #              echo $KEYSTORE_BASE64 | base64 --decode > ./app/$KEYSTORE
 #              echo -e "KEYSTORE=$KEYSTORE" >> ./gradle.properties
