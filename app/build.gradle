@@ -1,17 +1,21 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
+
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
+
 android {
     signingConfigs {
-        config {
+        release {
+            def keystoreFilename = keystoreProperties['storeFile']
+            storeFile = keystoreFilename == null ? null : rootProject.file(keystoreFilename)
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
-            storeFile rootProject.file('adbshellkit.keystore')
             storePassword keystoreProperties['storePassword']
+
         }
     }
     compileSdkVersion 28
@@ -36,7 +40,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-            signingConfig signingConfigs.config
+            signingConfig signingConfigs.release
         }
     }
     packagingOptions {
