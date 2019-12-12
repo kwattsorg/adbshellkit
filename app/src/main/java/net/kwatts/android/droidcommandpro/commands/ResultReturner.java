@@ -30,56 +30,6 @@ public abstract class ResultReturner {
      */
     private static final String SOCKET_INPUT_EXTRA = "socket_input";
 
-    public interface ResultWriter {
-        void writeResult(PrintWriter out) throws Exception;
-    }
-
-    /**
-     * Possible subclass of {@link ResultWriter} when input is to be read from stdin.
-     */
-    public static abstract class WithInput implements ResultWriter {
-        protected InputStream in;
-
-        public void setInput(InputStream inputStream) throws Exception {
-            this.in = inputStream;
-        }
-    }
-
-    /**
-     * Possible marker interface for a {@link ResultWriter} when input is to be read from stdin.
-     */
-    public static abstract class WithStringInput extends WithInput {
-        protected String inputString;
-
-        protected boolean trimInput() {
-            return true;
-        }
-
-        @Override
-        public final void setInput(InputStream inputStream) throws Exception {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int l;
-            while ((l = inputStream.read(buffer)) > 0) {
-                baos.write(buffer, 0, l);
-            }
-            inputString = new String(baos.toByteArray(), StandardCharsets.UTF_8);
-            if (trimInput()) inputString = inputString.trim();
-        }
-    }
-
-    public static abstract class ResultJsonWriter implements ResultWriter {
-        @Override
-        public final void writeResult(PrintWriter out) throws Exception {
-            JsonWriter writer = new JsonWriter(out);
-            writer.setIndent("  ");
-            writeJson(writer);
-            out.println(); // To add trailing newline.
-        }
-
-        public abstract void writeJson(JsonWriter out) throws Exception;
-    }
-
     /**
      * Just tell termux-api.c that we are done.
      */
@@ -149,6 +99,56 @@ public abstract class ResultReturner {
         } else {
             new Thread(runnable).start();
         }
+    }
+
+    public interface ResultWriter {
+        void writeResult(PrintWriter out) throws Exception;
+    }
+
+    /**
+     * Possible subclass of {@link ResultWriter} when input is to be read from stdin.
+     */
+    public static abstract class WithInput implements ResultWriter {
+        protected InputStream in;
+
+        public void setInput(InputStream inputStream) throws Exception {
+            this.in = inputStream;
+        }
+    }
+
+    /**
+     * Possible marker interface for a {@link ResultWriter} when input is to be read from stdin.
+     */
+    public static abstract class WithStringInput extends WithInput {
+        protected String inputString;
+
+        protected boolean trimInput() {
+            return true;
+        }
+
+        @Override
+        public final void setInput(InputStream inputStream) throws Exception {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int l;
+            while ((l = inputStream.read(buffer)) > 0) {
+                baos.write(buffer, 0, l);
+            }
+            inputString = new String(baos.toByteArray(), StandardCharsets.UTF_8);
+            if (trimInput()) inputString = inputString.trim();
+        }
+    }
+
+    public static abstract class ResultJsonWriter implements ResultWriter {
+        @Override
+        public final void writeResult(PrintWriter out) throws Exception {
+            JsonWriter writer = new JsonWriter(out);
+            writer.setIndent("  ");
+            writeJson(writer);
+            out.println(); // To add trailing newline.
+        }
+
+        public abstract void writeJson(JsonWriter out) throws Exception;
     }
 
 }

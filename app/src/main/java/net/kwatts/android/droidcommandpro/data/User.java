@@ -20,7 +20,7 @@ public class User {
     //10 - USER
     //99 - ADMINISTRATOR
 
-    public Map<String, String> vars = new HashMap<String, String>();
+    public Map<String, String> vars = new HashMap<>();
 
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
@@ -35,7 +35,7 @@ public class User {
 
     public String getVarValue(String key) {
         for (String name : vars.keySet()) {
-            if (key == name) {
+            if (key.equals(name)) {
                 return vars.get(key);
             }
         }

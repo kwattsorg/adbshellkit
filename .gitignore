@@ -12,6 +12,7 @@
 # bin/
 gen/
 out/
+app/release/
 
 # Gradle files
 .gradle/
@@ -36,18 +37,7 @@ captures/
 
 # Intellij
 *.iml
-.idea/vcs.xml
-.idea/workspace.xml
-.idea/gradle.xml
-.idea/libraries
-.idea/modules.xml
-.idea/misc.xml
-.idea/caches
-.idea/assetWizardSettings.xml
-.idea/navEditor.xml
-.idea/kotlinc.xml
-.idea/fileTemplates/internal
-.idea/markdown-*
+.idea/
 
 # Keystore files
 *.jks
@@ -65,7 +55,6 @@ keystore/
 keys-and-tools/
 
 
-
 # Freeline
 freeline.py
 freeline/
@@ -74,6 +63,6 @@ freeline_project_description.json
 # MacOS
 .DS_Store
 
-# specific files 
+# specific files
 app/src/main/assets/files/home/
 private_files/

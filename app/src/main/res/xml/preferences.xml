@@ -4,23 +4,23 @@
         android:key="general_settings"
         android:title="General Settings">
         <ListPreference
+            android:defaultValue="23"
             android:dialogTitle="Select Text Size"
             android:entries="@array/outTextSize_array"
             android:entryValues="@array/outTextSize_array"
             android:key="textSize"
             android:summary="Set the size of the text"
-            android:title="Text Size"
-            android:defaultValue="23"/>
+            android:title="Text Size" />
         <EditTextPreference
+            android:dialogTitle="Variables"
             android:key="variablesEditText"
-            android:title="Global Variables"
             android:summary="Global user variables passed to all commands. Format is VAR1=x,VAR2=y, etc..."
-            android:dialogTitle="Variables" />
+            android:title="Global Variables" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="disableShellSharing"
             android:summary="Instead of sharing shell for each command spawn a new shell. Note this will use more resources."
-            android:title= "Disable Shell Sharing"/>
+            android:title="Disable Shell Sharing" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="showNotifications"

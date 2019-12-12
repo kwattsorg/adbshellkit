@@ -5,19 +5,20 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.os.storage.StorageManager;
-import android.support.annotation.NonNull;
 import android.text.InputFilter;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 
-import java.io.File;
+import androidx.annotation.NonNull;
+
+import com.topjohnwu.superuser.io.SuFile;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.topjohnwu.superuser.io.*;
 
 /**
  * Created by coco on 6/7/15.

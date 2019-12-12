@@ -6,10 +6,13 @@ import android.util.JsonWriter;
 
 import net.kwatts.android.droidcommandpro.ApiReceiver;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 public class CommandRunSystem {
 
     public static String cmd = "cmd_run_system";
-    public static String[] permissions = { "" };
+    public static String[] permissions = {""};
 
     public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
 
@@ -23,15 +26,14 @@ public class CommandRunSystem {
                     try {
                         String[] cmdline = {"sh", "-c", exec_command};
                         Process proc = Runtime.getRuntime().exec(cmdline);
-                        java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(proc.getInputStream()));
+                        BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
                         String line;
-                        StringBuffer stdout = new StringBuffer();
+                        StringBuilder stdout = new StringBuilder();
                         while ((line = br.readLine()) != null)
                             stdout.append(line);
 
                         out.name("stdout").value(stdout.toString());
-                    } catch (Exception e) {
-
+                    } catch (Exception ignored) {
                     }
                 }
 

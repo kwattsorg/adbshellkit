@@ -13,12 +13,25 @@ import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
 
-import timber.log.Timber;
-
-import net.kwatts.android.droidcommandpro.commands.*;
+import net.kwatts.android.droidcommandpro.commands.CommandCamera;
+import net.kwatts.android.droidcommandpro.commands.CommandDeviceDump;
+import net.kwatts.android.droidcommandpro.commands.CommandDialog;
+import net.kwatts.android.droidcommandpro.commands.CommandGetContacts;
+import net.kwatts.android.droidcommandpro.commands.CommandMicrophoneRecorder;
+import net.kwatts.android.droidcommandpro.commands.CommandProcessTools;
+import net.kwatts.android.droidcommandpro.commands.CommandRunSystem;
+import net.kwatts.android.droidcommandpro.commands.CommandSmali;
+import net.kwatts.android.droidcommandpro.commands.CommandTelephony;
+import net.kwatts.android.droidcommandpro.commands.CommandTorch;
+import net.kwatts.android.droidcommandpro.commands.CommandUploadFile;
+import net.kwatts.android.droidcommandpro.commands.CommandVibrate;
+import net.kwatts.android.droidcommandpro.commands.CommandVolume;
+import net.kwatts.android.droidcommandpro.commands.ResultReturner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import timber.log.Timber;
 
 // am broadcast --user 0 -n net.kwatts.android.droidcommandpro/.AdbshellkitApiReceiver \
 // --es socket_input 1 --es socket_output 2 --es api_method cmd_device_os_setting_info
@@ -63,7 +76,7 @@ public class ApiReceiver extends BroadcastReceiver {
             Timber.e("Missing 'api_method' extra");
             return;
         }
-        Timber.i("apMethod= " + apiMethod);
+        Timber.i("apMethod= %s", apiMethod);
 
         switch (apiMethod) {
             //lifted from https://raw.githubusercontent.com/termux/termux-api/master/app/src/main/java/com/termux/api/TermuxApiReceiver.java
@@ -99,13 +112,13 @@ public class ApiReceiver extends BroadcastReceiver {
                 }
                 break;
             case "vibrate":
-                CommandVibrate.onReceive(this,context,intent);
+                CommandVibrate.onReceive(this, context, intent);
                 break;
             case "torch":
-                CommandTorch.onReceive(this,context,intent);
+                CommandTorch.onReceive(this, context, intent);
                 break;
             case "volume":
-                CommandVolume.onReceive(this,context,intent);
+                CommandVolume.onReceive(this, context, intent);
                 break;
             case "dialog":
                 context.startActivity(new Intent(context, CommandDialog.class).putExtras(intent.getExtras()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -128,7 +141,7 @@ public class ApiReceiver extends BroadcastReceiver {
                             }
                         });
                         Toast.makeText(context, "To take pictures silently you need to select 'ADB Shellkit' allowing draw over apps and run the command again",
-                             Toast.LENGTH_LONG).show();
+                                Toast.LENGTH_LONG).show();
                         HiddenCameraUtils.openDrawOverPermissionSetting(context);
                     }
                 }
@@ -151,7 +164,7 @@ public class ApiReceiver extends BroadcastReceiver {
                         Intent i = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
                         context.startActivity(i);
                     } else {
-                        CommandProcessTools.onReceiveUsageStats(this,context,intent);
+                        CommandProcessTools.onReceiveUsageStats(this, context, intent);
 
                     }
 
@@ -162,13 +175,13 @@ public class ApiReceiver extends BroadcastReceiver {
                 break;
 
             case "process_dump":
-                CommandProcessTools.onReceiveDumpProcesses(this,context,intent);
+                CommandProcessTools.onReceiveDumpProcesses(this, context, intent);
                 break;
             case "service_dump":
-                CommandProcessTools.onReceiveDumpServices(this,context,intent);
+                CommandProcessTools.onReceiveDumpServices(this, context, intent);
                 break;
             case "process_kill":
-                CommandProcessTools.onReceiveKillProcess(this,context,intent);
+                CommandProcessTools.onReceiveKillProcess(this, context, intent);
                 break;
             default:
                 Timber.e("Unrecognized 'api_method' extra: '" + apiMethod + "'");
@@ -182,7 +195,7 @@ public class ApiReceiver extends BroadcastReceiver {
     }
 
     public String getCommandApiUsage() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("usage:\t adbshellkit <command> <options>\n");
         sb.append("options:\t --es <string> <value>, --ei <number> <value>, --ez <true|false>, --ef <float> <value>\n");
         sb.append("\nExamples:\n");
@@ -202,7 +215,8 @@ public class ApiReceiver extends BroadcastReceiver {
                 if (!(mCmds.indexOf(c) == mCmds.size() - 1)) {
                     sb.append("\n");
                 }
-            } catch (Exception e) { }
+            } catch (Exception ignored) {
+            }
         }
 
         return sb.toString();

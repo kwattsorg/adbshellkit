@@ -1,18 +1,11 @@
 package net.kwatts.android.droidcommandpro;
 
+import android.content.Context;
+
 import java.io.File;
 import java.io.IOException;
-import android.provider.ContactsContract;
-
-import java.util.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import flipagram.assetcopylib.AssetCopier;
-
-import android.database.Cursor;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.RawContacts;
 
 /**
  * Created by kwatts on 11/6/17.
@@ -21,7 +14,7 @@ import android.provider.ContactsContract.RawContacts;
 public class Util {
     private static final String TAG = "MainActivity";
 
-    public static int copyAssetsToCacheDirectory(android.content.Context ctx, boolean isDir, String file) {
+    public static int copyAssetsToCacheDirectory(Context ctx, boolean isDir, String file) {
         int count = 0;
         try {
             if (isDir) {
@@ -36,16 +29,16 @@ public class Util {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Toast.makeText(ctx, (count==-1 ? "There was an error copying" : "files copied " + count), Toast.LENGTH_LONG).show();
+        //Toast.makeText(ctx, (count == -1 ? "There was an error copying" : "files copied " + count), Toast.LENGTH_LONG).show();
         return count;
     }
 
 
-    public static int copyAssetsToFilesDirectory(android.content.Context ctx, boolean isDir, String file) {
+    public static int copyAssetsToFilesDirectory(Context ctx, boolean isDir, String file) {
         int count = 0;
         try {
             if (isDir) {
-                File f = new File(ctx.getFilesDir().getAbsolutePath()+ "/" + file);
+                File f = new File(ctx.getFilesDir().getAbsolutePath() + "/" + file);
                 if (!f.exists()) {
                     f.mkdirs();
                     count = new AssetCopier(ctx).copy(file, f);
@@ -56,7 +49,7 @@ public class Util {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Toast.makeText(ctx, (count==-1 ? "There was an error copying" : "files copied " + count), Toast.LENGTH_LONG).show();
+        //Toast.makeText(ctx, (count == -1 ? "There was an error copying" : "files copied " + count), Toast.LENGTH_LONG).show();
         return count;
     }
 

@@ -1,5 +1,7 @@
 package net.kwatts.android.droidcommandpro.commands;
+
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -7,8 +9,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
 
+import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,14 +22,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import net.kwatts.android.droidcommandpro.ApiReceiver;
 import timber.log.Timber;
 
-public class CommandProcessTools  {
+public class CommandProcessTools {
 
     public static String cmd = "cmd_package_tools";
-    public String getCommandName() { return cmd; }
-    public String[] getPermissions() { return new String[] {}; }
 
     public static String usage() {
         return "{\"cmd\":\"" + cmd + "\"," +
@@ -42,9 +41,7 @@ public class CommandProcessTools  {
         } catch (Exception e) {
             Timber.e("Exception trying to dump information");
         }
-        ResultReturner.returnData(apiReceiver, intent, out -> {
-            out.print(res.toString(1));
-        });
+        ResultReturner.returnData(apiReceiver, intent, out -> out.print(res.toString(1)));
     }
 
     public static void onReceiveDumpProcesses(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
@@ -54,9 +51,7 @@ public class CommandProcessTools  {
         } catch (Exception e) {
             Timber.e("Exception trying to dump information");
         }
-        ResultReturner.returnData(apiReceiver, intent, out -> {
-            out.print(res.toString(1));
-        });
+        ResultReturner.returnData(apiReceiver, intent, out -> out.print(res.toString(1)));
     }
 
     public static void onReceiveDumpServices(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
@@ -66,9 +61,7 @@ public class CommandProcessTools  {
         } catch (Exception e) {
             Timber.e("Exception trying to dump information");
         }
-        ResultReturner.returnData(apiReceiver, intent, out -> {
-            out.print(res.toString(1));
-        });
+        ResultReturner.returnData(apiReceiver, intent, out -> out.print(res.toString(1)));
     }
 
     public static void onReceiveKillProcess(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
@@ -82,13 +75,11 @@ public class CommandProcessTools  {
 
     }
 
-    // helpers
-
     public static List<RunningAppProcessInfo> getPackageRunningProcesses(Context context, int packageUid) {
-        ActivityManager activityManager = (ActivityManager) context.getSystemService( Context.ACTIVITY_SERVICE );
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<RunningAppProcessInfo> procInfos = activityManager.getRunningAppProcesses();
-        List<RunningAppProcessInfo> res =  new ArrayList<>();
-        for(RunningAppProcessInfo runningProInfo:procInfos) {
+        List<RunningAppProcessInfo> res = new ArrayList<>();
+        for (RunningAppProcessInfo runningProInfo : procInfos) {
             if (runningProInfo.uid == packageUid) {
                 res.add(runningProInfo);
             }
@@ -99,7 +90,7 @@ public class CommandProcessTools  {
     public static JSONObject getAllRunningProcesses(Context context) {
         JSONObject res = new JSONObject();
 
-        ActivityManager am = (ActivityManager) context.getSystemService( Context.ACTIVITY_SERVICE );
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<RunningAppProcessInfo> procInfos = am.getRunningAppProcesses();
 
         try {
@@ -130,15 +121,14 @@ public class CommandProcessTools  {
             Timber.e("Exception getting processes");
         }
 
-
         return res;
-
-
     }
+
+    // helpers
 
     public static JSONObject getAllRunningServices(Context context) {
         JSONObject res = new JSONObject();
-        ActivityManager am = (ActivityManager) context.getSystemService( Context.ACTIVITY_SERVICE );
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningServiceInfo> runningServices = am.getRunningServices(Integer.MAX_VALUE);
 
         try {
@@ -164,7 +154,7 @@ public class CommandProcessTools  {
                     r.put("service.packageName", service.service.getPackageName());
                     r.put("service.className", service.service.getClassName());
                     PackageManager pm = context.getPackageManager();
-                    r.put("appname",  pm.getApplicationInfo(service.process, 0).loadLabel(pm).toString());
+                    r.put("appname", pm.getApplicationInfo(service.process, 0).loadLabel(pm).toString());
                 } catch (Exception je) {
                     r.put("exception", je.getMessage());
                 }
@@ -187,7 +177,7 @@ public class CommandProcessTools  {
         try {
             JSONArray resProcs = new JSONArray();
 
-            for(RunningAppProcessInfo runningProInfo:appProcesses) {
+            for (RunningAppProcessInfo runningProInfo : appProcesses) {
                 // only kill running processes and not the app
                 if (runningProInfo.processName.equals(packageName)) {
                     continue;
@@ -241,12 +231,13 @@ public class CommandProcessTools  {
         return uid;
 
     }
-    public static String getAppNameByPID(Context context, int pid){
+
+    public static String getAppNameByPID(Context context, int pid) {
         ActivityManager manager
                 = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
 
-        for(ActivityManager.RunningAppProcessInfo processInfo : manager.getRunningAppProcesses()){
-            if(processInfo.pid == pid){
+        for (ActivityManager.RunningAppProcessInfo processInfo : manager.getRunningAppProcesses()) {
+            if (processInfo.pid == pid) {
                 return processInfo.processName;
             }
         }
@@ -257,18 +248,8 @@ public class CommandProcessTools  {
     public static List<UsageStats> getActiveProcesses(Context context) {
         String mforegoundPppPackageName;
 
-        Comparator<UsageStats> usageStatsComparator = new Comparator<UsageStats>() {
-            @Override
-            public int compare(UsageStats o1, UsageStats o2) {
-                if (o1.getLastTimeUsed() > o2.getLastTimeUsed()) {
-                    return 1;
-                } else if (o1.getLastTimeUsed() < o2.getLastTimeUsed()) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            }
-        };
+        Comparator<UsageStats> usageStatsComparator = (o1, o2) ->
+                Long.compare(o1.getLastTimeUsed(), o2.getLastTimeUsed());
 
 
         UsageStatsManager usage = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
@@ -304,7 +285,7 @@ public class CommandProcessTools  {
 
                 long time = System.currentTimeMillis();
                 List<UsageStats> appStatsList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - DAY * 128, time);
-                for(UsageStats ustats:appStatsList) {
+                for (UsageStats ustats : appStatsList) {
                     //if (appStatsList != null && !appStatsList.isEmpty()) {
                     JSONObject r = new JSONObject();
                     try {
@@ -339,5 +320,13 @@ public class CommandProcessTools  {
 
     public static boolean isSystemPackage(PackageInfo pkgInfo) {
         return (pkgInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    public String getCommandName() {
+        return cmd;
+    }
+
+    public String[] getPermissions() {
+        return new String[]{};
     }
 }
