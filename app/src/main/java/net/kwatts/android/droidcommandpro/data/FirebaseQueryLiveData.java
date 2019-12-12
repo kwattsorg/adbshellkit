@@ -25,11 +25,9 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
     private final Query query;
     private final ValueEventListener valueListener = new mValueEventListener();
     //private final ChildEventListener childListener = new MyEventListener();
-
-    private List<Command> mQueryValuesList = new ArrayList<>();
-
-    private boolean listenerRemovePending = false;
     private final Handler handler = new Handler();
+    private List<Command> mQueryValuesList = new ArrayList<>();
+    private boolean listenerRemovePending = false;
     private final Runnable removeListener = new Runnable() {
         @Override
         public void run() {
@@ -42,7 +40,7 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
         this.query = query;
     }
 
-    public FirebaseQueryLiveData(DatabaseReference dbReference){
+    public FirebaseQueryLiveData(DatabaseReference dbReference) {
         this.query = dbReference;
     }
 
@@ -50,8 +48,7 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
     protected void onActive() {
         if (listenerRemovePending) {
             handler.removeCallbacks(removeListener);
-        }
-        else {
+        } else {
             query.addValueEventListener(valueListener);
         }
         listenerRemovePending = false;
@@ -66,7 +63,7 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
     }
 
 
-    private class mValueEventListener implements ValueEventListener{
+    private class mValueEventListener implements ValueEventListener {
 
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -75,20 +72,19 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-            Log.e(LOG_TAG,  "Cannot listen to query " + query, databaseError.toException());
+            Log.e(LOG_TAG, "Cannot listen to query " + query, databaseError.toException());
         }
     }
-
 
 
     private class MyEventListener implements ChildEventListener {
 
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            if(dataSnapshot != null){
+            if (dataSnapshot != null) {
                 Log.d(LOG_TAG, "onChildAdded(): previous child name = " + s);
                 setValue(dataSnapshot);
-                for(DataSnapshot snap : dataSnapshot.getChildren()){
+                for (DataSnapshot snap : dataSnapshot.getChildren()) {
                     Command msg = snap.getValue(Command.class);
                     mQueryValuesList.add(msg);
                 }
@@ -111,7 +107,7 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-            Log.e(LOG_TAG,  "Cannot listen to query " + query, databaseError.toException());
+            Log.e(LOG_TAG, "Cannot listen to query " + query, databaseError.toException());
         }
 
     }

@@ -1,39 +1,40 @@
 package net.kwatts.android.droidcommandpro.commands;
+
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.util.JsonWriter;
 import android.util.SparseArray;
+
 import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 import java.io.IOException;
 
 
 public class CommandVolume {
+    private static final int STREAM_UNKNOWN = -1;
     public static String cmd = "cmd_volume";
-    public static String[] permissions = { "" };
+    public static String[] permissions = {""};
+    // string representations for each of the available audio streams
+    private static SparseArray<String> streamMap = new SparseArray<>();
+
+    static {
+        streamMap.append(AudioManager.STREAM_ALARM, "alarm");
+        streamMap.append(AudioManager.STREAM_MUSIC, "music");
+        streamMap.append(AudioManager.STREAM_NOTIFICATION, "notification");
+        streamMap.append(AudioManager.STREAM_RING, "ring");
+        streamMap.append(AudioManager.STREAM_SYSTEM, "system");
+        streamMap.append(AudioManager.STREAM_VOICE_CALL, "call");
+    }
 
     public static String usage() {
         return "{\"cmd\":\"" + cmd + "\"," +
                 "\"args\":\"set-volume --es stream (alarm, music, notification, ring, system, call) --ei volume 50\"}";
 
     }
-    private static final int STREAM_UNKNOWN = -1;
-
-    // string representations for each of the available audio streams
-    private static SparseArray<String> streamMap = new SparseArray<>();
-    static {
-        streamMap.append(AudioManager.STREAM_ALARM,         "alarm");
-        streamMap.append(AudioManager.STREAM_MUSIC,         "music");
-        streamMap.append(AudioManager.STREAM_NOTIFICATION,  "notification");
-        streamMap.append(AudioManager.STREAM_RING,          "ring");
-        streamMap.append(AudioManager.STREAM_SYSTEM,        "system");
-        streamMap.append(AudioManager.STREAM_VOICE_CALL,    "call");
-    }
-
 
     public static void onReceive(final ApiReceiver receiver, final Context context, final Intent intent) {
-        final AudioManager audioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+        final AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         String action = intent.getAction();
 
         if ("set-volume".equals(action)) {
@@ -122,13 +123,20 @@ public class CommandVolume {
      */
     protected static int getAudioStream(String type) {
         switch (type == null ? "" : type) {
-            case "alarm":           return AudioManager.STREAM_ALARM;
-            case "call":            return AudioManager.STREAM_VOICE_CALL;
-            case "notification":    return AudioManager.STREAM_NOTIFICATION;
-            case "ring":            return AudioManager.STREAM_RING;
-            case "system":          return AudioManager.STREAM_SYSTEM;
-            case "music":           return AudioManager.STREAM_MUSIC;
-            default:                return STREAM_UNKNOWN;
+            case "alarm":
+                return AudioManager.STREAM_ALARM;
+            case "call":
+                return AudioManager.STREAM_VOICE_CALL;
+            case "notification":
+                return AudioManager.STREAM_NOTIFICATION;
+            case "ring":
+                return AudioManager.STREAM_RING;
+            case "system":
+                return AudioManager.STREAM_SYSTEM;
+            case "music":
+                return AudioManager.STREAM_MUSIC;
+            default:
+                return STREAM_UNKNOWN;
         }
     }
 }

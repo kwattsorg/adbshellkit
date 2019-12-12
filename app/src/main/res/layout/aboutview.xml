@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-				android:layout_width="wrap_content"
-				android:layout_height="120dip"
-				android:padding="3dp"
-				android:background="#ffffffff"
-				android:scaleGravity="bottom">
+    android:layout_width="wrap_content"
+    android:layout_height="120dip"
+    android:background="#ffffffff"
+    android:padding="3dp"
+    android:scaleGravity="bottom">
 
-<ImageView 	android:id="@+id/about_droidcommand_logo"
-			android:layout_width="70dip"
-			android:layout_height="70dip"
-			android:layout_marginRight="5dip"
-			android:layout_alignParentTop="true"
-        	android:layout_alignParentLeft="true"
-			 />
-			 
-<WebView
+    <ImageView
+        android:id="@+id/about_droidcommand_logo"
+        android:layout_width="70dip"
+        android:layout_height="70dip"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dip" />
+
+    <WebView
         android:id="@+id/about_webview"
-        android:layout_height="wrap_content" 
-        android:layout_width="wrap_content"   
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/about_droidcommand_logo"
-               
-/>			 					 
+
+        />
 </RelativeLayout>

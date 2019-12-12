@@ -1,9 +1,7 @@
 package net.kwatts.android.droidcommandpro.commands;
 
-import java.io.File;
-
-
-import android.content.*;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.JsonWriter;
@@ -12,16 +10,19 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import net.kwatts.android.droidcommandpro.ApiReceiver;
 
+import java.io.File;
+
 import timber.log.Timber;
+
 //TODO: this should sync the users files/home directory
 // https://github.com/firebase/snippets-android/blob/7d03e65500cd63a26e5bf9b8b6e4d3ab9479806a/storage/app/src/main/java/com/google/firebase/referencecode/storage/StorageActivity.java#L194-L208
-public class CommandUploadFile  {
+public class CommandUploadFile {
 
 
     public static String cmd = "upload_file";

@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -40,7 +41,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-import android.webkit.WebView;
+
+import net.kwatts.android.droidcommandpro.ApiPermissionActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,9 +51,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import net.kwatts.android.droidcommandpro.ApiReceiver;
-import net.kwatts.android.droidcommandpro.ApiPermissionActivity;
-
 /**
  * API that allows receiving user input interactively in a variety of different ways
  */
@@ -59,15 +58,33 @@ import net.kwatts.android.droidcommandpro.ApiPermissionActivity;
 // https://alvinalexander.com/android/how-to-show-html-webview-in-alertdialog-android
 public class CommandDialog extends AppCompatActivity {
 
-    private boolean resultReturned = false;
     public static String cmd = "dialog";
     public static String descr = "Displays a dialog with inputs and views";
     public static String args = "--es input_method=[text|webview|confirm|checkbox|date|radio|sheet] \n" +
-                                "METHOD OPTIONS:\n" +
-                                "\ttext: --ez multiple_lines [true|false]" + "\n" +
-                                "\twebview: --es web_url [url to show] OR --es web_text [html text]";
+            "METHOD OPTIONS:\n" +
+            "\ttext: --ez multiple_lines [true|false]" + "\n" +
+            "\twebview: --es web_url [url to show] OR --es web_text [html text]";
     public static String[] permissions = {};
+    private boolean resultReturned = false;
 
+    /**
+     * Extract value extras from intent into String array
+     */
+    static String[] getInputValues(Intent intent) {
+        String[] items = new String[]{};
+
+        if (intent != null && intent.hasExtra("input_values")) {
+            String[] temp = intent.getStringExtra("input_values").split(",");
+            items = new String[temp.length];
+
+            // remove possible whitespace from strings in temp array
+            for (int j = 0; j < temp.length; ++j) {
+                String s = temp[j];
+                items[j] = s.trim();
+            }
+        }
+        return items;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,25 +118,6 @@ public class CommandDialog extends AppCompatActivity {
     }
 
     /**
-     * Extract value extras from intent into String array
-     */
-    static String[] getInputValues(Intent intent) {
-        String[] items = new String[] { };
-
-        if (intent != null && intent.hasExtra("input_values")) {
-            String[] temp = intent.getStringExtra("input_values").split(",");
-            items = new String[temp.length];
-
-            // remove possible whitespace from strings in temp array
-            for (int j = 0; j < temp.length; ++j) {
-                String s = temp[j];
-                items[j] = s.trim();
-            }
-        }
-        return items;
-    }
-
-    /**
      * Writes the InputResult to the console
      */
     protected void postResult(final Context context, final InputResult result) {
@@ -131,7 +129,7 @@ public class CommandDialog extends AppCompatActivity {
 
                 out.name("code").value(result.code);
                 out.name("text").value(result.text);
-                if(result.index > -1) {
+                if (result.index > -1) {
                     out.name("index").value(result.index);
                 }
                 if (result.values.size() > 0) {
@@ -156,6 +154,21 @@ public class CommandDialog extends AppCompatActivity {
         });
     }
 
+
+    /**
+     * Interface for creating an input method type
+     */
+    interface InputMethod {
+        void create(AppCompatActivity activity, InputResultListener resultListener);
+    }
+
+
+    /**
+     * Callback interface for receiving an InputResult
+     */
+    interface InputResultListener {
+        void onResult(InputResult result);
+    }
 
     /**
      * Factory for returning proper input method type that we received in our incoming intent
@@ -197,31 +210,14 @@ public class CommandDialog extends AppCompatActivity {
         }
     }
 
-
-    /**
-     * Interface for creating an input method type
-     */
-    interface InputMethod {
-        void create(AppCompatActivity activity, InputResultListener resultListener);
-    }
-
-
-    /**
-     * Callback interface for receiving an InputResult
-     */
-    interface InputResultListener {
-        void onResult(InputResult result);
-    }
-
-
     /**
      * Simple POJO to store the result of input methods
      */
     static class InputResult {
+        public static int index = -1;
         public String text = "";
         public String error = "";
         public int code = 0;
-        public static int index = -1;
         public List<Value> values = new ArrayList<>();
     }
 
@@ -390,7 +386,7 @@ public class CommandDialog extends AppCompatActivity {
                 max = DEFAULT_MAX;
 
                 // halfway
-                counter = (DEFAULT_MAX - DEFAULT_MIN) /  2;
+                counter = (DEFAULT_MAX - DEFAULT_MIN) / 2;
             }
             updateLabel();
         }
@@ -515,14 +511,17 @@ public class CommandDialog extends AppCompatActivity {
 
 
         WebView webView;
-        WebInputMethod(AppCompatActivity activity) { super(activity); }
+
+        WebInputMethod(AppCompatActivity activity) {
+            super(activity);
+        }
 
         @Override
         WebView createWidgetView(AppCompatActivity activity) {
             final Intent intent = activity.getIntent();
             webView = new WebView(activity);
 
-            webView.setVerticalScrollBarEnabled(intent.getBooleanExtra("scrollbar",true));
+            webView.setVerticalScrollBarEnabled(intent.getBooleanExtra("scrollbar", true));
 
             if (intent.hasExtra("web_url")) {
                 webView.loadUrl(intent.getStringExtra("web_url"));
@@ -544,6 +543,7 @@ public class CommandDialog extends AppCompatActivity {
             return webView.toString();
         }
     }
+
     /**
      * Time InputMethod
      * Allow users to pick a specific time
@@ -886,25 +886,32 @@ public class CommandDialog extends AppCompatActivity {
 
                 // unused
                 @Override
-                public void onEndOfSpeech() { }
+                public void onEndOfSpeech() {
+                }
 
                 @Override
-                public void onReadyForSpeech(Bundle bundle) { }
+                public void onReadyForSpeech(Bundle bundle) {
+                }
 
                 @Override
-                public void onBeginningOfSpeech() { }
+                public void onBeginningOfSpeech() {
+                }
 
                 @Override
-                public void onRmsChanged(float v) { }
+                public void onRmsChanged(float v) {
+                }
 
                 @Override
-                public void onBufferReceived(byte[] bytes) { }
+                public void onBufferReceived(byte[] bytes) {
+                }
 
                 @Override
-                public void onPartialResults(Bundle bundle) { }
+                public void onPartialResults(Bundle bundle) {
+                }
 
                 @Override
-                public void onEvent(int i, Bundle bundle) { }
+                public void onEvent(int i, Bundle bundle) {
+                }
             });
             return recognizer;
         }
@@ -913,6 +920,7 @@ public class CommandDialog extends AppCompatActivity {
 
     /**
      * Base Dialog class to extend from for adding specific views / widgets to a Dialog interface
+     *
      * @param <T> Main view type that will be displayed within dialog
      */
     abstract static class InputDialog<T extends View> implements InputMethod {
@@ -932,6 +940,12 @@ public class CommandDialog extends AppCompatActivity {
         AppCompatActivity activity;
 
 
+        InputDialog(AppCompatActivity activity) {
+            this.activity = activity;
+            widgetView = createWidgetView(activity);
+            initActivityDisplay(activity);
+        }
+
         // method to be implemented that handles creating view that is placed in our dialog
         abstract T createWidgetView(AppCompatActivity activity);
 
@@ -939,14 +953,6 @@ public class CommandDialog extends AppCompatActivity {
         String getResult() {
             return null;
         }
-
-
-        InputDialog(AppCompatActivity activity) {
-            this.activity = activity;
-            widgetView = createWidgetView(activity);
-            initActivityDisplay(activity);
-        }
-
 
         @Override
         public void create(AppCompatActivity activity, final InputResultListener resultListener) {

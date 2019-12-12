@@ -1,12 +1,7 @@
 package net.kwatts.android.droidcommandpro;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.webkit.WebView;
@@ -16,7 +11,7 @@ import timber.log.Timber;
 
 
 public class WelcomeActivity extends AppCompatActivity //implements ActivityCompat.OnRequestPermissionsResultCallback
- {
+{
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int AUDIO_PERMISSION_REQUEST_CODE = 2;
@@ -73,6 +68,7 @@ public class WelcomeActivity extends AppCompatActivity //implements ActivityComp
     protected void onStart() {
         super.onStart();
     }
+
     protected void onDestroy() {
         super.onDestroy();
     }

@@ -9,7 +9,7 @@ import net.kwatts.android.droidcommandpro.ApiReceiver;
 public class CommandRunSystem {
 
     public static String cmd = "cmd_run_system";
-    public static String[] permissions = { "" };
+    public static String[] permissions = {""};
 
     public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
 

@@ -15,13 +15,13 @@
         android:orientation="vertical">
 
         <ImageView
-            style="@style/ThemeOverlay.FirebaseIcon"
             android:id="@+id/google_icon"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/icon"
+            style="@style/ThemeOverlay.FirebaseIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="visible"/>
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/icon"
+            android:visibility="visible" />
 
         <TextView
             android:id="@+id/title_text"

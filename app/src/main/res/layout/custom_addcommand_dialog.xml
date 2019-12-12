@@ -8,108 +8,115 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add or Modify private commands. Note modifying public commands will save to your private commands."
-        android:textSize="12dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textSize="12dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="4dp"
-        android:textAllCaps="true"
-        android:text="ATTRIBUTES"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:paddingTop="4dp"
+        android:text="ATTRIBUTES"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark" />
 
     <TextView
         android:id="@+id/tvAddCommandAttributes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="2dp"
-        android:textAllCaps="false"
-        android:text="Details"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccent"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
+        android:paddingTop="2dp"
+        android:text="Details"
+        android:textAllCaps="false"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccent" />
 
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
         android:id="@+id/addCommandLinearLayoutAdmin"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:visibility="gone">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textAllCaps="true"
-            android:text="ADMIN ADD PERMISSION"
             android:fontFamily="sans-serif-condensed"
-            android:textColor="@color/colorAccentDark"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:text="ADMIN ADD PERMISSION"
+            android:textAllCaps="true"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/colorAccentDark" />
+
         <Spinner
             android:id="@+id/spinnerAddPermission"
-            android:spinnerMode="dropdown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
+            android:spinnerMode="dropdown"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/colorAccent"
-            android:textSize="12dp"
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
+            android:textSize="12dp" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textAllCaps="true"
-            android:text="ADMIN REMOVE PERMISSION"
             android:fontFamily="sans-serif-condensed"
-            android:textColor="@color/colorAccentDark"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:text="ADMIN REMOVE PERMISSION"
+            android:textAllCaps="true"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/colorAccentDark" />
+
         <Spinner
             android:id="@+id/spinnerRemovePermission"
-            android:spinnerMode="dropdown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
+            android:spinnerMode="dropdown"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/colorAccent"
-            android:textSize="12dp"
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
+            android:textSize="12dp" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textAllCaps="true"
-            android:text="ADMIN TAGS"
             android:fontFamily="sans-serif-condensed"
-            android:textColor="@color/colorAccentDark"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:text="ADMIN TAGS"
+            android:textAllCaps="true"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/colorAccentDark" />
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
             <CheckBox
                 android:id="@+id/tagAdminIsPublicCheckBox"
-                android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:fontFamily="sans-serif-condensed"
+                android:text="isPublic"
                 android:textColor="@color/colorAccent"
                 android:textSize="12dp"
-                android:textStyle="normal"
-                android:text="isPublic"/>
+                android:textStyle="normal" />
+
             <CheckBox
                 android:id="@+id/tagAdminOnboardingCheckBox"
-                android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:fontFamily="sans-serif-condensed"
+                android:text="onboarding"
                 android:textColor="@color/colorAccent"
                 android:textSize="12dp"
-                android:textStyle="normal"
-                android:text="onboarding"/>
+                android:textStyle="normal" />
         </LinearLayout>
     </LinearLayout>
 
@@ -117,73 +124,77 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:textAllCaps="true"
-        android:text="TAGS"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:text="TAGS"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical" android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
             <CheckBox
                 android:id="@+id/tagSuperUserCheckBox"
-                android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:fontFamily="sans-serif-condensed"
+                android:text="superuser"
                 android:textColor="@color/colorAccent"
                 android:textSize="12dp"
-                android:textStyle="normal"
-                android:text="superuser"/>
+                android:textStyle="normal" />
+
             <CheckBox
                 android:id="@+id/tagPinnedCheckBox"
-                android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:fontFamily="sans-serif-condensed"
+                android:text="pinned"
                 android:textColor="@color/colorAccent"
                 android:textSize="12dp"
-                android:textStyle="normal"
-                android:text="pinned"/>
+                android:textStyle="normal" />
         </LinearLayout>
     </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAllCaps="true"
-        android:text="Description"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:text="Description"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark" />
 
     <EditText
         android:id="@+id/dialogEditDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textNoSuggestions"
         android:hint="Describe the command..."
+        android:inputType="textNoSuggestions"
         android:textSize="@dimen/text_size_small" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAllCaps="true"
-        android:text="Command"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:text="Command"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark" />
 
     <EditText
         android:id="@+id/dialogEditCommand"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textNoSuggestions"
         android:hint="Enter The Command..."
+        android:inputType="textNoSuggestions"
         android:textSize="@dimen/text_size_small" />
 </LinearLayout>

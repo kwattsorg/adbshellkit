@@ -5,7 +5,9 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+
 import timber.log.Timber;
+
 /**
  * Created by kwatts on 7/14/17.
  */

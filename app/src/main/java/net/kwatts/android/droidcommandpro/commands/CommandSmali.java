@@ -20,20 +20,22 @@ import org.jf.dexlib2.iface.MethodImplementation;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.ReferenceInstruction;
 import org.jf.dexlib2.iface.reference.MethodReference;
-import org.jf.dexlib2.iface.value.*;
+import org.jf.dexlib2.iface.value.BooleanEncodedValue;
+import org.jf.dexlib2.iface.value.CharEncodedValue;
+import org.jf.dexlib2.iface.value.EncodedValue;
+import org.jf.dexlib2.iface.value.IntEncodedValue;
+import org.jf.dexlib2.iface.value.StringEncodedValue;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 import lanchon.multidexlib2.BasicDexFileNamer;
 import lanchon.multidexlib2.DexFileNamer;
 import lanchon.multidexlib2.MultiDexIO;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Set;
-import java.io.File;
-
 import timber.log.Timber;
 
 //A deeper dive with https://github.com/dorneanu/smalisca...
@@ -43,7 +45,7 @@ am broadcast --user 0 -n net.kwatts.android.droidcommandpro/.AdbshellkitApiRecei
     --es socket_input 1 --es socket_output 2 --es api_method cmd_smali --es application_name net.kwatts.android.droidcommandpro
 */
 
-public class CommandSmali  {
+public class CommandSmali {
     public static String cmd = "smali";
     public static String descr = "Disassembles an application, outputs a json to home directory";
     public static String args = "--es application_name <package name> --ez savetofile <true or false>";
@@ -57,15 +59,15 @@ public class CommandSmali  {
             if (application_name == null) {
                 out.print("");
             } else {
-                JSONObject res = run(context,saveFile,application_name);
+                JSONObject res = run(context, saveFile, application_name);
                 out.print(res.toString(1));
             }
         });
     }
 
     public static JSONObject run(android.content.Context ctx, boolean saveFile, String appName) {
-        String appNameSmali = appName.replace('.','/');
-        String packageApkFileName = getApkFileName(ctx,appName);
+        String appNameSmali = appName.replace('.', '/');
+        String packageApkFileName = getApkFileName(ctx, appName);
 
         JSONObject res = new JSONObject();
 
@@ -91,9 +93,8 @@ public class CommandSmali  {
                     null);
 
 
-
         } catch (IOException ioe) {
-            Timber.e(ioe,"Unable to load APK");
+            Timber.e(ioe, "Unable to load APK");
             return res;
         }
 
@@ -102,7 +103,6 @@ public class CommandSmali  {
                 //res.put("dex_class_count", dex.getClasses().size());
                 Set<? extends ClassDef> dexClasses = dex.getClasses();
                 ClassDef[] classDefs = dexClasses.toArray(new ClassDef[dexClasses.size()]);
-
 
 
                 //JSONObject classes = new JSONObject();
@@ -122,7 +122,7 @@ public class CommandSmali  {
                         Iterable<? extends Field> fields = clazz.getFields();
 
                         JSONArray class_fields = new JSONArray();
-                        for (Field field:fields) {
+                        for (Field field : fields) {
                             StringBuffer f = new StringBuffer(field.getName());
                             EncodedValue initialValue = field.getInitialValue();
 
@@ -157,14 +157,14 @@ public class CommandSmali  {
                         // CLASS METHODS
                         JSONArray class_methods = new JSONArray();
 
-                        for (Method methodDef: clazz.getMethods()) {
+                        for (Method methodDef : clazz.getMethods()) {
                             MethodImplementation methodImpl = methodDef.getImplementation();
                             if (methodImpl != null) {
-                                for (Instruction instruction: methodImpl.getInstructions()) {
+                                for (Instruction instruction : methodImpl.getInstructions()) {
                                     if (instruction instanceof ReferenceInstruction) {
-                                        if (((ReferenceInstruction)instruction).getReferenceType() == ReferenceType.METHOD) {
+                                        if (((ReferenceInstruction) instruction).getReferenceType() == ReferenceType.METHOD) {
                                             MethodReference method =
-                                                    (MethodReference) ((ReferenceInstruction)instruction).getReference();
+                                                    (MethodReference) ((ReferenceInstruction) instruction).getReference();
 
                                             String name = method.getName();
                                             String definingClass = method.getDefiningClass();
@@ -191,7 +191,7 @@ public class CommandSmali  {
                         f.put("superclass", clazz.getSuperclass());
                         f.put("fields", class_fields);
                         f.put("methods", class_methods);
-                        dex_classes.put(clazz.getType(),f);
+                        dex_classes.put(clazz.getType(), f);
 
                     }
 
@@ -201,8 +201,7 @@ public class CommandSmali  {
                 Timber.e(e);
             }
 
-        } else
-        {
+        } else {
             Timber.d("dex file is null");
         }
 
@@ -235,10 +234,6 @@ public class CommandSmali  {
         return res;
 
     }
-
-
-
-
 
 
     // Get resources for package
@@ -280,16 +275,17 @@ public class CommandSmali  {
 
             java.lang.reflect.Field[] fields = resources.getClass().getFields();
             int allfields[] = {};
-            for(int z = 0; z < fields.length; z++){
+            for (int z = 0; z < fields.length; z++) {
                 // something like this, look at https://android.googlesource.com/platform/frameworks/base/+/0e2d281/core/java/android/content/res/Resources.java
-               // allfields[z] = fields[z].getInt();
+                // allfields[z] = fields[z].getInt();
             }
 
             int resId = resources.getIdentifier("entryvalues_font_size", "array", appName);
             if (resId != 0) {
                 try {
                     resval.put(resId + ": " + resources.getStringArray(resId).toString());
-                } catch (Exception e) { }
+                } catch (Exception e) {
+                }
             }
 
             res.put(appName, resval);
@@ -308,7 +304,7 @@ public class CommandSmali  {
     // Get from package manager or 'cmd package list packages -f'
     public static String getApkFileName(android.content.Context ctx, String appName) {
         final PackageManager pm = ctx.getPackageManager();
-        List<ApplicationInfo> packages =  pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
         for (ApplicationInfo packageInfo : packages) {
             if (packageInfo.packageName.equals(appName)) {
@@ -318,8 +314,6 @@ public class CommandSmali  {
 
         return null;
     }
-
-
 
 
 }

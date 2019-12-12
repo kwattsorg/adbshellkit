@@ -2,17 +2,8 @@ package net.kwatts.android.droidcommandpro;
 
 import java.io.File;
 import java.io.IOException;
-import android.provider.ContactsContract;
-
-import java.util.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import flipagram.assetcopylib.AssetCopier;
-
-import android.database.Cursor;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.RawContacts;
 
 /**
  * Created by kwatts on 11/6/17.
@@ -45,7 +36,7 @@ public class Util {
         int count = 0;
         try {
             if (isDir) {
-                File f = new File(ctx.getFilesDir().getAbsolutePath()+ "/" + file);
+                File f = new File(ctx.getFilesDir().getAbsolutePath() + "/" + file);
                 if (!f.exists()) {
                     f.mkdirs();
                     count = new AssetCopier(ctx).copy(file, f);

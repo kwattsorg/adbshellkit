@@ -1,8 +1,6 @@
 package net.kwatts.android.droidcommandpro;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -28,17 +26,7 @@ import java.util.ListIterator;
 public class CustomAdapterCommands extends ArrayAdapter<Command> {
 
 
-    private static class ViewHolder {
-        TextView mEmail;
-        TextView mIsPublic;
-        TextView mCommandTags;
-        TextView mCommandDescription;
-        TextView mCommand;
-    }
-
-
     public List<Command> spinnerCmds;
-
     Context mContext;
 
     public CustomAdapterCommands(@NonNull Context context, List<Command> cmds) {
@@ -47,8 +35,6 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         this.mContext = context;
         this.spinnerCmds = cmds;
     }
-
-
 
     @Override
     public int getCount() {
@@ -66,8 +52,8 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
     }
 
     @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+    @Override
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         ViewHolder mViewHolder = new ViewHolder();
         if (convertView == null) {
             LayoutInflater mInflater = (LayoutInflater) mContext.
@@ -101,7 +87,7 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
 
         if (c.getTagList() != null) {
             mViewHolder.mCommandTags.setText(
-                    TextUtils.join(",",c.getTagList())
+                    TextUtils.join(",", c.getTagList())
             );
         } else {
             mViewHolder.mCommandTags.setText("");
@@ -118,7 +104,7 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
 
         return convertView;
 
-        }
+    }
 
     @Override
     public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -137,11 +123,11 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         spinnerCmds.clear();
 
         boolean haveRoot = Shell.rootAccess();
-        for(Command c: cmds){
+        for (Command c : cmds) {
             if (c.isSuperUser() && hideSuperUser) {
-              if (haveRoot) {
-                  spinnerCmds.add(c);
-              }
+                if (haveRoot) {
+                    spinnerCmds.add(c);
+                }
             } else {
                 spinnerCmds.add(c);
             }
@@ -153,8 +139,8 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
     public void removeUserCommands() {
         //spinnerCmds.removeIf(c -> !c.isPublic);
         ListIterator<Command> iter = spinnerCmds.listIterator();
-        while(iter.hasNext()){
-            if(!iter.next().isPublic){
+        while (iter.hasNext()) {
+            if (!iter.next().isPublic) {
                 iter.remove();
             }
         }
@@ -164,7 +150,7 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
 
     @Override
     public void addAll(Command... items) {
-        for(Command item: items){
+        for (Command item : items) {
             super.add(item);
             spinnerCmds.add(item);
         }
@@ -202,6 +188,13 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         this.setNotifyOnChange(true);
     }
 
+    private static class ViewHolder {
+        TextView mEmail;
+        TextView mIsPublic;
+        TextView mCommandTags;
+        TextView mCommandDescription;
+        TextView mCommand;
+    }
 
 
 }

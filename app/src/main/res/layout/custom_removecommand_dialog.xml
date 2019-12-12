@@ -2,36 +2,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingLeft="5dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingLeft="5dp">
 
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="WARNING! Review and make sure this is the command you want to remove!"
-        android:textSize="13dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textSize="13dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:textAllCaps="true"
-        android:text="COMMAND"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:paddingTop="10dp"
+        android:text="COMMAND"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark" />
 
     <TextView
         android:id="@+id/tvRemoveCommandDetails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="13dp"
-        android:textAllCaps="false"
-        android:text="Details"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccent"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:paddingTop="13dp"
+        android:text="Details"
+        android:textAllCaps="false"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccent" />
 </LinearLayout>

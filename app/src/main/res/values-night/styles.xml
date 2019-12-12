@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="MatchSpinnerStyle" parent="android:style/Widget.ListView.DropDown">
         <item name="android:divider">@color/colorDividerWhite</item>
         <item name="android:dividerHeight">1dp</item>
     </style>
+
     <style name="MatchSpinnerTheme" parent="@style/Theme.AppCompat.DayNight">
         <item name="android:dropDownListViewStyle">@style/MatchSpinnerStyle</item>
     </style>

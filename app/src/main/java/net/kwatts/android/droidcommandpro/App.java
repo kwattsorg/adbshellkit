@@ -7,44 +7,39 @@ package net.kwatts.android.droidcommandpro;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.preference.PreferenceManager;
+import android.os.Build;
 import android.util.Log;
 
-import flipagram.assetcopylib.AssetCopier;
-import timber.log.Timber;
+import androidx.annotation.NonNull;
+
+import com.crashlytics.android.Crashlytics;
+import com.eggheadgames.aboutbox.AboutConfig;
 import com.google.firebase.database.FirebaseDatabase;
 import com.topjohnwu.superuser.Shell;
-//import com.topjohnwu.superuser.ContainerApp;
-import com.eggheadgames.aboutbox.AboutConfig;
-import com.crashlytics.android.Crashlytics;
-import android.os.*;
 
 import org.apache.commons.io.FileUtils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
-import androidx.annotation.NonNull;
+import flipagram.assetcopylib.AssetCopier;
+import timber.log.Timber;
+
+//import com.topjohnwu.superuser.ContainerApp;
 
 /**
  * This is a subclass of {@link Application} used to provide shared objects and superuser functionality across the full app
  */
 //public class App extends ContainerApp  {
-public class App extends Application  {
-    public static App INSTANCE = null;
-    public App() {
-        INSTANCE = this;
-    }
-
-    public static SharedPreferences mSharedPref;
-
+public class App extends Application {
     public static final String PREFS_NAME = "AppPrefs";
     public static final String USER_IS_ONBOARD_PREF_NAME = "user_is_onboard";
     public static final String FILES_PATH = "/data/data/net.kwatts.android.droidcommandpro/files";
-    public static final String GOOGLE_GEOCODE_API_KEY="AIzaSyCzr5mPCjrmxtor-RpEPWJLCuZ4P-xhqEs";
-
+    public static final String GOOGLE_GEOCODE_API_KEY = "AIzaSyCzr5mPCjrmxtor-RpEPWJLCuZ4P-xhqEs";
     public static final String APP_NAME = "ADB Shellkit";
-    public static final String APP_DESCRIPTION_HTML = "Welcome to <b>"+APP_NAME+"!</b><br><br><b>"+APP_NAME+"</b>" +
+    public static final String APP_DESCRIPTION_HTML = "Welcome to <b>" + APP_NAME + "!</b><br><br><b>" + APP_NAME + "</b>" +
             "The journey to discover the hidden commands that came with your phone starts now! <br><br>" +
             "<b> Hints to help guide you along the path:</b><br>" +
             "<ul>" +
@@ -56,6 +51,8 @@ public class App extends Application  {
             "</ul>" +
             "<br>ADB Shellkit is fully open source! <a href=\"https://github.com/kwattsorg/adbshellkit\">https://github.com/kwattsorg/adbshellkit</a>" +
             " for feedback, support, or to dust off those coding skills :)";
+    public static App INSTANCE = null;
+    public static SharedPreferences mSharedPref;
 
     static {
         Shell.Config.setTimeout(20); //20 second timeout
@@ -64,21 +61,8 @@ public class App extends Application  {
         Shell.Config.addInitializers(ADBShellInitializer.class);
     }
 
-    static class ADBShellInitializer extends Shell.Initializer {
-        @Override
-        public boolean onInit(Context context, @NonNull Shell shell) {
-            InputStream bashrc;
-
-            try {
-                bashrc = new FileInputStream(App.FILES_PATH + "/home/bashrc");
-            } catch (java.io.FileNotFoundException e) {
-                bashrc = new ByteArrayInputStream("".getBytes());
-            }
-
-            shell.newJob().add(bashrc).exec();
-
-            return true;
-        }
+    public App() {
+        INSTANCE = this;
     }
 
     @Override
@@ -145,9 +129,8 @@ public class App extends Application  {
 
                 Timber.d("Total files copied: " + count);
                 Shell.sh("/system/bin/chmod -R 755 " + App.FILES_PATH + "/bin* "
-                            + App.FILES_PATH + "/lib* " + App.FILES_PATH + "/scripts "
-                            + App.FILES_PATH + "/share").exec();
-
+                        + App.FILES_PATH + "/lib* " + App.FILES_PATH + "/scripts "
+                        + App.FILES_PATH + "/share").exec();
 
 
             }
@@ -158,9 +141,26 @@ public class App extends Application  {
 
     }
 
+    static class ADBShellInitializer extends Shell.Initializer {
+        @Override
+        public boolean onInit(Context context, @NonNull Shell shell) {
+            InputStream bashrc;
+
+            try {
+                bashrc = new FileInputStream(App.FILES_PATH + "/home/bashrc");
+            } catch (java.io.FileNotFoundException e) {
+                bashrc = new ByteArrayInputStream("".getBytes());
+            }
+
+            shell.newJob().add(bashrc).exec();
+
+            return true;
+        }
+    }
 
     public static final class ReleaseTree extends Timber.Tree {
-        @Override protected void log(int priority, String tag, String message, Throwable throwable) {
+        @Override
+        protected void log(int priority, String tag, String message, Throwable throwable) {
             switch (priority) {
                 case Log.VERBOSE:
                 case Log.DEBUG:
@@ -187,7 +187,6 @@ public class App extends Application  {
     }
 
 
-
     public static final class DebugTree extends Timber.DebugTree {
         @Override
         protected void log(int priority, String tag, String message, Throwable t) {
@@ -198,6 +197,7 @@ public class App extends Application  {
             }
             super.log(priority, tag, message, t);
         }
+
         @Override
         protected String createStackElementTag(StackTraceElement element) {
             return String.format("net.kwatts.android.droidcommander [C:%s] [M:%s] [L:%s] ",

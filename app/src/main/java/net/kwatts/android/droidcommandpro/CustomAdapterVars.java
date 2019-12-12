@@ -19,13 +19,6 @@ import java.util.List;
 public class CustomAdapterVars extends ArrayAdapter<String> {
 
 
-    private static class ViewHolder {
-        TextView mVar;
-
-    }
-
-
-
     public List<String> spinnerVars = new ArrayList<>();
     Context mContext;
 
@@ -34,7 +27,6 @@ public class CustomAdapterVars extends ArrayAdapter<String> {
         this.mContext = context;
         this.spinnerVars = vars;
     }
-
 
     @Override
     public int getCount() {
@@ -74,5 +66,10 @@ public class CustomAdapterVars extends ArrayAdapter<String> {
     @Override
     public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         return getView(position, convertView, parent);
+    }
+
+    private static class ViewHolder {
+        TextView mVar;
+
     }
 }

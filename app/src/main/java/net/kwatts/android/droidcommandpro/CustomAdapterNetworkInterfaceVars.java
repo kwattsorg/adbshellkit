@@ -8,8 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import java.net.*;
 
+import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,13 +20,6 @@ import java.util.List;
 public class CustomAdapterNetworkInterfaceVars extends ArrayAdapter<String> {
 
 
-    private static class ViewHolder {
-        TextView mVar;
-
-    }
-
-
-
     public List<NetworkInterface> spinnerVars = new ArrayList<>();
     Context mContext;
 
@@ -35,7 +28,6 @@ public class CustomAdapterNetworkInterfaceVars extends ArrayAdapter<String> {
         this.mContext = context;
         this.spinnerVars = vars;
     }
-
 
     @Override
     public int getCount() {
@@ -75,5 +67,10 @@ public class CustomAdapterNetworkInterfaceVars extends ArrayAdapter<String> {
     @Override
     public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         return getView(position, convertView, parent);
+    }
+
+    private static class ViewHolder {
+        TextView mVar;
+
     }
 }

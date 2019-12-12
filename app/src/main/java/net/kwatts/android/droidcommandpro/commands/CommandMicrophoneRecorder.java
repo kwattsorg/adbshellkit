@@ -4,13 +4,11 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaRecorder;
-import android.os.Environment;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
-import net.kwatts.android.droidcommandpro.ApiReceiver;
 import net.kwatts.android.droidcommandpro.App;
 
 import org.json.JSONException;
@@ -22,10 +20,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import timber.log.Timber;
+
 import static android.media.MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED;
 import static android.media.MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED;
-
-import timber.log.Timber;
 
 /* to use the service approach (steps at https://gist.github.com/tniessen/ea3d68e7d572ed7c607b81d715798800)
 1. find the service first, in this case "audio"
@@ -83,6 +81,7 @@ public class CommandMicrophoneRecorder {
 
     public static String cmd = "cmd_microphone_recorder";
     public static String[] permissions = {android.Manifest.permission.READ_CONTACTS};
+
     /**
      * Starts our MicRecorder service
      */
@@ -91,6 +90,32 @@ public class CommandMicrophoneRecorder {
         recorderService.setAction(intent.getAction());
         recorderService.putExtras(intent.getExtras());
         context.startService(recorderService);
+    }
+
+    /**
+     * Converts time in seconds to a formatted time string: HH:MM:SS
+     * Hours will not be included if it is 0
+     */
+    public static String getTimeString(int totalSeconds) {
+        int hours = (totalSeconds / 3600);
+        int mins = (totalSeconds % 3600) / 60;
+        int secs = (totalSeconds % 60);
+
+        String result = "";
+
+        // only show hours if we have them
+        if (hours > 0) {
+            result += String.format("%02d:", hours);
+        }
+        result += String.format("%02d:%02d", mins, secs);
+        return result;
+    }
+
+    /**
+     * Interface for handling recorder commands
+     */
+    interface RecorderCommandHandler {
+        RecorderCommandResult handle(final Context context, final Intent intent);
     }
 
     /**
@@ -109,134 +134,6 @@ public class CommandMicrophoneRecorder {
 
         // file we're recording too
         protected static File file;
-
-
-        public void onCreate() {
-            getMediaRecorder(this);
-        }
-
-        public int onStartCommand(Intent intent, int flags, int startId) {
-            // get command handler and display result
-            String command = intent.getAction();
-            Context context = getApplicationContext();
-            RecorderCommandHandler handler = getRecorderCommandHandler(command);
-            RecorderCommandResult result = handler.handle(context, intent);
-            postRecordCommandResult(context, intent, result);
-
-            return Service.START_NOT_STICKY;
-        }
-
-        protected static RecorderCommandHandler getRecorderCommandHandler(final String command) {
-            switch (command == null ? "" : command) {
-                case "info":
-                    return infoHandler;
-                case "record":
-                    return recordHandler;
-                case "quit":
-                    return quitHandler;
-                default:
-                    return (context, intent) -> {
-                        RecorderCommandResult result = new RecorderCommandResult();
-                        result.error = "Unknown command: " + command;
-                        if (!isRecording)
-                            context.stopService(intent);
-                        return result;
-                    };
-            }
-        }
-
-        protected static void postRecordCommandResult(final Context context, final Intent intent,
-                                                      final RecorderCommandResult result) {
-
-            ResultReturner.returnData(context, intent, out -> {
-                out.append(result.message).append("\n");
-                if (result.error != null) {
-                    out.append(result.error).append("\n");
-                }
-                out.flush();
-                out.close();
-            });
-        }
-
-        /**
-         * Returns our MediaPlayer instance and ensures it has all the necessary callbacks
-         */
-        protected static void getMediaRecorder(MicRecorderService service) {
-            mediaRecorder = new MediaRecorder();
-            mediaRecorder.setOnErrorListener(service);
-            mediaRecorder.setOnInfoListener(service);
-        }
-
-        public void onDestroy() {
-            cleanupMediaRecorder();
-            Timber.i("MicRecorderAPI MicRecorderService onDestroy()");
-        }
-
-        /**
-         * Releases MediaRecorder resources
-         */
-        protected static void cleanupMediaRecorder() {
-            if (isRecording) {
-                mediaRecorder.stop();
-                isRecording = false;
-            }
-            mediaRecorder.reset();
-            mediaRecorder.release();
-        }
-
-        @Override
-        public IBinder onBind(Intent intent) {
-            return null;
-        }
-
-        @Override
-        public void onError(MediaRecorder mr, int what, int extra) {
-            isRecording = false;
-            this.stopSelf();
-            Timber.e("MicRecorderService onError() " + what);
-        }
-
-        @Override
-        public void onInfo(MediaRecorder mr, int what, int extra) {
-            switch (what) {
-                case MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED: // intentional fallthrough
-                case MEDIA_RECORDER_INFO_MAX_DURATION_REACHED:
-                    this.stopSelf();
-            }
-            Timber.i("MicRecorderService onInfo() " + what);
-        }
-
-        protected static String getDefaultRecordingFilename() {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            Date date = new Date();
-            return App.FILES_PATH + "/AudioRecording_" + dateFormat.format(date);
-            //return Environment.getExternalStorageDirectory().getAbsolutePath() + "/TermuxAudioRecording_" + dateFormat.format(date);
-        }
-
-        protected static String getRecordingInfoJSONString() {
-            String result = "";
-            JSONObject info = new JSONObject();
-            try {
-                info.put("isRecording", isRecording);
-                if (isRecording) {
-                    info.put("outputFile", file.getAbsolutePath());
-                } else {
-                    info.put("getaudiosourcemax", MediaRecorder.getAudioSourceMax());
-                    //How to check microphones and apps using it
-                    // - "lsof | grep msm_pcm_in" or "lsof | grep pcm" then to find the file "lsof | grep ^media | grep data"
-                    // - dumpsys media.player
-                    // - dump Settings > Apps > Gear symbol (or menu button depending on phone) > App Permissions > Microphone.
-                    //   + pull a list of apps with microphone permission then see which are running
-                    //SDK 28 ONLY: List<MicrophoneInfo> microphoneInfoList = mediaRecorder.getActiveMicrophones()
-                }
-                result = info.toString(2);
-            } catch (JSONException e) {
-                Timber.e( e);
-            }
-            return result;
-        }
-
-
         /**
          * -----
          * Recorder Command Handlers
@@ -253,7 +150,6 @@ public class CommandMicrophoneRecorder {
                 return result;
             }
         };
-
         static RecorderCommandHandler recordHandler = new RecorderCommandHandler() {
             @Override
             public RecorderCommandResult handle(Context context, Intent intent) {
@@ -330,7 +226,7 @@ public class CommandMicrophoneRecorder {
                                     duration <= 0 ?
                                             "unlimited" :
                                             getTimeString(duration / 1000),
-                                    source,encoder);
+                                    source, encoder);
 
                         } catch (IllegalStateException | IOException e) {
                             Timber.e("MediaRecorder error");
@@ -343,7 +239,6 @@ public class CommandMicrophoneRecorder {
                 return result;
             }
         };
-
         static RecorderCommandHandler quitHandler = new RecorderCommandHandler() {
             @Override
             public RecorderCommandResult handle(Context context, Intent intent) {
@@ -358,13 +253,131 @@ public class CommandMicrophoneRecorder {
                 return result;
             }
         };
-    }
 
-    /**
-     * Interface for handling recorder commands
-     */
-    interface RecorderCommandHandler {
-        RecorderCommandResult handle(final Context context, final Intent intent);
+        protected static RecorderCommandHandler getRecorderCommandHandler(final String command) {
+            switch (command == null ? "" : command) {
+                case "info":
+                    return infoHandler;
+                case "record":
+                    return recordHandler;
+                case "quit":
+                    return quitHandler;
+                default:
+                    return (context, intent) -> {
+                        RecorderCommandResult result = new RecorderCommandResult();
+                        result.error = "Unknown command: " + command;
+                        if (!isRecording)
+                            context.stopService(intent);
+                        return result;
+                    };
+            }
+        }
+
+        protected static void postRecordCommandResult(final Context context, final Intent intent,
+                                                      final RecorderCommandResult result) {
+
+            ResultReturner.returnData(context, intent, out -> {
+                out.append(result.message).append("\n");
+                if (result.error != null) {
+                    out.append(result.error).append("\n");
+                }
+                out.flush();
+                out.close();
+            });
+        }
+
+        /**
+         * Returns our MediaPlayer instance and ensures it has all the necessary callbacks
+         */
+        protected static void getMediaRecorder(MicRecorderService service) {
+            mediaRecorder = new MediaRecorder();
+            mediaRecorder.setOnErrorListener(service);
+            mediaRecorder.setOnInfoListener(service);
+        }
+
+        /**
+         * Releases MediaRecorder resources
+         */
+        protected static void cleanupMediaRecorder() {
+            if (isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+            }
+            mediaRecorder.reset();
+            mediaRecorder.release();
+        }
+
+        protected static String getDefaultRecordingFilename() {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            Date date = new Date();
+            return App.FILES_PATH + "/AudioRecording_" + dateFormat.format(date);
+            //return Environment.getExternalStorageDirectory().getAbsolutePath() + "/TermuxAudioRecording_" + dateFormat.format(date);
+        }
+
+        protected static String getRecordingInfoJSONString() {
+            String result = "";
+            JSONObject info = new JSONObject();
+            try {
+                info.put("isRecording", isRecording);
+                if (isRecording) {
+                    info.put("outputFile", file.getAbsolutePath());
+                } else {
+                    info.put("getaudiosourcemax", MediaRecorder.getAudioSourceMax());
+                    //How to check microphones and apps using it
+                    // - "lsof | grep msm_pcm_in" or "lsof | grep pcm" then to find the file "lsof | grep ^media | grep data"
+                    // - dumpsys media.player
+                    // - dump Settings > Apps > Gear symbol (or menu button depending on phone) > App Permissions > Microphone.
+                    //   + pull a list of apps with microphone permission then see which are running
+                    //SDK 28 ONLY: List<MicrophoneInfo> microphoneInfoList = mediaRecorder.getActiveMicrophones()
+                }
+                result = info.toString(2);
+            } catch (JSONException e) {
+                Timber.e(e);
+            }
+            return result;
+        }
+
+        public void onCreate() {
+            getMediaRecorder(this);
+        }
+
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            // get command handler and display result
+            String command = intent.getAction();
+            Context context = getApplicationContext();
+            RecorderCommandHandler handler = getRecorderCommandHandler(command);
+            RecorderCommandResult result = handler.handle(context, intent);
+            postRecordCommandResult(context, intent, result);
+
+            return Service.START_NOT_STICKY;
+        }
+
+        public void onDestroy() {
+            cleanupMediaRecorder();
+            Timber.i("MicRecorderAPI MicRecorderService onDestroy()");
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+
+        @Override
+        public void onError(MediaRecorder mr, int what, int extra) {
+            isRecording = false;
+            this.stopSelf();
+            Timber.e("MicRecorderService onError() " + what);
+        }
+
+        @Override
+        public void onInfo(MediaRecorder mr, int what, int extra) {
+            switch (what) {
+                case MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED: // intentional fallthrough
+                case MEDIA_RECORDER_INFO_MAX_DURATION_REACHED:
+                    this.stopSelf();
+            }
+            Timber.i("MicRecorderService onInfo() " + what);
+        }
     }
 
     /**
@@ -373,24 +386,5 @@ public class CommandMicrophoneRecorder {
     static class RecorderCommandResult {
         public String message = "";
         public String error;
-    }
-
-    /**
-     * Converts time in seconds to a formatted time string: HH:MM:SS
-     * Hours will not be included if it is 0
-     */
-    public static String getTimeString(int totalSeconds) {
-        int hours = (totalSeconds / 3600);
-        int mins = (totalSeconds % 3600) / 60;
-        int secs = (totalSeconds % 60);
-
-        String result = "";
-
-        // only show hours if we have them
-        if (hours > 0) {
-            result += String.format("%02d:", hours);
-        }
-        result += String.format("%02d:%02d", mins, secs);
-        return result;
     }
 }

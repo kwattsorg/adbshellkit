@@ -1,5 +1,5 @@
 package net.kwatts.android.droidcommandpro.commands;
-import android.Manifest;
+
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -54,16 +54,18 @@ public class CommandDeviceDump {
         try {
             res.put("device.policymanager.global", getDevicePolicyManagerGlobalData(ctx));
             res.put("device.policymanager", getDevicePolicyManagerData(ctx));
-            res.put("device.os.build",getOSBuildData());
+            res.put("device.os.build", getOSBuildData());
             res.put("settings.global.development_settings_enabled", developer_mode_enabled);
             res.put("settings.global.adb_enabled", usb_debugging_enabled);
             res.put("settings.secure.install_non_market_apps", sideloading_enabled);
             try {
                 res.put("settings.global", getAndroidGlobalSettings(ctx));
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
             try {
                 res.put("settings.secure", getAndroidSecureSettings(ctx));
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
 
         } catch (JSONException e) {
 
@@ -113,7 +115,7 @@ public class CommandDeviceDump {
                             JSONArray policiesUsedJson = new JSONArray(policiesUsed);
                             adminApps.put("policiesused", policiesUsedJson);
                         } catch (Exception e) {
-                            Timber.e( e);
+                            Timber.e(e);
                         }
                         for (ComponentName admin : activeAdmins) {
                             if (admin.getPackageName().equals(ai.packageName)) {
@@ -166,12 +168,12 @@ public class CommandDeviceDump {
                 adminApps.put("password_expiration", Long.toString(activeDevicePolicyManager.getPasswordExpiration(null)));
                 adminApps.put("maximum_time_to_lock", Long.toString(activeDevicePolicyManager.getMaximumTimeToLock(null)));
                 adminApps.put("keyguard_disabled_feature", Integer.toString(activeDevicePolicyManager.getKeyguardDisabledFeatures(null)));
-                adminApps.put("camera_disabled",activeDevicePolicyManager.getCameraDisabled(null));
-                adminApps.put("auto_time_required",activeDevicePolicyManager.getAutoTimeRequired());
+                adminApps.put("camera_disabled", activeDevicePolicyManager.getCameraDisabled(null));
+                adminApps.put("auto_time_required", activeDevicePolicyManager.getAutoTimeRequired());
                 adminApps.put("maximum_failed_password_wipe", Integer.toString(activeDevicePolicyManager.getMaximumFailedPasswordsForWipe(null)));
                 adminApps.put("screen_capture_disabled", activeDevicePolicyManager.getScreenCaptureDisabled(null));
-                adminApps.put("storage_encryption",activeDevicePolicyManager.getStorageEncryption(null));
-                adminApps.put("is_unistall_blocked",activeDevicePolicyManager.isUninstallBlocked(null,null));
+                adminApps.put("storage_encryption", activeDevicePolicyManager.getStorageEncryption(null));
+                adminApps.put("is_unistall_blocked", activeDevicePolicyManager.isUninstallBlocked(null, null));
 
             } catch (Exception e) {
                 //e.printStackTrace();
@@ -223,6 +225,7 @@ public class CommandDeviceDump {
 
         return osBuildInfo;
     }
+
     public static JSONObject getAndroidGlobalSettings(Context ctx) {
         JSONObject androidGlobalSettings = new JSONObject();
         try {

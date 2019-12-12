@@ -25,8 +25,6 @@ public class GoogleUser {
     }
 
 
-
-
     public String getVarValue(String key) {
         //for (Map.Entry<String,String> entry : vars.entrySet())
         //    System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());

@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 
-//import net.kwatts.android.droidcommandpro.Manifest;
-
 import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 import org.json.JSONArray;
@@ -14,6 +12,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+//import net.kwatts.android.droidcommandpro.Manifest;
 
 public class CommandGetContacts {
 
@@ -43,7 +43,7 @@ public class CommandGetContacts {
                 contactListSize = 50;
             }
 
-            for(int i=0;i<contactListSize;i++) {
+            for (int i = 0; i < contactListSize; i++) {
                 JSONObject c = new JSONObject();
                 // Get the raw contact id.
                 Integer rawContactId = rawContactsIdList.get(i);
@@ -96,7 +96,6 @@ public class CommandGetContacts {
                 queryColumnList.add(ContactsContract.Data.CONTACT_LAST_UPDATED_TIMESTAMP);
 
 
-
                 // ContactsContract.Data.MIMETYPE = "mimetype";
                 queryColumnList.add(ContactsContract.Data.MIMETYPE);
 
@@ -131,7 +130,7 @@ public class CommandGetContacts {
                 // Query data table and return related contact data.
                 Cursor cursor = cr.query(dataContentUri, queryColumnArr, whereClauseBuf.toString(), null, null);
 
-                if(cursor!=null && cursor.getCount() > 0) {
+                if (cursor != null && cursor.getCount() > 0) {
                     //StringBuffer lineBuf = new StringBuffer();
                     cursor.moveToFirst();
 
@@ -145,18 +144,17 @@ public class CommandGetContacts {
 
 
                     long contactId = cursor.getLong(cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID));
-                    c.put("contact_id",contactId );
+                    c.put("contact_id", contactId);
                     do {
                         String mimeType = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE));
 
                         List<String> dataValueList = getColumnValueByMimetype(cursor, mimeType);
                         int dataValueListSize = dataValueList.size();
-                        for(int j=0;j < dataValueListSize;j++)
-                        {
+                        for (int j = 0; j < dataValueListSize; j++) {
                             c.put(mimeType + "_" + j, dataValueList.get(j));
                         }
 
-                    } while(cursor.moveToNext());
+                    } while (cursor.moveToNext());
 
                 }
 
@@ -173,8 +171,7 @@ public class CommandGetContacts {
     }
 
     // Return all raw_contacts _id in a list.
-    public static List<Integer> getRawContactsIdList(android.content.ContentResolver contentResolver)
-    {
+    public static List<Integer> getRawContactsIdList(android.content.ContentResolver contentResolver) {
         List<Integer> ret = new ArrayList<Integer>();
 
         // Row contacts content uri( access raw_contacts table. ).
@@ -182,15 +179,14 @@ public class CommandGetContacts {
         // Return _id column in contacts raw_contacts table.
         String queryColumnArr[] = {ContactsContract.RawContacts._ID};
         // Query raw_contacts table and return raw_contacts table _id.
-        Cursor cursor = contentResolver.query(rawContactUri,queryColumnArr, null, null, null);
-        if(cursor!=null)
-        {
+        Cursor cursor = contentResolver.query(rawContactUri, queryColumnArr, null, null, null);
+        if (cursor != null) {
             cursor.moveToFirst();
-            do{
+            do {
                 int idColumnIndex = cursor.getColumnIndex(ContactsContract.RawContacts._ID);
                 int rawContactsId = cursor.getInt(idColumnIndex);
                 ret.add(new Integer(rawContactsId));
-            }while(cursor.moveToNext());
+            } while (cursor.moveToNext());
         }
 
         cursor.close();
@@ -203,14 +199,12 @@ public class CommandGetContacts {
      *  such as Organization.CONTENT_ITEM_TYPE need return company, department, title, job description etc.
      *  So the return is a list string, each string for one column value.
      * */
-    public static List<String> getColumnValueByMimetype(Cursor cursor, String mimeType)
-    {
+    public static List<String> getColumnValueByMimetype(Cursor cursor, String mimeType) {
         List<String> ret = new ArrayList<String>();
 
-        switch (mimeType)
-        {
+        switch (mimeType) {
             // Get email data.
-            case ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE :
+            case ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE:
                 // Email.ADDRESS == data1
                 String emailAddress = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS));
                 // Email.TYPE == data2
@@ -373,20 +367,16 @@ public class CommandGetContacts {
         return ret;
     }
 
-    public static String getEmailTypeString(int dataType)
-    {
+    public static String getEmailTypeString(int dataType) {
         String ret = "";
 
-        if(ContactsContract.CommonDataKinds.Email.TYPE_HOME == dataType)
-        {
+        if (ContactsContract.CommonDataKinds.Email.TYPE_HOME == dataType) {
             ret = "Home";
-        }else if(ContactsContract.CommonDataKinds.Email.TYPE_WORK==dataType)
-        {
+        } else if (ContactsContract.CommonDataKinds.Email.TYPE_WORK == dataType) {
             ret = "Work";
         }
         return ret;
     }
-
 
 
 }
