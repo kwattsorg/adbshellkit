@@ -165,27 +165,25 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         this.setNotifyOnChange(false);
 
         //TODO: replace with last time used order
-        Collections.sort(spinnerCmds, new java.util.Comparator<Command>() {
-            public int compare(Command c1, Command c2) {
-                java.util.Date c1Date = new Date(c1.getLastused());
-                java.util.Date c2Date = new Date(c2.getLastused());
-                return c1Date.compareTo(c2Date);
-            }
+        Collections.sort(spinnerCmds, (c1, c2) -> {
+            Date c1Date = new Date(c1.getLastused());
+            Date c2Date = new Date(c2.getLastused());
+            return c1Date.compareTo(c2Date);
         });
         // reverse to display at top
         Collections.reverse(spinnerCmds);
         //TODO: only do this if the command is public
-        /*
+/*
         for (Command c : spinnerCmds) {
             if (c.isOnboardingUser()) {
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-                if (sp.getBoolean(App.COMPLETED_ONBOARDING_PREF_NAME, false) == false) {
-                        spinnerCmds.remove(c);
-                        spinnerCmds.add(c);
+                if (!sp.getBoolean(App.COMPLETED_ONBOARDING_PREF_NAME, false)) {
+                    spinnerCmds.remove(c);
+                    spinnerCmds.add(c);
                 }
             }
-        } */
-
+        }
+*/
         this.setNotifyOnChange(true);
     }
 

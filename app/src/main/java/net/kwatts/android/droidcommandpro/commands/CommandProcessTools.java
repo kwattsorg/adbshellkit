@@ -41,9 +41,7 @@ public class CommandProcessTools {
         } catch (Exception e) {
             Timber.e("Exception trying to dump information");
         }
-        ResultReturner.returnData(apiReceiver, intent, out -> {
-            out.print(res.toString(1));
-        });
+        ResultReturner.returnData(apiReceiver, intent, out -> out.print(res.toString(1)));
     }
 
     public static void onReceiveDumpProcesses(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
@@ -53,9 +51,7 @@ public class CommandProcessTools {
         } catch (Exception e) {
             Timber.e("Exception trying to dump information");
         }
-        ResultReturner.returnData(apiReceiver, intent, out -> {
-            out.print(res.toString(1));
-        });
+        ResultReturner.returnData(apiReceiver, intent, out -> out.print(res.toString(1)));
     }
 
     public static void onReceiveDumpServices(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
@@ -65,9 +61,7 @@ public class CommandProcessTools {
         } catch (Exception e) {
             Timber.e("Exception trying to dump information");
         }
-        ResultReturner.returnData(apiReceiver, intent, out -> {
-            out.print(res.toString(1));
-        });
+        ResultReturner.returnData(apiReceiver, intent, out -> out.print(res.toString(1)));
     }
 
     public static void onReceiveKillProcess(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
@@ -127,10 +121,7 @@ public class CommandProcessTools {
             Timber.e("Exception getting processes");
         }
 
-
         return res;
-
-
     }
 
     // helpers
@@ -257,18 +248,8 @@ public class CommandProcessTools {
     public static List<UsageStats> getActiveProcesses(Context context) {
         String mforegoundPppPackageName;
 
-        Comparator<UsageStats> usageStatsComparator = new Comparator<UsageStats>() {
-            @Override
-            public int compare(UsageStats o1, UsageStats o2) {
-                if (o1.getLastTimeUsed() > o2.getLastTimeUsed()) {
-                    return 1;
-                } else if (o1.getLastTimeUsed() < o2.getLastTimeUsed()) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            }
-        };
+        Comparator<UsageStats> usageStatsComparator = (o1, o2) ->
+                Long.compare(o1.getLastTimeUsed(), o2.getLastTimeUsed());
 
 
         UsageStatsManager usage = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);

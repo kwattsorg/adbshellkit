@@ -18,10 +18,10 @@
     ads:adUnitId="ca-app-pub-3940256099942544/6300978111" -->
 
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
+        android:paddingStart="20dp"
         android:paddingTop="20dp">
 
 
@@ -30,7 +30,7 @@
             android:layout_width="120dp"
             android:layout_height="40dp"
             android:layout_above="@+id/signed_in_image_button"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:visibility="gone" />
 
         <ImageButton
@@ -39,14 +39,13 @@
             android:layout_height="wrap_content"
             android:background="@drawable/ic_account_circle" />
 
-
         <TextView
             android:id="@+id/textViewStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@+id/signed_in_image_button"
-            android:layout_toRightOf="@+id/signed_in_image_button"
-            android:paddingLeft="5dp"
+            android:layout_toEndOf="@+id/signed_in_image_button"
+            android:paddingStart="5dp"
             android:textColor="@color/colorAccentDark"
             android:textSize="11dp"
             android:textStyle="italic"
@@ -57,8 +56,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textViewStatus"
-            android:layout_alignLeft="@+id/textViewStatus"
-            android:paddingLeft="5dp"
+            android:layout_alignStart="@+id/textViewStatus"
+            android:paddingStart="5dp"
             android:textColor="@color/colorAccentDark"
             android:textSize="9dp"
             android:textStyle="bold"
@@ -69,8 +68,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textViewStatus"
-            android:layout_toRightOf="@+id/textViewState"
-            android:paddingLeft="5dp"
+            android:layout_toEndOf="@+id/textViewState"
+            android:paddingStart="5dp"
             android:textColor="@color/colorAccentDark"
             android:textSize="9dp"
             android:textStyle="bold"
@@ -89,15 +88,15 @@
             android:id="@+id/linearLayout1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:paddingLeft="20dp"
             android:paddingRight="20dp">
 
             <Spinner
                 android:id="@+id/spinnerGlobalCommands"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.50"
                 android:theme="@style/MatchSpinnerTheme" />
@@ -108,16 +107,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/linearLayout1"
-            android:layout_alignLeft="@+id/linearLayout1"
-            android:layout_alignRight="@+id/linearLayout1"
+            android:layout_alignStart="@+id/linearLayout1"
+            android:layout_alignEnd="@+id/linearLayout1"
             android:paddingTop="20dp">
 
             <EditText
                 android:id="@+id/topCommandView"
-                android:layout_width="fill_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentRight="true"
                 android:layout_weight="0.20"
                 android:backgroundTint="@color/grey_300"
                 android:ellipsize="end"
@@ -125,7 +122,7 @@
                 android:inputType="textNoSuggestions"
                 android:lines="1"
                 android:maxLines="2"
-                android:textSize="15dp" />
+                android:textSize="15sp" />
 
             <Button
                 android:id="@+id/runButton"
@@ -145,7 +142,6 @@
                 android:text="STOP"
                 android:textColor="@color/white"
                 android:visibility="gone" />
-
 
         </LinearLayout>
 
@@ -168,9 +164,9 @@
                 <LinearLayout
                     android:id="@+id/lines"
                     android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical" />
-                />
+
             </ScrollView>
 
             <WebView

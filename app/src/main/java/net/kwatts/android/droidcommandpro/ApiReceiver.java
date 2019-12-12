@@ -76,7 +76,7 @@ public class ApiReceiver extends BroadcastReceiver {
             Timber.e("Missing 'api_method' extra");
             return;
         }
-        Timber.i("apMethod= " + apiMethod);
+        Timber.i("apMethod= %s", apiMethod);
 
         switch (apiMethod) {
             //lifted from https://raw.githubusercontent.com/termux/termux-api/master/app/src/main/java/com/termux/api/TermuxApiReceiver.java
@@ -195,7 +195,7 @@ public class ApiReceiver extends BroadcastReceiver {
     }
 
     public String getCommandApiUsage() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("usage:\t adbshellkit <command> <options>\n");
         sb.append("options:\t --es <string> <value>, --ei <number> <value>, --ez <true|false>, --ef <float> <value>\n");
         sb.append("\nExamples:\n");
@@ -215,7 +215,7 @@ public class ApiReceiver extends BroadcastReceiver {
                 if (!(mCmds.indexOf(c) == mCmds.size() - 1)) {
                     sb.append("\n");
                 }
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
 

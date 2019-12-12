@@ -10,7 +10,7 @@
         android:text="Add or Modify private commands. Note modifying public commands will save to your private commands."
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/colorAccentDark"
-        android:textSize="12dp" />
+        android:textSize="12sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -34,7 +34,7 @@
         android:textColor="@color/colorAccent" />
 
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:id="@+id/addCommandLinearLayoutAdmin"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -59,7 +59,7 @@
             android:spinnerMode="dropdown"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/colorAccent"
-            android:textSize="12dp" />
+            android:textSize="12sp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -79,7 +79,7 @@
             android:spinnerMode="dropdown"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/colorAccent"
-            android:textSize="12dp" />
+            android:textSize="12sp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -104,7 +104,7 @@
                 android:fontFamily="sans-serif-condensed"
                 android:text="isPublic"
                 android:textColor="@color/colorAccent"
-                android:textSize="12dp"
+                android:textSize="12sp"
                 android:textStyle="normal" />
 
             <CheckBox
@@ -115,7 +115,7 @@
                 android:fontFamily="sans-serif-condensed"
                 android:text="onboarding"
                 android:textColor="@color/colorAccent"
-                android:textSize="12dp"
+                android:textSize="12sp"
                 android:textStyle="normal" />
         </LinearLayout>
     </LinearLayout>
@@ -130,7 +130,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/colorAccentDark" />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -148,7 +148,7 @@
                 android:fontFamily="sans-serif-condensed"
                 android:text="superuser"
                 android:textColor="@color/colorAccent"
-                android:textSize="12dp"
+                android:textSize="12sp"
                 android:textStyle="normal" />
 
             <CheckBox
@@ -159,7 +159,7 @@
                 android:fontFamily="sans-serif-condensed"
                 android:text="pinned"
                 android:textColor="@color/colorAccent"
-                android:textSize="12dp"
+                android:textSize="12sp"
                 android:textStyle="normal" />
         </LinearLayout>
     </LinearLayout>

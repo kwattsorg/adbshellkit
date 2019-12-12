@@ -28,7 +28,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         if (key.equals(KEY_PREF_TEXTSIZE)) {
             Preference connectionPref = findPreference(key);
             // Set summary to be the user-description for the selected value
-            Timber.d("Setting text size: " + key);
+            Timber.d("Setting text size: %s", key);
             connectionPref.setSummary(sharedPreferences.getString(key, ""));
         }
 

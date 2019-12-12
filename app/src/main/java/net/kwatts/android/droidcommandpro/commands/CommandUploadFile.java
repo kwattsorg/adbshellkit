@@ -5,10 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.JsonWriter;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
@@ -58,22 +54,13 @@ public class CommandUploadFile {
                         StorageReference riversRef = userRef.child(file.getLastPathSegment());
                         UploadTask uploadTask = riversRef.putFile(file);
                         // Register observers to listen for when the download is done or if it fails
-                        uploadTask.addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception exception) {
-                                Timber.e(exception);
-                            }
-                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                Timber.d("Successfully uploaded file!" + taskSnapshot.getMetadata().getPath());
-                                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                                // ...
-                            }
+                        uploadTask.addOnFailureListener(Timber::e).addOnSuccessListener(taskSnapshot -> {
+                            Timber.d("Successfully uploaded file!%s", taskSnapshot.getMetadata().getPath());
+                            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                            // ...
                         });
                         out.name("API_SUCCESS").value(filename + " uploaded!");
                     }
-
 
                 }
                 out.endObject();

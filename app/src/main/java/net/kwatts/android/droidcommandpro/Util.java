@@ -1,5 +1,7 @@
 package net.kwatts.android.droidcommandpro;
 
+import android.content.Context;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -12,7 +14,7 @@ import flipagram.assetcopylib.AssetCopier;
 public class Util {
     private static final String TAG = "MainActivity";
 
-    public static int copyAssetsToCacheDirectory(android.content.Context ctx, boolean isDir, String file) {
+    public static int copyAssetsToCacheDirectory(Context ctx, boolean isDir, String file) {
         int count = 0;
         try {
             if (isDir) {
@@ -27,12 +29,12 @@ public class Util {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Toast.makeText(ctx, (count==-1 ? "There was an error copying" : "files copied " + count), Toast.LENGTH_LONG).show();
+        //Toast.makeText(ctx, (count == -1 ? "There was an error copying" : "files copied " + count), Toast.LENGTH_LONG).show();
         return count;
     }
 
 
-    public static int copyAssetsToFilesDirectory(android.content.Context ctx, boolean isDir, String file) {
+    public static int copyAssetsToFilesDirectory(Context ctx, boolean isDir, String file) {
         int count = 0;
         try {
             if (isDir) {
@@ -47,7 +49,7 @@ public class Util {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Toast.makeText(ctx, (count==-1 ? "There was an error copying" : "files copied " + count), Toast.LENGTH_LONG).show();
+        //Toast.makeText(ctx, (count == -1 ? "There was an error copying" : "files copied " + count), Toast.LENGTH_LONG).show();
         return count;
     }
 

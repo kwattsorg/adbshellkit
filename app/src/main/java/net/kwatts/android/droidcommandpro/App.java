@@ -95,45 +95,43 @@ public class App extends Application {
 
 
         // Prepare local file and scripts, making them executable etc
-        new Thread(new Runnable() {
-            public void run() {
+        new Thread(() -> {
 
-                int count = 0;
+            int count = 0;
 
-                try {
-                    int v1 = 0;
-                    int v2 = BuildConfig.VERSION_CODE;
+            try {
+                int v1 = 0;
+                int v2 = BuildConfig.VERSION_CODE;
 
-                    File verFile = new File(App.FILES_PATH + "/files_version.txt");
+                File verFile = new File(App.FILES_PATH + "/files_version.txt");
 
-                    if (verFile.exists()) {
-                        v1 = Integer.parseInt(FileUtils.readFileToString(verFile));
-                    } else {
-                        Timber.d(App.FILES_PATH + "/files_version.txt" + " doesn't exist, creating");
-                    }
-
-                    Timber.d("files_version.txt exists: " + verFile.exists());
-                    Timber.d("files_version_code=" + v1 + ",app_version_code=" + v2);
-                    Timber.d("buildconfig version_code: " + v2);
-
-                    if (v1 != v2) {
-                        count = new AssetCopier(App.INSTANCE.getApplicationContext())
-                                .copy("files", App.INSTANCE.getApplicationContext().getFilesDir());
-                        FileUtils.writeStringToFile(verFile, String.valueOf(BuildConfig.VERSION_CODE));
-                    }
-
-                } catch (Exception e) {
-                    Timber.e(e);
-                    e.printStackTrace();
+                if (verFile.exists()) {
+                    v1 = Integer.parseInt(FileUtils.readFileToString(verFile));
+                } else {
+                    Timber.d(App.FILES_PATH + "/files_version.txt" + " doesn't exist, creating");
                 }
 
-                Timber.d("Total files copied: " + count);
-                Shell.sh("/system/bin/chmod -R 755 " + App.FILES_PATH + "/bin* "
-                        + App.FILES_PATH + "/lib* " + App.FILES_PATH + "/scripts "
-                        + App.FILES_PATH + "/share").exec();
+                Timber.d("files_version.txt exists: %s", verFile.exists());
+                Timber.d("files_version_code=" + v1 + ",app_version_code=" + v2);
+                Timber.d("buildconfig version_code: %s", v2);
 
+                if (v1 != v2) {
+                    count = new AssetCopier(App.INSTANCE.getApplicationContext())
+                            .copy("files", App.INSTANCE.getApplicationContext().getFilesDir());
+                    FileUtils.writeStringToFile(verFile, String.valueOf(BuildConfig.VERSION_CODE));
+                }
 
+            } catch (Exception e) {
+                Timber.e(e);
+                e.printStackTrace();
             }
+
+            Timber.d("Total files copied: %s", count);
+            Shell.sh("/system/bin/chmod -R 755 " + App.FILES_PATH + "/bin* "
+                    + App.FILES_PATH + "/lib* " + App.FILES_PATH + "/scripts "
+                    + App.FILES_PATH + "/share").exec();
+
+
         }).start();
 
 
@@ -162,16 +160,15 @@ public class App extends Application {
         @Override
         protected void log(int priority, String tag, String message, Throwable throwable) {
             switch (priority) {
-                case Log.VERBOSE:
-                case Log.DEBUG:
-                case Log.INFO:
-                    break;
                 case Log.WARN:
                     logWarning(priority, tag, message);
                     break;
                 case Log.ERROR:
                     logException(throwable);
                     break;
+                case Log.VERBOSE:
+                case Log.DEBUG:
+                case Log.INFO:
                 default:
                     break;
             }

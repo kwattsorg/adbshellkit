@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Build;
 
 import net.kwatts.android.droidcommandpro.ApiReceiver;
@@ -30,6 +31,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -65,7 +67,7 @@ public class CommandSmali {
         });
     }
 
-    public static JSONObject run(android.content.Context ctx, boolean saveFile, String appName) {
+    public static JSONObject run(Context ctx, boolean saveFile, String appName) {
         String appNameSmali = appName.replace('.', '/');
         String packageApkFileName = getApkFileName(ctx, appName);
 
@@ -102,18 +104,17 @@ public class CommandSmali {
             try {
                 //res.put("dex_class_count", dex.getClasses().size());
                 Set<? extends ClassDef> dexClasses = dex.getClasses();
-                ClassDef[] classDefs = dexClasses.toArray(new ClassDef[dexClasses.size()]);
+                ClassDef[] classDefs = dexClasses.toArray(new ClassDef[0]);
 
 
                 //JSONObject classes = new JSONObject();
-                for (int c = 0; c < classDefs.length; c++) {
+                for (ClassDef clazz : classDefs) {
 
-                    ClassDef clazz = classDefs[c];
                     // if "sourcefile": "R.java"
                     // and unzip apk file, get resources.arsc, then strings it or look at offset
                     // or use aapt?
 
-                    //                     if (!className.startsWith("Landroid") && !className.startsWith("Ljava") && !className.startsWith("Ldalvik")) {
+                    // if (!className.startsWith("Landroid") && !className.startsWith("Ljava") && !className.startsWith("Ldalvik")) {
                     if (clazz.getType().startsWith("L" + appNameSmali)) {
 
 
@@ -123,7 +124,7 @@ public class CommandSmali {
 
                         JSONArray class_fields = new JSONArray();
                         for (Field field : fields) {
-                            StringBuffer f = new StringBuffer(field.getName());
+                            StringBuilder f = new StringBuilder(field.getName());
                             EncodedValue initialValue = field.getInitialValue();
 
                             if (initialValue != null) {
@@ -132,20 +133,20 @@ public class CommandSmali {
                                 //https://github.com/ylya/horndroid/blob/master/src/main/java/com/horndroid/util/FormatEncodedValue.java
                                 switch (initialValue.getValueType()) {
                                     case ValueType.STRING:
-                                        f.append("=" + ((StringEncodedValue) initialValue).getValue());
+                                        f.append("=").append(((StringEncodedValue) initialValue).getValue());
                                         break;
                                     case ValueType.INT:
-                                        f.append("=" + ((IntEncodedValue) initialValue).getValue());
+                                        f.append("=").append(((IntEncodedValue) initialValue).getValue());
                                         break;
                                     case ValueType.CHAR:
-                                        f.append("=" + ((CharEncodedValue) initialValue).getValue());
+                                        f.append("=").append(((CharEncodedValue) initialValue).getValue());
                                         break;
                                     case ValueType.BOOLEAN:
-                                        f.append("=" + ((BooleanEncodedValue) initialValue).getValue());
+                                        f.append("=").append(((BooleanEncodedValue) initialValue).getValue());
                                         break;
 
                                     default:
-                                        //f.append("=" + ValueType.getValueTypeName(initialValue.getValueType()) + ")");
+                                        //f.append("=").append(ValueType.getValueTypeName(initialValue.getValueType())).append(")");
 
                                 }
 
@@ -171,7 +172,7 @@ public class CommandSmali {
                                             String returnType = method.getReturnType();
 
                                             List<? extends CharSequence> paramTypes = method.getParameterTypes();
-                                            StringBuffer returnTypes = new StringBuffer("(");
+                                            StringBuilder returnTypes = new StringBuilder("(");
                                             if (paramTypes != null) {
                                                 for (CharSequence type : paramTypes) {
                                                     returnTypes.append(type.toString());
@@ -265,16 +266,16 @@ public class CommandSmali {
                     PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
           */
 
-    public static JSONObject getResources(android.content.Context ctx, String appName) {
+    public static JSONObject getResources(Context ctx, String appName) {
         JSONArray resval = new JSONArray();
         JSONObject res = new JSONObject();
 
         try {
             // You can get PackageManager from the Context
-            android.content.res.Resources resources = ctx.getPackageManager().getResourcesForApplication(appName); //"com.android.settings"
+            Resources resources = ctx.getPackageManager().getResourcesForApplication(appName); //"com.android.settings"
 
             java.lang.reflect.Field[] fields = resources.getClass().getFields();
-            int allfields[] = {};
+            int[] allfields = {};
             for (int z = 0; z < fields.length; z++) {
                 // something like this, look at https://android.googlesource.com/platform/frameworks/base/+/0e2d281/core/java/android/content/res/Resources.java
                 // allfields[z] = fields[z].getInt();
@@ -283,8 +284,8 @@ public class CommandSmali {
             int resId = resources.getIdentifier("entryvalues_font_size", "array", appName);
             if (resId != 0) {
                 try {
-                    resval.put(resId + ": " + resources.getStringArray(resId).toString());
-                } catch (Exception e) {
+                    resval.put(resId + ": " + Arrays.toString(resources.getStringArray(resId)));
+                } catch (Exception ignored) {
                 }
             }
 
@@ -302,7 +303,7 @@ public class CommandSmali {
     }
 
     // Get from package manager or 'cmd package list packages -f'
-    public static String getApkFileName(android.content.Context ctx, String appName) {
+    public static String getApkFileName(Context ctx, String appName) {
         final PackageManager pm = ctx.getPackageManager();
         List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 

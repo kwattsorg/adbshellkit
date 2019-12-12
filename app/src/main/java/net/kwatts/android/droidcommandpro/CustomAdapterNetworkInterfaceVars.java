@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.net.NetworkInterface;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +20,7 @@ import java.util.List;
 public class CustomAdapterNetworkInterfaceVars extends ArrayAdapter<String> {
 
 
-    public List<NetworkInterface> spinnerVars = new ArrayList<>();
+    public List<NetworkInterface> spinnerVars;
     Context mContext;
 
     public CustomAdapterNetworkInterfaceVars(@NonNull Context context, List<NetworkInterface> vars) {
@@ -54,7 +53,7 @@ public class CustomAdapterNetworkInterfaceVars extends ArrayAdapter<String> {
             LayoutInflater mInflater = (LayoutInflater) mContext.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = mInflater.inflate(R.layout.custom_spinner_row_vars, parent, false);
-            mViewHolder.mVar = (TextView) convertView.findViewById(R.id.tvVar);
+            mViewHolder.mVar = convertView.findViewById(R.id.tvVar);
             convertView.setTag(mViewHolder);
         } else {
             mViewHolder = (ViewHolder) convertView.getTag();

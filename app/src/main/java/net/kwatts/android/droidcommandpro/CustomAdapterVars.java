@@ -10,7 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +19,7 @@ import java.util.List;
 public class CustomAdapterVars extends ArrayAdapter<String> {
 
 
-    public List<String> spinnerVars = new ArrayList<>();
+    public List<String> spinnerVars;
     Context mContext;
 
     public CustomAdapterVars(@NonNull Context context, List<String> vars) {
@@ -53,7 +52,7 @@ public class CustomAdapterVars extends ArrayAdapter<String> {
             LayoutInflater mInflater = (LayoutInflater) mContext.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = mInflater.inflate(R.layout.custom_spinner_row_vars, parent, false);
-            mViewHolder.mVar = (TextView) convertView.findViewById(R.id.tvVar);
+            mViewHolder.mVar = convertView.findViewById(R.id.tvVar);
             convertView.setTag(mViewHolder);
         } else {
             mViewHolder = (ViewHolder) convertView.getTag();

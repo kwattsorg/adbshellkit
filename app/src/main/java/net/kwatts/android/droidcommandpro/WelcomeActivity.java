@@ -2,7 +2,6 @@ package net.kwatts.android.droidcommandpro;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
 
@@ -30,24 +29,20 @@ public class WelcomeActivity extends AppCompatActivity //implements ActivityComp
             }
             setContentView(R.layout.welcome_activity);
 
-            //ImageView image = (ImageView) findViewById(R.id.welcome_netscanner_logo);
+            //ImageView image = findViewById(R.id.welcome_netscanner_logo);
             //image.setImageResource(R.drawable.antenna_blue_48x48);
 
             mWebView = findViewById(R.id.welcome_webview);
-            StringBuilder outXML = new StringBuilder();
-            outXML.append("<html><head><style type=\"text/css\">");
-            outXML.append("body { font-size: 1em; }</style></head><body>");
-            outXML.append(App.APP_DESCRIPTION_HTML);
-            outXML.append("</body></html>");
-            mWebView.loadData(outXML.toString(), "text/html", "utf-8");
+            String outXML = "<html><head><style type=\"text/css\">" +
+                    "body { font-size: 1em; }</style></head><body>" +
+                    App.APP_DESCRIPTION_HTML +
+                    "</body></html>";
+            mWebView.loadData(outXML, "text/html", "utf-8");
 
             Button startButton = findViewById(R.id.startButton);
-            startButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    App.mSharedPref.edit().putBoolean("first_time_run", true).commit();
-                    startMainActivity();
-                }
+            startButton.setOnClickListener(v -> {
+                App.mSharedPref.edit().putBoolean("first_time_run", true).apply();
+                startMainActivity();
             });
 
             //checkPermissions();
@@ -80,8 +75,7 @@ public class WelcomeActivity extends AppCompatActivity //implements ActivityComp
         this.finish();
     }
 
-    /*
-
+/*
     private void checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -123,9 +117,7 @@ public class WelcomeActivity extends AppCompatActivity //implements ActivityComp
 
         }
     }
-
-    */
-
+*/
 
 }
 

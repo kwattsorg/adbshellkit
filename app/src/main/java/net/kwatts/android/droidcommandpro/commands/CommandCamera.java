@@ -13,6 +13,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.JsonWriter;
 import android.util.Size;
@@ -93,9 +94,9 @@ public class CommandCamera {
                 out.append(result.message).append("\n");
                 if (result.error != null) {
                     out.append(result.error).append("\n");
-                    Timber.d("CameraCommand error: " + result.error);
+                    Timber.d("CameraCommand error: %s", result.error);
                 }
-                Timber.d("CameraCommand message: " + result.message);
+                Timber.d("CameraCommand message: %s", result.message);
                 out.flush();
                 out.close();
             });
@@ -209,7 +210,7 @@ public class CommandCamera {
             String command = intent.getAction();
             Context context = getApplicationContext();
 
-            Timber.d("CommandCamera intent with command:" + command);
+            Timber.d("CommandCamera intent with command:%s", command);
 
             CameraCommandResult result = new CameraCommandResult();
 
@@ -271,12 +272,9 @@ public class CommandCamera {
 
                     startCamera(cameraConfig);
 
-                    new android.os.Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            Timber.d("CommandCamera.onStartCommand: Taking picture!");
-                            takePicture();
-                        }
+                    new Handler().postDelayed(() -> {
+                        Timber.d("CommandCamera.onStartCommand: Taking picture!");
+                        takePicture();
                     }, 2000L);
                 } else {
                     //Open settings to grant permission for "Draw other apps".
@@ -301,7 +299,8 @@ public class CommandCamera {
 /*
             String moveFileName = imageFile.getAbsolutePath() + "/" + getDefaultCameraImageFilename();
             boolean isMoved = imageFile.renameTo(new File(moveFileName));
-            Timber.d("Renamed file: isMoved=" + isMoved + ",moveFileName=" + moveFileName); */
+            Timber.d("Renamed file: isMoved=" + isMoved + ",moveFileName=" + moveFileName);
+*/
 
             Timber.d("Adding to media scanner...");
             if (storegallery) {
@@ -313,7 +312,7 @@ public class CommandCamera {
 
         @Override
         public void onCameraError(@CameraError.CameraErrorCodes int errorCode) {
-            Timber.i("CommandCamera.onCameraError errorCode: " + errorCode);
+            Timber.i("CommandCamera.onCameraError errorCode: %s", errorCode);
             switch (errorCode) {
                 case CameraError.ERROR_CAMERA_OPEN_FAILED:
                     //Camera open failed. Probably because another application

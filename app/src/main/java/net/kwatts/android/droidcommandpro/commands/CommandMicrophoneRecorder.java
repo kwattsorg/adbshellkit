@@ -197,7 +197,7 @@ public class CommandMicrophoneRecorder {
 
                 file = new File(filename);
 
-                Timber.i("MediaRecording file is: " + file.getAbsolutePath());
+                Timber.i("MediaRecording file is: %s", file.getAbsolutePath());
 
                 if (file.exists()) {
                     result.error = String.format("File: %s already exists! Please specify a different filename", file.getName());
@@ -366,7 +366,7 @@ public class CommandMicrophoneRecorder {
         public void onError(MediaRecorder mr, int what, int extra) {
             isRecording = false;
             this.stopSelf();
-            Timber.e("MicRecorderService onError() " + what);
+            Timber.e("MicRecorderService onError() %s", what);
         }
 
         @Override
@@ -376,7 +376,7 @@ public class CommandMicrophoneRecorder {
                 case MEDIA_RECORDER_INFO_MAX_DURATION_REACHED:
                     this.stopSelf();
             }
-            Timber.i("MicRecorderService onInfo() " + what);
+            Timber.i("MicRecorderService onInfo() %s", what);
         }
     }
 

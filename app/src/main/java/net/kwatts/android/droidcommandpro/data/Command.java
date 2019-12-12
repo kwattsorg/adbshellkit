@@ -3,7 +3,7 @@ package net.kwatts.android.droidcommandpro.data;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +44,6 @@ public class Command {
     public Command() {
     }
 
-    ;
-
     public String getUid() {
         return mUid;
     }
@@ -72,7 +70,7 @@ public class Command {
 
     public List<String> getPermissionList() {
         if (mPermissionlist == null) {
-            mPermissionlist = new ArrayList<String>();
+            mPermissionlist = new ArrayList<>();
         }
         return mPermissionlist;
     }
@@ -85,7 +83,7 @@ public class Command {
         if (mPermissionlist != null) {
             mPermissionlist.add(permission);
         } else {
-            mPermissionlist = Arrays.asList(permission);
+            mPermissionlist = Collections.singletonList(permission);
         }
 
     }
@@ -175,16 +173,17 @@ public class Command {
     public String getCommandName() {
         return key;
     }
+
     public String[] getPermissions() {
         return mPermissionlist.toArray(new String[0]);
     }
+
     public JSONObject execute(android.content.Context ctx, List<String> args) {
         JSONObject res = new JSONObject();
         res.put("key", key);
         return res;
     }
 */
-
 
     public void addToRuncounts() {
         if (!isPublic) {
@@ -241,7 +240,7 @@ public class Command {
         if (obj == this) return true;
         if (!(obj instanceof Command)) return false;
         Command o = (Command) obj;
-        return o.key == this.key;
+        return o.key.equals(this.key);
     }
 
     public String toString() {

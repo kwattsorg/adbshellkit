@@ -1,8 +1,11 @@
 package net.kwatts.android.droidcommandpro.commands;
 
+import android.Manifest;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.ContactsContract;
 
 import net.kwatts.android.droidcommandpro.ApiReceiver;
@@ -18,7 +21,7 @@ import java.util.List;
 public class CommandGetContacts {
 
     public static String cmd = "cmd_get_contacts";
-    public static String[] permissions = {android.Manifest.permission.READ_CONTACTS};
+    public static String[] permissions = {Manifest.permission.READ_CONTACTS};
 
     public static void onReceive(final ApiReceiver apiReceiver, final Context context, final Intent intent) {
         ResultReturner.returnData(apiReceiver, intent, out -> {
@@ -28,7 +31,7 @@ public class CommandGetContacts {
     }
 
     // https://www.dev2qa.com/how-to-get-contact-list-in-android-programmatically/
-    public static JSONObject getAllContacts(android.content.ContentResolver cr) {
+    public static JSONObject getAllContacts(ContentResolver cr) {
         JSONArray res_val = new JSONArray();
         JSONObject res = new JSONObject();
 
@@ -50,10 +53,10 @@ public class CommandGetContacts {
 
 
                 // Data content uri (access data table. )
-                android.net.Uri dataContentUri = ContactsContract.Data.CONTENT_URI;
+                Uri dataContentUri = ContactsContract.Data.CONTENT_URI;
 
                 // Build query columns name array.
-                List<String> queryColumnList = new ArrayList<String>();
+                List<String> queryColumnList = new ArrayList<>();
 
                 // ContactsContract.Data.CONTACT_ID = "contact_id";
                 queryColumnList.add(ContactsContract.Data.CONTACT_ID);
@@ -119,16 +122,15 @@ public class CommandGetContacts {
                 queryColumnList.add(ContactsContract.Data.DATA15);
 
                 // Translate column name list to array.
-                String queryColumnArr[] = queryColumnList.toArray(new String[queryColumnList.size()]);
+                String[] queryColumnArr = queryColumnList.toArray(new String[0]);
 
                 // Build query condition string. Query rows by contact id.
-                StringBuffer whereClauseBuf = new StringBuffer();
-                whereClauseBuf.append(ContactsContract.Data.RAW_CONTACT_ID);
-                whereClauseBuf.append("=");
-                whereClauseBuf.append(rawContactId);
 
                 // Query data table and return related contact data.
-                Cursor cursor = cr.query(dataContentUri, queryColumnArr, whereClauseBuf.toString(), null, null);
+                String whereClauseBuf = ContactsContract.Data.RAW_CONTACT_ID +
+                        "=" +
+                        rawContactId;
+                Cursor cursor = cr.query(dataContentUri, queryColumnArr, whereClauseBuf, null, null);
 
                 if (cursor != null && cursor.getCount() > 0) {
                     //StringBuffer lineBuf = new StringBuffer();
@@ -171,13 +173,13 @@ public class CommandGetContacts {
     }
 
     // Return all raw_contacts _id in a list.
-    public static List<Integer> getRawContactsIdList(android.content.ContentResolver contentResolver) {
-        List<Integer> ret = new ArrayList<Integer>();
+    public static List<Integer> getRawContactsIdList(ContentResolver contentResolver) {
+        List<Integer> ret = new ArrayList<>();
 
         // Row contacts content uri( access raw_contacts table. ).
-        android.net.Uri rawContactUri = ContactsContract.RawContacts.CONTENT_URI;
+        Uri rawContactUri = ContactsContract.RawContacts.CONTENT_URI;
         // Return _id column in contacts raw_contacts table.
-        String queryColumnArr[] = {ContactsContract.RawContacts._ID};
+        String[] queryColumnArr = {ContactsContract.RawContacts._ID};
         // Query raw_contacts table and return raw_contacts table _id.
         Cursor cursor = contentResolver.query(rawContactUri, queryColumnArr, null, null, null);
         if (cursor != null) {
@@ -185,7 +187,7 @@ public class CommandGetContacts {
             do {
                 int idColumnIndex = cursor.getColumnIndex(ContactsContract.RawContacts._ID);
                 int rawContactsId = cursor.getInt(idColumnIndex);
-                ret.add(new Integer(rawContactsId));
+                ret.add(rawContactsId);
             } while (cursor.moveToNext());
         }
 
@@ -200,7 +202,7 @@ public class CommandGetContacts {
      *  So the return is a list string, each string for one column value.
      * */
     public static List<String> getColumnValueByMimetype(Cursor cursor, String mimeType) {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
 
         switch (mimeType) {
             // Get email data.

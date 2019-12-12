@@ -65,6 +65,7 @@
             android:layout_centerInParent="true"
             android:orientation="horizontal"
             android:paddingLeft="16dp"
+            style="?android:attr/buttonBarStyle"
             android:paddingRight="16dp"
             android:visibility="gone"
             tools:visibility="visible">
@@ -72,6 +73,7 @@
             <Button
                 android:id="@+id/sign_out_button"
                 android:layout_width="0dp"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/sign_out"
@@ -81,6 +83,7 @@
                 android:id="@+id/disconnect_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_weight="1"
                 android:text="@string/disconnect"
                 android:theme="@style/ThemeOverlay.MyDarkButton" />

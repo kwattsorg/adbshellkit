@@ -7,7 +7,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -25,6 +24,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.style.TabStopSpan;
@@ -50,8 +50,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import androidx.annotation.MainThread;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.ShareActionProvider;
 import androidx.core.app.ActivityCompat;
@@ -72,15 +70,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.google.common.base.Splitter;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -97,7 +94,6 @@ import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 import com.topjohnwu.superuser.CallbackList;
 import com.topjohnwu.superuser.Shell;
-import com.topjohnwu.superuser.io.SuFile;
 
 import net.kwatts.android.droidcommandpro.data.Command;
 import net.kwatts.android.droidcommandpro.data.GoogleUser;
@@ -145,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     private static final int MSG_CMD_TERMINATED = 2;
     private static final int MSG_CMD_COMPLETE = 3;
     public static SharedPreferences mSharedPref;
-    public static List<Command> mCommandQueue = new LinkedList<Command>();
+    public static List<Command> mCommandQueue = new LinkedList<>();
     public static TextView mTextViewState;
     public static EditText mTopCommandView;
     public static StringBuffer mTopOutString = new StringBuffer();
@@ -156,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public static List<Command> mGlobalCommands = new ArrayList<>();
     public static List<Command> mUserCommands = new ArrayList<>();
     public static FirebaseAnalytics mFirebaseAnalytics;
-    public static Map<String, String> mUserMapVars = new HashMap<String, String>();
+    public static Map<String, String> mUserMapVars = new HashMap<>();
     public static ToggleButton mToggleButtonVariables;
     public static NotificationCompat.Builder mNotificationBuilder;
     public static NotificationManagerCompat mNotificationManager;
@@ -234,15 +230,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     String mCurrentUserVars;
     private ShareActionProvider shareActionProvider;
     private ImageButton mGoogleUserSignedInImageButton;
-    private com.google.android.gms.common.SignInButton mGoogleUserSignInButton;
     private FirebaseAuth mAuth;
     private EditText dialogEditDescription;
     private EditText dialogEditCommand;
-    private View positiveAction;
     private CheckBox tagSuperUserCheckBox;
     private CheckBox tagPinnedCheckBox;
-    private TextView tvRemoveCommandDetails;
-    private TextView tvAddCommandAttributes;
 
     public static boolean isUserAdmin() {
         return isAdminUserClaim;
@@ -349,7 +341,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan("monospace", Typeface.NORMAL, mTextSize, displayTextColor, null);
         spanString.setSpan(textAppearanceSpan, 0, spanString.length(), 0);
         // Display "\t", offset by 100 pixels
-        spanString.setSpan(new TabStopSpan.Standard(100), 0, spanString.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spanString.setSpan(new TabStopSpan.Standard(100), 0, spanString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 
         lineView.setText(spanString);
@@ -361,12 +353,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         if (mLines.getChildCount() > 5000)
             mLines.removeViewAt(0);
 
-        mScrollView.post(new Runnable() {
-            public void run() {
-                if (autoscroll) {
-                    mScrollView.scrollTo(0, mLines.getBottom() - mScrollView.getHeight());
+        mScrollView.post(() -> {
+            if (autoscroll) {
+                mScrollView.scrollTo(0, mLines.getBottom() - mScrollView.getHeight());
 
-                }
             }
         });
     }
@@ -444,24 +434,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
 
             mGoogleUserSignedInImageButton = findViewById(R.id.signed_in_image_button);
-            mGoogleUserSignInButton = findViewById(R.id.sign_in_button);
+            SignInButton mGoogleUserSignInButton = findViewById(R.id.sign_in_button);
 
             AdapterView.OnItemSelectedListener myListener = new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    switch (parent.getId()) {
-                        case R.id.spinnerGlobalCommands:
-                            Command c = mCustomCmdsAdapter.getItem(position);
-                            if (c != null) {
-                                mTopCommandView.setText(c.getCommand());
-                                //hide keyboard
-                                InputMethodManager imm = (InputMethodManager) App.INSTANCE.getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(mTopCommandView.getWindowToken(), 0);
-                                //mTopCommandView.setSelection(c.getCommand().length());
-                            }
-                            break;
-                        default:
-                            break;
+                    if (parent.getId() == R.id.spinnerGlobalCommands) {
+                        Command c = mCustomCmdsAdapter.getItem(position);
+                        if (c != null) {
+                            mTopCommandView.setText(c.getCommand());
+                            //hide keyboard
+                            InputMethodManager imm = (InputMethodManager) App.INSTANCE.getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(mTopCommandView.getWindowToken(), 0);
+                            //mTopCommandView.setSelection(c.getCommand().length());
+                        }
                     }
                     invalidateOptionsMenu();
                 }
@@ -471,7 +457,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 }
             };
             mSpinnerCommands.setOnItemSelectedListener(myListener);
-            mCustomCmdsAdapter = new CustomAdapterCommands(MainActivity.this, new ArrayList<Command>());
+            mCustomCmdsAdapter = new CustomAdapterCommands(MainActivity.this, new ArrayList<>());
             mSpinnerCommands.setAdapter(mCustomCmdsAdapter);
 
             mRunButton = findViewById(R.id.runButton);
@@ -480,21 +466,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             mChronometer = findViewById(R.id.chronometer);
 
 
-            mGoogleUserSignedInImageButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mFirebaseUser != null) {
-                        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-                        startActivityForResult(signInIntent, RC_SIGN_IN);
-                    }
-                }
-            });
-            mGoogleUserSignInButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            mGoogleUserSignedInImageButton.setOnClickListener(v -> {
+                if (mFirebaseUser != null) {
                     Intent signInIntent = mGoogleSignInClient.getSignInIntent();
                     startActivityForResult(signInIntent, RC_SIGN_IN);
                 }
+            });
+            mGoogleUserSignInButton.setOnClickListener(v -> {
+                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                startActivityForResult(signInIntent, RC_SIGN_IN);
             });
 
             // Notifications
@@ -547,7 +527,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
 
         } catch (Exception e) {
-            Timber.e(e, "MainActivity onCreate() failed:" + e.getMessage());
+            Timber.e(e, "MainActivity onCreate() failed:%s", e.getMessage());
         }
 
     }
@@ -624,13 +604,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 // https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=XYZ123
-                GoogleSignInAccount account = task.getResult(com.google.android.gms.common.api.ApiException.class);
+                GoogleSignInAccount account = task.getResult(ApiException.class);
 
                 if (account != null) {
                     firebaseAuthWithGoogle(account);
                 }
-            } catch (com.google.android.gms.common.api.ApiException e) {
-                Timber.e(e, "signInResult:failed code=" + e.getStatusCode());
+            } catch (ApiException e) {
+                Timber.e(e, "signInResult:failed code=%s", e.getStatusCode());
                 Toast.makeText(getApplicationContext(), "Unable to sign in with Google Play Services (status_code: " + e.getStatusCode() + ")", Toast.LENGTH_SHORT).show();
             }
         }
@@ -640,23 +620,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
 
-        Timber.d("firebaseAuthWithGoogle:" + acct.getId());
+        Timber.d("firebaseAuthWithGoogle:%s", acct.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        mProgressDialog.cancel();
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Timber.d("signInWithCredential:success");
-                            mFirebaseUser = mAuth.getCurrentUser();
-                            refreshUserUI(true);
-                        } else {
-                            Timber.w("signInWithCredential:failure:" + task.getException());
-                            Toast.makeText(getApplicationContext(), "Authentication Failed.", Toast.LENGTH_SHORT).show();
-                        }
+                .addOnCompleteListener(this, task -> {
+                    mProgressDialog.cancel();
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Timber.d("signInWithCredential:success");
+                        mFirebaseUser = mAuth.getCurrentUser();
+                        refreshUserUI(true);
+                    } else {
+                        Timber.w("signInWithCredential:failure:%s", task.getException());
+                        Toast.makeText(getApplicationContext(), "Authentication Failed.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -712,9 +689,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         mTextSize = Integer.parseInt(mSharedPref.getString("textSize", "23"));
 
-        StringBuffer vars = new StringBuffer();
+        StringBuilder vars = new StringBuilder();
         for (Map.Entry<String, String> entry : mUserMapVars.entrySet()) {
-            vars.append(entry.getKey() + "=" + entry.getValue() + ";");
+            vars.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
         }
 
         if (mToggleButtonVariables != null) {
@@ -728,7 +705,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
 
         // NOW WE RUN!!!
-        Timber.d("Running:" + runCommand);
+        Timber.d("Running:%s", runCommand);
         commandTimer(true);
 
         List<String> consoleList;
@@ -757,38 +734,34 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
         startTime = SystemClock.elapsedRealtime();
 
-        Shell.ResultCallback runResultCallback = new Shell.ResultCallback() {
-            @MainThread
-            @Override
-            public void onResult(Shell.Result out) {
-                commandTimer(false);
-                CharSequence last_line = "";
-                if (mLines.getChildCount() > 0) {
-                    last_line = ((TextView) mLines.getChildAt(mLines.getChildCount() - 1)).getText();
-                }
-                long ms = SystemClock.elapsedRealtime() - startTime;
-                double s = ms / 1000.0;
-
-                String state = "Command finished after " + s + "secs (lines=" + mLines.getChildCount() +
-                        ",state=" + ((out.getCode() < 0) ? "fail(" + out.getCode() + ")" : "success") + ")";
-
-                setTextState(state, "", last_line.toString());
-                // clear the job...
-                mJob = null;
-
-                setShareData(state, runCommand);
-
-                // ... and close the shell after a couple of seconds if sharing is off
-                /*
-                if (mSharedPref.getBoolean("disableShellSharing",false)) {
-                    try {
-                        mShell.waitAndClose(2, TimeUnit.SECONDS);
-                    } catch (Exception e)  {
-                        Timber.e(e);
-                    }
-                } */
-
+        Shell.ResultCallback runResultCallback = out -> {
+            commandTimer(false);
+            CharSequence last_line = "";
+            if (mLines.getChildCount() > 0) {
+                last_line = ((TextView) mLines.getChildAt(mLines.getChildCount() - 1)).getText();
             }
+            long ms = SystemClock.elapsedRealtime() - startTime;
+            double s = ms / 1000.0;
+
+            String state = "Command finished after " + s + "secs (lines=" + mLines.getChildCount() +
+                    ",state=" + ((out.getCode() < 0) ? "fail(" + out.getCode() + ")" : "success") + ")";
+
+            setTextState(state, "", last_line.toString());
+            // clear the job...
+            mJob = null;
+
+            setShareData(state, runCommand);
+
+            // ... and close the shell after a couple of seconds if sharing is off
+            /*
+            if (mSharedPref.getBoolean("disableShellSharing",false)) {
+                try {
+                    mShell.waitAndClose(2, TimeUnit.SECONDS);
+                } catch (Exception e)  {
+                    Timber.e(e);
+                }
+            } */
+
         };
 
         mJob.add(runCommand);
@@ -819,43 +792,41 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (Build.VERSION.SDK_INT > 11) {
-            invalidateOptionsMenu();
+        invalidateOptionsMenu();
 
-            shareMenuItem.setVisible(true);
+        shareMenuItem.setVisible(true);
 
-            // User is logged in!
-            if ((FirebaseAuth.getInstance().getCurrentUser() != null)) {
-                menu.findItem(R.id.action_login).setVisible(false);
-                menu.findItem(R.id.action_logout).setVisible(true);
-                addCommandMenuItem.setVisible(true);
+        // User is logged in!
+        if ((FirebaseAuth.getInstance().getCurrentUser() != null)) {
+            menu.findItem(R.id.action_login).setVisible(false);
+            menu.findItem(R.id.action_logout).setVisible(true);
+            addCommandMenuItem.setVisible(true);
 
-                if (mCustomCmdsAdapter.getCount() > 0) {
+            if (mCustomCmdsAdapter.getCount() > 0) {
 
-                    Command c = mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
-                    if (c != null) {
-                        if (c.isPublic && isAdmin == false) {
-                            changeCommandMenuItem.setVisible(false);
-                            removeCommandMenuItem.setVisible(false);
-                        } else {
-                            changeCommandMenuItem.setVisible(true);
-                            removeCommandMenuItem.setVisible(true);
-                        }
+                Command c = mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
+                if (c != null) {
+                    if (c.isPublic && isAdmin == false) {
+                        changeCommandMenuItem.setVisible(false);
+                        removeCommandMenuItem.setVisible(false);
+                    } else {
+                        changeCommandMenuItem.setVisible(true);
+                        removeCommandMenuItem.setVisible(true);
                     }
-                } else {
-                    changeCommandMenuItem.setVisible(false);
-                    removeCommandMenuItem.setVisible(false);
                 }
-
             } else {
-                menu.findItem(R.id.action_login).setVisible(true);
-                menu.findItem(R.id.action_logout).setVisible(false);
-                addCommandMenuItem.setVisible(false);
                 changeCommandMenuItem.setVisible(false);
                 removeCommandMenuItem.setVisible(false);
             }
 
+        } else {
+            menu.findItem(R.id.action_login).setVisible(true);
+            menu.findItem(R.id.action_logout).setVisible(false);
+            addCommandMenuItem.setVisible(false);
+            changeCommandMenuItem.setVisible(false);
+            removeCommandMenuItem.setVisible(false);
         }
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -949,40 +920,37 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 FirebaseDatabase.getInstance().getReference().child("users").child(mFirebaseUser.getUid()).setValue(user);
 
 
-                mFirebaseUser.getIdToken(false).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
-                    @Override
-                    public void onSuccess(GetTokenResult result) {
-                        //Map<String, Object> res_claims = result.getClaims();
-                        isAdmin = Boolean.FALSE;
-                        try {
+                mFirebaseUser.getIdToken(false).addOnSuccessListener(result -> {
+                    //Map<String, Object> res_claims = result.getClaims();
+                    isAdmin = Boolean.FALSE;
+                    try {
 
-                            //Object obj = result.getClaims().getOrDefault("admin", Boolean.FALSE);
-                            Map<String, Object> res = result.getClaims();
-                            for (Map.Entry<String, Object> entry : res.entrySet()) {
-                                String k = entry.getKey();
-                                Object v = entry.getValue();
+                        //Object obj = result.getClaims().getOrDefault("admin", Boolean.FALSE);
+                        Map<String, Object> res = result.getClaims();
+                        for (Map.Entry<String, Object> entry : res.entrySet()) {
+                            String k = entry.getKey();
+                            Object v = entry.getValue();
 
-                                if (k.equals("admin")) {
-                                    if (v instanceof Boolean) {
-                                        isAdmin = (Boolean) v;
-                                    }
+                            if (k.equals("admin")) {
+                                if (v instanceof Boolean) {
+                                    isAdmin = (Boolean) v;
                                 }
                             }
-
-                            if (isAdmin) {
-                                isAdminUserClaim = true;
-                                setTextUserStatus(mFirebaseUser.getEmail() + " as admin");
-                            } else {
-                                isAdminUserClaim = false;
-                                setTextUserStatus(mFirebaseUser.getEmail() + " as user");
-                            }
-
-
-                        } catch (Exception e) {
-                            isAdminUserClaim = false;
-                            setTextUserStatus("Logged in not as user or admin?");
-                            Timber.e(e, "Exception checking for user permission claims");
                         }
+
+                        if (isAdmin) {
+                            isAdminUserClaim = true;
+                            setTextUserStatus(mFirebaseUser.getEmail() + " as admin");
+                        } else {
+                            isAdminUserClaim = false;
+                            setTextUserStatus(mFirebaseUser.getEmail() + " as user");
+                        }
+
+
+                    } catch (Exception e) {
+                        isAdminUserClaim = false;
+                        setTextUserStatus("Logged in not as user or admin?");
+                        Timber.e(e, "Exception checking for user permission claims");
                     }
                 });
 
@@ -1027,7 +995,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         } else {
             // setTextUserStatus("Logged in as anonymous");
         }
-/* BEGIN NEW
+/*
+        //BEGIN NEW
         // https://firebase.googleblog.com/2017/12/using-android-architecture-components.html
         // https://firebase.googleblog.com/2017/12/using-android-architecture-components_20.html
 
@@ -1040,7 +1009,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             public void onChanged(@Nullable DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null) {
                     mGlobalCommands.clear();
-                    for (DataSnapshot cmdSnapshot: dataSnapshot.getChildren()) {
+                    for (DataSnapshot cmdSnapshot : dataSnapshot.getChildren()) {
                         Command cmd = cmdSnapshot.getValue(Command.class);
                         if (cmd != null) {
                             cmd.key = cmdSnapshot.getKey();
@@ -1051,8 +1020,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     allCommands.addAll(mUserCommands);
                     allCommands.addAll(mGlobalCommands);
 
-                    boolean hideSuperCommands = mSharedPref.getBoolean("hideSuperUserCommands",false);
-                    mCustomCmdsAdapter.addAllCommands(allCommands,hideSuperCommands);
+                    boolean hideSuperCommands = mSharedPref.getBoolean("hideSuperUserCommands", false);
+                    mCustomCmdsAdapter.addAllCommands(allCommands, hideSuperCommands);
                     mCustomCmdsAdapter.notifyDataSetChanged();
                 }
             }
@@ -1132,7 +1101,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public void addDynamicShortcut(String cmd_key, String cmd, String label) {
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                 ShortcutManager smgr = (ShortcutManager) getSystemService(SHORTCUT_SERVICE);
                 Intent di = new Intent(App.INSTANCE.getApplicationContext(), MainActivity.class);
                 di.setAction(Intent.ACTION_MAIN);
@@ -1157,7 +1126,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public void removeDynamicShortcuts() {
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                 ShortcutManager smgr = (ShortcutManager) getSystemService(SHORTCUT_SERVICE);
                 smgr.removeAllDynamicShortcuts();
             }
@@ -1170,15 +1139,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         if (shareActionProvider != null) {
             Intent share = new Intent(Intent.ACTION_SEND);
             share.setType("text/plain");
-            StringBuffer cmdOut = new StringBuffer();
-            cmdOut.append(state + "\n\n");
+            StringBuilder cmdOut = new StringBuilder();
+            cmdOut.append(state).append("\n\n");
             cmdOut.append("=== COMMAND ===" + "\n");
-            cmdOut.append(cmd + "\n");
+            cmdOut.append(cmd).append("\n");
             cmdOut.append("===============" + "\n\n");
 
             for (int x = 0; x < mLines.getChildCount(); x++) {
                 TextView currentTextView = (TextView) mLines.getChildAt(x);
-                cmdOut.append(currentTextView.getText() + "\r\n");
+                cmdOut.append(currentTextView.getText()).append("\r\n");
             }
             share.putExtra(android.content.Intent.EXTRA_SUBJECT, "ADB Shellkit Command Results");
             share.putExtra(Intent.EXTRA_TEXT, cmdOut.toString());
@@ -1197,14 +1166,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         runOnUiThread(() -> {
             if (start) {
                 mChronometer.setVisibility(View.VISIBLE);
-                mChronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
-                    @Override
-                    public void onChronometerTick(Chronometer chronometer) {
-                        //long systemCurrTime = SystemClock.elapsedRealtime();
-                        //long chronometerBaseTime = mChronometer.getBase();
-                        //long deltaTimeSeconds = TimeUnit.MILLISECONDS.toSeconds(systemCurrTime - chronometerBaseTime);
-                        //if (deltaTimeSeconds % 15L == 0) { }
-                    }
+                mChronometer.setOnChronometerTickListener(chronometer -> {
+                    //long systemCurrTime = SystemClock.elapsedRealtime();
+                    //long chronometerBaseTime = mChronometer.getBase();
+                    //long deltaTimeSeconds = TimeUnit.MILLISECONDS.toSeconds(systemCurrTime - chronometerBaseTime);
+                    //if (deltaTimeSeconds % 15L == 0) { }
                 });
 
                 mChronometer.setBase(SystemClock.elapsedRealtime());
@@ -1223,7 +1189,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         if (c.isSuperUser()) {
             // Check if we are superuser
             if (!Shell.rootAccess()) {
-                Toast.makeText(getApplicationContext(), "Superuser/root access not detected and required to run this command. You can hide superuser commands in settings", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(),
+                        "Superuser/root access not detected and required to run this command. You can hide superuser commands in settings",
+                        Toast.LENGTH_LONG).show();
             }
         }
         // Command defined permissions
@@ -1246,7 +1214,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     }
 
-    public boolean checkCommandPermission(String permission) {
+    public void checkCommandPermission(String permission) {
         int result;
 
         result = ContextCompat.checkSelfPermission(MainActivity.this, permission);
@@ -1254,26 +1222,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
                 //Toast.makeText(getApplicationContext(), "This command needs permission " + permission + " and may not run properly without it granted",
                 //     Toast.LENGTH_LONG).show();
-                showPermissionExplanation("Permission Needed", "This command needs " + permission + " and may not run properly without it granted", permission, COMMAND_PERMISSION);
+                showPermissionExplanation("This command needs " + permission
+                        + " and may not run properly without it granted", permission);
             } else {
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, COMMAND_PERMISSION);
             }
 
-            return false;
         }
 
-        return true;
     }
 
-    private void showPermissionExplanation(String title, String message, final String permission, final int permissionRequestCode) {
+    private void showPermissionExplanation(String message, final String permission) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title)
+        builder.setTitle("Permission Needed")
                 .setMessage(message)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, COMMAND_PERMISSION);
-                    }
-                });
+                .setPositiveButton(android.R.string.ok, (dialog, id) ->
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, COMMAND_PERMISSION));
         builder.create().show();
     }
 
@@ -1287,23 +1251,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             }
         }
         if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), MULTIPLE_PERMISSIONS);
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[0]), MULTIPLE_PERMISSIONS);
             return false;
         }
         return true;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case MULTIPLE_PERMISSIONS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permissions granted.
                     lastPermissionStatus = true;
                 } else {
-                    String permsNoGrant = "";
+                    StringBuilder permsNoGrant = new StringBuilder();
                     for (String per : permissionsList) {
-                        permsNoGrant += "\n" + per;
+                        permsNoGrant.append("\n").append(per);
                     }
                     lastPermissionStatus = false;
                     // permissions list of don't granted permission
@@ -1318,15 +1282,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     Toast.makeText(MainActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
 
                 } else {
-                    String permsNoGrant = "";
+                    StringBuilder permsNoGrant = new StringBuilder();
                     for (String per : permissionsList) {
-                        permsNoGrant += "\n" + per;
+                        permsNoGrant.append("\n").append(per);
                     }
                     lastPermissionStatus = false;
                     //Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
                     // permissions list of don't granted permission
                 }
-                return;
 
             }
         }
@@ -1350,12 +1313,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public Map<String, String> splitVariables(String v) {
         try {
-            Map<String, String> map = com.google.common.base.Splitter.on(',')
+            return Splitter.on(',')
                     .omitEmptyStrings()
                     .trimResults()
                     .withKeyValueSeparator("=")
                     .split(v);
-            return map;
         } catch (Exception e) {
             Timber.e(e, "Unable to parse variables!");
         }
@@ -1364,8 +1326,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     }
 
     private void loadVariables() {
-        mAppPackagesList = new ArrayList<String>();
-        mNetworkInterfaceList = new ArrayList<NetworkInterface>();
+        mAppPackagesList = new ArrayList<>();
+        mNetworkInterfaceList = new ArrayList<>();
 
         String thisPackageName = getPackageName();
         PackageManager packageManager = getPackageManager();
@@ -1410,49 +1372,48 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     public void showVariableView() {
         loadVariables();
 
-        MaterialDialog dialog =
-                new MaterialDialog.Builder(this)
-                        .title("Variable Editor")
-                        .customView(R.layout.custom_addvariables_dialog, true)
-                        .positiveText("DONE")
-                        .onPositive(
-                                (dialog1, which) ->
-                                {
-                                    try {
-                                        if (mPackagesSpinner.getSelectedItemPosition() >= 0) {
-                                            mUserMapVars.put("APP_PACKAGE", mAppPackagesList.get(mPackagesSpinner.getSelectedItemPosition()));
-                                        }
+        MaterialDialog dialog = new MaterialDialog.Builder(this)
+                .title("Variable Editor")
+                .customView(R.layout.custom_addvariables_dialog, true)
+                .positiveText("DONE")
+                .onPositive(
+                        (dialog1, which) ->
+                        {
+                            try {
+                                if (mPackagesSpinner.getSelectedItemPosition() >= 0) {
+                                    mUserMapVars.put("APP_PACKAGE", mAppPackagesList.get(mPackagesSpinner.getSelectedItemPosition()));
+                                }
 
-                                        if (mNetworkInterfaceSpinner.getSelectedItemPosition() >= 0) {
-                                            mUserMapVars.put("NETWORK_INTERFACE", mNetworkInterfaceList.get(mNetworkInterfaceSpinner.getSelectedItemPosition()).getDisplayName());
+                                if (mNetworkInterfaceSpinner.getSelectedItemPosition() >= 0) {
+                                    mUserMapVars.put("NETWORK_INTERFACE", mNetworkInterfaceList.get(mNetworkInterfaceSpinner.getSelectedItemPosition()).getDisplayName());
 
-                                        }
-                                        mCurrentUserVars = mDialogEditUserVars.getText().toString();
-                                        Map<String, String> m = splitVariables(mCurrentUserVars);
-                                        if (m != null) {
-                                            mUserMapVars.putAll(m);
-                                        }
+                                }
+                                mCurrentUserVars = mDialogEditUserVars.getText().toString();
+                                Map<String, String> m = splitVariables(mCurrentUserVars);
+                                if (m != null) {
+                                    mUserMapVars.putAll(m);
+                                }
 
-                                        String chosenFileName = mDialogFileSelectedVars.getText().toString();
-                                        if (TextUtils.isEmpty(chosenFileName)) {
-                                            mUserMapVars.put("FILE_CHOOSER", "");
+                                String chosenFileName = mDialogFileSelectedVars.getText().toString();
+                                if (TextUtils.isEmpty(chosenFileName)) {
+                                    mUserMapVars.put("FILE_CHOOSER", "");
 
-                                        } else {
-                                            mUserMapVars.put("FILE_CHOOSER", chosenFileName);
-                                        }
+                                } else {
+                                    mUserMapVars.put("FILE_CHOOSER", chosenFileName);
+                                }
 
-                                    } catch (Exception e) {
-                                        Timber.e(e);
-                                    }
+                            } catch (Exception e) {
+                                Timber.e(e);
+                            }
 
 
-                                })
-                        .build();
+                        })
+                .build();
 
-        mPackagesSpinner = (Spinner) dialog.getCustomView().findViewById(R.id.spinnerAppPackageVar);
+        mPackagesSpinner = dialog.getCustomView().findViewById(R.id.spinnerAppPackageVar);
         mPackagesSpinner.setAdapter(mCustomVarsAdapter);
-        TextView networkInterfaceVarDetailsTextView = (TextView) dialog.getCustomView().findViewById(R.id.tvNetworkInterfaceVarDetails);
-        mNetworkInterfaceSpinner = (Spinner) dialog.getCustomView().findViewById(R.id.spinnerNetworkInterfaceVar);
+        TextView networkInterfaceVarDetailsTextView = dialog.getCustomView().findViewById(R.id.tvNetworkInterfaceVarDetails);
+        mNetworkInterfaceSpinner = dialog.getCustomView().findViewById(R.id.spinnerNetworkInterfaceVar);
         mNetworkInterfaceSpinner.setAdapter(mCustomVarsNetworkInterfaceAdapter);
         mDialogEditUserVars = dialog.getCustomView().findViewById(R.id.dialogEditUserVars);
         mToggleButtonVariables = dialog.getCustomView().findViewById(R.id.toggleButtonVariables);
@@ -1460,35 +1421,29 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mButtonFileSelectedVariables = dialog.getCustomView().findViewById(R.id.buttonFileSelectedVariables);
         mDialogFileSelectedVars = dialog.getCustomView().findViewById(R.id.dialogFileSelectedVars);
 
-        mButtonFileSelectedVariables.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+        mButtonFileSelectedVariables.setOnClickListener(v -> {
 
-                String startPath;
+            String startPath;
 
-                // first see if directory is entered
-                String inputFileName = mDialogFileSelectedVars.getText().toString();
-                if (!TextUtils.isEmpty(inputFileName)) {
-                    startPath = new File(inputFileName).getAbsolutePath();
+            // first see if directory is entered
+            String inputFileName = mDialogFileSelectedVars.getText().toString();
+            if (!TextUtils.isEmpty(inputFileName)) {
+                startPath = new File(inputFileName).getAbsolutePath();
+            } else {
+                if (Shell.getShell().isRoot()) {
+                    startPath = "/";
                 } else {
-                    if (Shell.getShell().isRoot()) {
-                        startPath = "/";
-                    } else {
-                        startPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-                    }
+                    startPath = Environment.getExternalStorageDirectory().getAbsolutePath();
                 }
-
-
-                new ChooserDialog().with(MainActivity.this)
-                        .withStartFile(startPath)
-                        .withChosenListener(new ChooserDialog.Result() {
-                            //@Override
-                            public void onChoosePath(String path, SuFile pathFile) {
-                                mDialogFileSelectedVars.setText(path);
-                            }
-                        })
-                        .build()
-                        .show();
             }
+
+
+            //@Override
+            new ChooserDialog().with(MainActivity.this)
+                    .withStartFile(startPath)
+                    .withChosenListener((path, pathFile) -> mDialogFileSelectedVars.setText(path))
+                    .build()
+                    .show();
         });
 
         // Set to previously set user vars
@@ -1498,32 +1453,27 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         mPackagesSpinner.setSelection(mAppPackagesList.indexOf(mUserMapVars.get("APP_PACKAGE")));
         mNetworkInterfaceSpinner.setSelection(mNetworkInterfaceList.indexOf(mUserMapVars.get("NETWORK_INTERFACE")));
 
-        android.widget.AdapterView.OnItemSelectedListener myListener = new android.widget.AdapterView.OnItemSelectedListener() {
+        AdapterView.OnItemSelectedListener myListener = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (parent.getId()) {
-                    case R.id.spinnerNetworkInterfaceVar:
-                        NetworkInterface netInterface = mCustomVarsNetworkInterfaceAdapter.spinnerVars.get(position);
-                        Timber.d("networkinterface selected: " + netInterface.getDisplayName());
-                        try {
-                            StringBuffer n = new StringBuffer();
-                            Enumeration ee = netInterface.getInetAddresses();
-                            while (ee.hasMoreElements()) {
-                                InetAddress i = (InetAddress) ee.nextElement();
-                                n.append(i.getHostAddress() + " ");
-                            }
-
-                            networkInterfaceVarDetailsTextView.setText(netInterface.getDisplayName() + ": " +
-                                    "isUp=" + netInterface.isUp() + "," +
-                                    "addresses=" + n.toString());
-                        } catch (Exception e) {
-                            networkInterfaceVarDetailsTextView.setText(netInterface.getDisplayName() + ": " + e.getMessage());
-
+                if (parent.getId() == R.id.spinnerNetworkInterfaceVar) {
+                    NetworkInterface netInterface = mCustomVarsNetworkInterfaceAdapter.spinnerVars.get(position);
+                    Timber.d("networkinterface selected: %s", netInterface.getDisplayName());
+                    try {
+                        StringBuilder n = new StringBuilder();
+                        Enumeration ee = netInterface.getInetAddresses();
+                        while (ee.hasMoreElements()) {
+                            InetAddress i = (InetAddress) ee.nextElement();
+                            n.append(i.getHostAddress()).append(" ");
                         }
 
-                        break;
-                    default:
-                        break;
+                        networkInterfaceVarDetailsTextView.setText(netInterface.getDisplayName() + ": " +
+                                "isUp=" + netInterface.isUp() + "," +
+                                "addresses=" + n.toString());
+                    } catch (Exception e) {
+                        networkInterfaceVarDetailsTextView.setText(netInterface.getDisplayName() + ": " + e.getMessage());
+
+                    }
                 }
             }
 
@@ -1547,40 +1497,36 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             Command c = mCustomCmdsAdapter.getItem(mSpinnerCommands.getSelectedItemPosition());
 
             if (c.isPublic && !isUserAdmin()) {
-                Toast.makeText(getApplicationContext(), "This is a public command, maybe you meant to select/remove a private command?", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "This is a public command, maybe you meant to select/remove a private command?",
+                        Toast.LENGTH_SHORT).show();
             }
 
-            MaterialDialog dialog =
-                    new MaterialDialog.Builder(this)
-                            .title("Remove command")
-                            .customView(R.layout.custom_removecommand_dialog, true)
-                            .positiveText("REMOVE")
-                            .negativeText(android.R.string.cancel)
-                            .onPositive(
-                                    (dialog1, which) ->
-                                    {
-                                        if (firebaseUser != null) {
-                                            try {
-                                                removeCommand(c);
-                                            } catch (Exception e) {
-                                                Timber.e(e);
-                                            }
-                                            Toast.makeText(getApplicationContext(), "Command removed for " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
-                                        } else {
-                                            Toast.makeText(getApplicationContext(), "Please Login to remove commands!", Toast.LENGTH_SHORT).show();
-                                        }
+            MaterialDialog dialog = new MaterialDialog.Builder(this)
+                    .title("Remove command")
+                    .customView(R.layout.custom_removecommand_dialog, true)
+                    .positiveText("REMOVE")
+                    .negativeText(android.R.string.cancel)
+                    .onPositive((dialog1, which) -> {
+                        if (firebaseUser != null) {
+                            try {
+                                removeCommand(c);
+                            } catch (Exception e) {
+                                Timber.e(e);
+                            }
+                            Toast.makeText(getApplicationContext(), "Command removed for " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Please Login to remove commands!", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .build();
 
-
-                                    })
-                            .build();
-
-            positiveAction = dialog.getActionButton(DialogAction.POSITIVE);
-            tvRemoveCommandDetails = dialog.getCustomView().findViewById(R.id.tvRemoveCommandDetails);
+            View positiveAction = dialog.getActionButton(DialogAction.POSITIVE);
+            TextView tvRemoveCommandDetails = dialog.getCustomView().findViewById(R.id.tvRemoveCommandDetails);
 
 
             if (c.key != null) {
 
-                String permString[] = c.getPermissionList().toArray(new String[0]);
+                String[] permString = c.getPermissionList().toArray(new String[0]);
 
                 tvRemoveCommandDetails.setText("key: " + c.key +
                         "\nuid: " + c.getUid() +
@@ -1612,78 +1558,68 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
     public void showCommandView(FirebaseUser user, Command c) {
         //If command is empty, we are creating a new one.
-        final boolean isNewCommand = (c.getCommand().isEmpty()) ? true : false;
+        final boolean isNewCommand = c.getCommand().isEmpty();
 
 
-        MaterialDialog dialog =
-                new MaterialDialog.Builder(this)
-                        .title("Command editor")
-                        .customView(R.layout.custom_addcommand_dialog, true)
-                        .negativeText(android.R.string.cancel)
-                        .positiveText("DONE")
-                        .onPositive(
-                                (dialog1, which) ->
-                                {
+        MaterialDialog dialog = new MaterialDialog.Builder(this)
+                .title("Command editor")
+                .customView(R.layout.custom_addcommand_dialog, true)
+                .negativeText(android.R.string.cancel)
+                .positiveText("DONE")
+                .onPositive((dialog1, which) -> {
+                    if (user != null) {
 
-                                    if (user != null) {
+                        List<String> tags = new ArrayList<>();
+                        if (isUserAdmin()) {
+                            try {
+                                String addPermissionSelected = spinnerAddPermission.getSelectedItem().toString();
+                                String removePermissionSelected = spinnerRemovePermission.getSelectedItem().toString();
+                                if (!addPermissionSelected.equals("-")) {
+                                    c.addPermission(addPermissionSelected);
+                                }
+                                if (!removePermissionSelected.equals("-")) {
+                                    c.removePermission(removePermissionSelected);
+                                }
+                            } catch (Exception e) {
+                                Timber.e(e);
+                            }
 
-                                        List<String> tags = new ArrayList<>();
-                                        if (isUserAdmin()) {
-                                            try {
-                                                String addPermissionSelected = spinnerAddPermission.getSelectedItem().toString();
-                                                String removePermissionSelected = spinnerRemovePermission.getSelectedItem().toString();
-                                                if (addPermissionSelected != "-") {
-                                                    c.addPermission(addPermissionSelected);
-                                                }
-                                                if (removePermissionSelected != "-") {
-                                                    c.removePermission(removePermissionSelected);
-                                                }
-                                            } catch (Exception e) {
-                                                Timber.e(e);
-                                            }
+                            c.isPublic = tagAdminIsPublicCheckBox.isChecked();
+                            if (tagAdminOnboardingCheckBox.isChecked()) {
+                                tags.add("onboarding");
+                            }
+                        }
 
-                                            if (tagAdminIsPublicCheckBox.isChecked()) {
-                                                c.isPublic = true;
-                                            } else {
-                                                c.isPublic = false;
-                                            }
-                                            if (tagAdminOnboardingCheckBox.isChecked()) {
-                                                tags.add("onboarding");
-                                            }
+                        if (tagSuperUserCheckBox.isChecked()) {
+                            tags.add("superuser");
+                        }
+                        if (tagPinnedCheckBox.isChecked()) {
+                            tags.add("pinned");
+                        }
+                        c.setUid(user.getUid());
+                        c.setEmail(user.getEmail());
+                        c.setTagList(tags);
+                        c.setDescription(dialogEditDescription.getText().toString());
+                        c.setCommand(dialogEditCommand.getText().toString());
+                        c.setLastused(System.currentTimeMillis());
 
-
-                                        }
-
-
-                                        if (tagSuperUserCheckBox.isChecked()) {
-                                            tags.add("superuser");
-                                        }
-                                        if (tagPinnedCheckBox.isChecked()) {
-                                            tags.add("pinned");
-                                        }
-                                        c.setUid(user.getUid());
-                                        c.setEmail(user.getEmail());
-                                        c.setTagList(tags);
-                                        c.setDescription(dialogEditDescription.getText().toString());
-                                        c.setCommand(dialogEditCommand.getText().toString());
-                                        c.setLastused(System.currentTimeMillis());
-
-                                        try {
-                                            writeCommand(c);
-                                        } catch (Exception e) {
-                                            Timber.e(e);
-                                        }
+                        try {
+                            writeCommand(c);
+                        } catch (Exception e) {
+                            Timber.e(e);
+                        }
 
 
-                                        Toast.makeText(getApplicationContext(), "Command saved for " + user.getEmail() + ", isNewCommand=" + isNewCommand, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Command saved for " + user.getEmail()
+                                + ", isNewCommand=" + isNewCommand, Toast.LENGTH_SHORT).show();
 
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "Please Login to create commands!", Toast.LENGTH_SHORT).show();
-                                    }
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Please Login to create commands!", Toast.LENGTH_SHORT).show();
+                    }
 
 
-                                })
-                        .build();
+                })
+                .build();
 
         // Custom options only available for admins
         if (isUserAdmin()) {
@@ -1697,16 +1633,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             spinnerAddPermission = dialog.getCustomView().findViewById(R.id.spinnerAddPermission);
             String[] permAddList = Util.getPermissions();  //TODO: get perms server side
             final List<String> permsAddStringList = new ArrayList<>(Arrays.asList(permAddList));
-            final ArrayAdapter<String> spinnerArrayPermsAddAdapter = new ArrayAdapter<String>(
+            final ArrayAdapter<String> spinnerArrayPermsAddAdapter = new ArrayAdapter<>(
                     this, android.R.layout.simple_spinner_item, permsAddStringList);
             spinnerArrayPermsAddAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerAddPermission.setAdapter(spinnerArrayPermsAddAdapter);
             spinnerRemovePermission = dialog.getCustomView().findViewById(R.id.spinnerRemovePermission);
 
-            List<String> removePermissionList = new ArrayList<String>(c.getPermissionList());
+            List<String> removePermissionList = new ArrayList<>(c.getPermissionList());
             removePermissionList.add(0, "-");
 
-            final ArrayAdapter<String> spinnerArrayPermsRemoveAdapter = new ArrayAdapter<String>(
+            final ArrayAdapter<String> spinnerArrayPermsRemoveAdapter = new ArrayAdapter<>(
                     this, android.R.layout.simple_spinner_item, removePermissionList);
             spinnerArrayPermsRemoveAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerRemovePermission.setAdapter(spinnerArrayPermsRemoveAdapter);
@@ -1727,7 +1663,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
 
 
-        tvAddCommandAttributes = dialog.getCustomView().findViewById(R.id.tvAddCommandAttributes);
+        TextView tvAddCommandAttributes = dialog.getCustomView().findViewById(R.id.tvAddCommandAttributes);
 
 
         if (isNewCommand) {
@@ -1765,7 +1701,5 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
 
         dialog.show();
-
-
     }
 }

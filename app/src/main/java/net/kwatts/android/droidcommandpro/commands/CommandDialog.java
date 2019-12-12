@@ -131,8 +131,8 @@ public class CommandDialog extends AppCompatActivity {
 
                 out.name("code").value(result.code);
                 out.name("text").value(result.text);
-                if (result.index > -1) {
-                    out.name("index").value(result.index);
+                if (InputResult.index > -1) {
+                    out.name("index").value(InputResult.index);
                 }
                 if (result.values.size() > 0) {
                     out.name("values");
@@ -682,7 +682,7 @@ public class CommandDialog extends AppCompatActivity {
                 textView.setOnClickListener(view -> {
                     InputResult result = new InputResult();
                     result.text = values[j];
-                    result.index = j;
+                    InputResult.index = j;
                     dialog.dismiss();
                     resultListener.onResult(result);
                 });
