@@ -2,10 +2,11 @@ package net.kwatts.android.droidcommandpro;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import timber.log.Timber;
 

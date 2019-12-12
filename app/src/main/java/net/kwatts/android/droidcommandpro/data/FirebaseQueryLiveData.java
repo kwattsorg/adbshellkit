@@ -1,8 +1,9 @@
 package net.kwatts.android.droidcommandpro.data;
 
-import android.arch.lifecycle.LiveData;
 import android.os.Handler;
 import android.util.Log;
+
+import androidx.lifecycle.LiveData;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;

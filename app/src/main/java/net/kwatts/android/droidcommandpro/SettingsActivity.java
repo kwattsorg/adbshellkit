@@ -11,7 +11,7 @@ import timber.log.Timber;
 /**
  * Created by kwatts on 7/14/17.
  */
-
+// TODO: Migrate to AndroidX preference PreferenceFragmentCompat
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
 
