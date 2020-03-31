@@ -102,6 +102,7 @@ import com.topjohnwu.superuser.CallbackList;
 import com.topjohnwu.superuser.Shell;
 import com.topjohnwu.superuser.io.*;
 
+import net.kwatts.android.droidcommandpro.commands.CommandAppRiskReport;
 import net.kwatts.android.droidcommandpro.data.Command;
 import net.kwatts.android.droidcommandpro.data.GoogleUser;
 import net.kwatts.android.droidcommandpro.data.User;
@@ -504,6 +505,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
             } catch (Exception e) {
                 Timber.e(e);
             }
+
+            //CommandAppRiskReport.run(this,false,"net.kwatts.android.things");
 
         } catch (Exception e) {
          	Timber.e(e,"MainActivity onCreate() failed:" + e.getMessage());
@@ -1292,7 +1295,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         //TODO: this is user defined data, need to sanitize/make sure it doesn't lead to crashes. For now wrapping in try/catch block
         try {
             for (String p : c.getPermissionList()) {
-                checkCommandPermission(p);
+              checkCommandPermission(p);
             }
         } catch (Exception e) {
             Timber.e(e);

@@ -58,6 +58,19 @@ android {
             signingConfig signingConfigs.release
         }
     }
+    //New app bundles
+    //TODO: split based on assets arch - https://stackoverflow.com/questions/54562928/how-to-create-app-bundle-with-different-assets-in-different-language
+    bundle {
+        language {
+            enableSplit = true
+        }
+        density {
+            enableSplit = true
+        }
+        abi {
+            enableSplit = true
+        }
+    }
     packagingOptions {
         exclude 'project.properties'
         exclude 'META-INF/io.netty.versions.properties'
@@ -125,8 +138,10 @@ android {
         def lifecycle_version = "1.1.1"
         implementation    "android.arch.lifecycle:extensions:$lifecycle_version"
         implementation    "android.arch.lifecycle:compiler:$lifecycle_version"
-
         implementation    "org.jetbrains.kotlin:kotlin-stdlib:1.2.60"
+        implementation "com.github.andriydruk:rx2dnssd:0.9.13"
+        implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+        //implementation 'com.android.volley:volley:1.1.0'
         //implementation 'com.box:box-java-sdk:2.31.0'
         //implementation 'com.box:box-android-browse-sdk:2.0.0'
         //implementation 'com.box:box-android-sdk:3.0.2'

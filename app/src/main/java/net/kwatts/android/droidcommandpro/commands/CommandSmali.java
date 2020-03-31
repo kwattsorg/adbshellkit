@@ -43,6 +43,9 @@ am broadcast --user 0 -n net.kwatts.android.droidcommandpro/.AdbshellkitApiRecei
     --es socket_input 1 --es socket_output 2 --es api_method cmd_smali --es application_name net.kwatts.android.droidcommandpro
 */
 
+//TODO: yara!
+// crypto: https://github.com/xingkong123600/findcrypt-yara
+
 public class CommandSmali  {
     public static String cmd = "smali";
     public static String descr = "Disassembles an application, outputs a json to home directory";

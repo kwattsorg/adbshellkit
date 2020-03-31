@@ -27,6 +27,16 @@ import java.util.Arrays;
 // https://github.com/termux/termux-api/blob/master/app/src/main/java/com/termux/api/ShareAPI.java
 // https://github.com/termux/termux-api-package/tree/master/scripts
 
+//TODO: add for adb ones on non root devices
+// adb -d shell pm grant net.kwatts.android.droidcommandpro ...
+// android.permission.BATTERY_STATS
+// android.permission.DUMP
+// android.permission.PACKAGE_USAGE_STATS
+    /* Shows you the screen on vs. awake ratio. Ideally, the screen on time should be equal to the awake time.
+    Find changes in the awake/sleep profile and quickly identify the rogue apps.
+    Battery stats shows you the detailed metrics of Doze so you can check how effective battery-saver apps are.
+    It can pick out apps that result in partial wakelocks or apps that consume CPU in kernel wakelocks.
+    */
 
 //TODO:
 // - command that automatically scans network, finding all services, and makes a clean report
@@ -42,7 +52,8 @@ public class ApiReceiver extends BroadcastReceiver {
                     CommandVibrate.class,
                     CommandTelephony.class,
                     CommandSmali.class,
-                    CommandDialog.class)
+                    CommandDialog.class,
+                    CommandAppRiskReport.class)
     );
 
     @Override
@@ -70,6 +81,9 @@ public class ApiReceiver extends BroadcastReceiver {
             //todo: check permissions before each call
             case "device_dump":
                 CommandDeviceDump.onReceive(this, context, intent);
+                break;
+            case "app_risk_report":
+                CommandAppRiskReport.onReceive(this, context, intent);
                 break;
             case "smali":
                 CommandSmali.onReceive(this, context, intent);

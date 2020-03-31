@@ -5,12 +5,15 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.XmlResourceParser;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 
 import net.kwatts.android.droidcommandpro.ApiReceiver;
 
@@ -52,22 +55,19 @@ public class CommandDeviceDump {
                 Settings.Secure.INSTALL_NON_MARKET_APPS, 0) == 1;
 
         try {
-            res.put("device.policymanager.global", getDevicePolicyManagerGlobalData(ctx));
-            res.put("device.policymanager", getDevicePolicyManagerData(ctx));
-            res.put("device.os.build",getOSBuildData());
-            res.put("settings.global.development_settings_enabled", developer_mode_enabled);
-            res.put("settings.global.adb_enabled", usb_debugging_enabled);
-            res.put("settings.secure.install_non_market_apps", sideloading_enabled);
-            try {
+                res.put("device.battery", getBatteryData(ctx));
+                res.put("device.policymanager.global", getDevicePolicyManagerGlobalData(ctx));
+                res.put("device.policymanager", getDevicePolicyManagerData(ctx));
+                res.put("device.os.build",getOSBuildData());
+        } catch (Exception e) {}
+        
+        try {
+                res.put("settings.global.development_settings_enabled", developer_mode_enabled);
+                res.put("settings.global.adb_enabled", usb_debugging_enabled);
+                res.put("settings.secure.install_non_market_apps", sideloading_enabled);
                 res.put("settings.global", getAndroidGlobalSettings(ctx));
-            } catch (Exception e) {}
-            try {
                 res.put("settings.secure", getAndroidSecureSettings(ctx));
-            } catch (Exception e) {}
-
-        } catch (JSONException e) {
-
-        }
+        } catch (Exception e) {}
         return res;
     }
 
@@ -320,6 +320,50 @@ public class CommandDeviceDump {
             e.printStackTrace();
         }
         return androidSecureSettings;
+    }
+
+    public static JSONObject getBatteryData(Context ctx) {
+        JSONObject androidBatteryStats = new JSONObject();
+        try {
+            if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                BatteryManager mBatteryManager = (BatteryManager) ctx.getSystemService(Context.BATTERY_SERVICE);
+                Long avgCurrent = null, currentNow = null;
+                avgCurrent = mBatteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE);
+                currentNow = mBatteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
+                androidBatteryStats.put("battery_current_average_mah", avgCurrent);
+                androidBatteryStats.put("battery_current_now_mah",currentNow);
+
+
+                IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                Intent batteryStatus = ctx.registerReceiver(null, ifilter);
+                int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+                androidBatteryStats.put("battery_charging_status_code",status);
+                boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL;
+                androidBatteryStats.put("battery_charging_status_is_charging",isCharging);
+                int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                androidBatteryStats.put("battery_charging_charge_plug_code",chargePlug);
+                boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+                androidBatteryStats.put("battery_charging_charge_plug_usb",usbCharge);
+                boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+                androidBatteryStats.put("battery_charging_charge_plug_ac",acCharge);
+
+                int voltage = batteryStatus.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
+                androidBatteryStats.put("battery_voltage",voltage);
+
+                int temp = batteryStatus.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1);
+                androidBatteryStats.put("battery_temperature",temp);
+
+                String tech = batteryStatus.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY);
+                if (tech != null) {
+                    androidBatteryStats.put("battery_technology",tech);
+                }
+
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return androidBatteryStats;
     }
 
     public static String[] clean(final String[] v) {
