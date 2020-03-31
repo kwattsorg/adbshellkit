@@ -69,7 +69,8 @@ public class ApiReceiver extends BroadcastReceiver {
                     CommandTelephony.class,
                     CommandSmali.class,
                     CommandDialog.class,
-                    CommandAppRiskReport.class)
+                    CommandAppRiskReport.class,
+                    CommandDiscovery.class)
     );
 
     @Override
@@ -199,6 +200,9 @@ public class ApiReceiver extends BroadcastReceiver {
                 break;
             case "process_kill":
                 CommandProcessTools.onReceiveKillProcess(this, context, intent);
+                break;
+            case "discovery":
+                CommandDiscovery.onReceive(context, intent);
                 break;
             default:
                 Timber.e("Unrecognized 'api_method' extra: '" + apiMethod + "'");
