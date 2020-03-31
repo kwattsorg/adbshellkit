@@ -1,5 +1,5 @@
 # ADB Shellkit  <a style="margin-bottom: 0;" href='https://play.google.com/store/apps/details?id=net.kwatts.android.droidcommandpro'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="80px"/></a>
-[![CircleCI](https://circleci.com/gh/kwatkins/android-nativecommander.svg?circle-token=edd7dd723a8c80cfd0d9ce03c5b3048bb48d27dc&style=svg)](https://circleci.com/gh/kwatkins/android-nativecommander?circle-token=edd7dd723a8c80cfd0d9ce03c5b3048bb48d27dc)
+[![CircleCI](https://circleci.com/gh/kwattsorg/adbshellkit.svg?style=svg)](https://circleci.com/gh/kwattsorg/adbshellkit)
 
 This repository contains the source code for the ADB Shellkit app.
 

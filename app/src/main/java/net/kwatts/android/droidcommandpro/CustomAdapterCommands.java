@@ -1,16 +1,15 @@
 package net.kwatts.android.droidcommandpro;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.topjohnwu.superuser.Shell;
 
@@ -28,17 +27,7 @@ import java.util.ListIterator;
 public class CustomAdapterCommands extends ArrayAdapter<Command> {
 
 
-    private static class ViewHolder {
-        TextView mEmail;
-        TextView mIsPublic;
-        TextView mCommandTags;
-        TextView mCommandDescription;
-        TextView mCommand;
-    }
-
-
     public List<Command> spinnerCmds;
-
     Context mContext;
 
     public CustomAdapterCommands(@NonNull Context context, List<Command> cmds) {
@@ -47,8 +36,6 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         this.mContext = context;
         this.spinnerCmds = cmds;
     }
-
-
 
     @Override
     public int getCount() {
@@ -66,8 +53,8 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
     }
 
     @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+    @Override
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         ViewHolder mViewHolder = new ViewHolder();
         if (convertView == null) {
             LayoutInflater mInflater = (LayoutInflater) mContext.
@@ -101,7 +88,7 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
 
         if (c.getTagList() != null) {
             mViewHolder.mCommandTags.setText(
-                    TextUtils.join(",",c.getTagList())
+                    TextUtils.join(",", c.getTagList())
             );
         } else {
             mViewHolder.mCommandTags.setText("");
@@ -118,7 +105,7 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
 
         return convertView;
 
-        }
+    }
 
     @Override
     public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -137,11 +124,11 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         spinnerCmds.clear();
 
         boolean haveRoot = Shell.rootAccess();
-        for(Command c: cmds){
+        for (Command c : cmds) {
             if (c.isSuperUser() && hideSuperUser) {
-              if (haveRoot) {
-                  spinnerCmds.add(c);
-              }
+                if (haveRoot) {
+                    spinnerCmds.add(c);
+                }
             } else {
                 spinnerCmds.add(c);
             }
@@ -153,8 +140,8 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
     public void removeUserCommands() {
         //spinnerCmds.removeIf(c -> !c.isPublic);
         ListIterator<Command> iter = spinnerCmds.listIterator();
-        while(iter.hasNext()){
-            if(!iter.next().isPublic){
+        while (iter.hasNext()) {
+            if (!iter.next().isPublic) {
                 iter.remove();
             }
         }
@@ -164,7 +151,7 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
 
     @Override
     public void addAll(Command... items) {
-        for(Command item: items){
+        for (Command item : items) {
             super.add(item);
             spinnerCmds.add(item);
         }
@@ -178,30 +165,35 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         this.setNotifyOnChange(false);
 
         //TODO: replace with last time used order
-        Collections.sort(spinnerCmds, new java.util.Comparator<Command>() {
-            public int compare(Command c1, Command c2) {
-                java.util.Date c1Date = new Date(c1.getLastused());
-                java.util.Date c2Date = new Date(c2.getLastused());
-                return c1Date.compareTo(c2Date);
-            }
+        Collections.sort(spinnerCmds, (c1, c2) -> {
+            Date c1Date = new Date(c1.getLastused());
+            Date c2Date = new Date(c2.getLastused());
+            return c1Date.compareTo(c2Date);
         });
         // reverse to display at top
         Collections.reverse(spinnerCmds);
         //TODO: only do this if the command is public
-        /*
+/*
         for (Command c : spinnerCmds) {
             if (c.isOnboardingUser()) {
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-                if (sp.getBoolean(App.COMPLETED_ONBOARDING_PREF_NAME, false) == false) {
-                        spinnerCmds.remove(c);
-                        spinnerCmds.add(c);
+                if (!sp.getBoolean(App.COMPLETED_ONBOARDING_PREF_NAME, false)) {
+                    spinnerCmds.remove(c);
+                    spinnerCmds.add(c);
                 }
             }
-        } */
-
+        }
+*/
         this.setNotifyOnChange(true);
     }
 
+    private static class ViewHolder {
+        TextView mEmail;
+        TextView mIsPublic;
+        TextView mCommandTags;
+        TextView mCommandDescription;
+        TextView mCommand;
+    }
 
 
 }

@@ -5,11 +5,13 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+
 import timber.log.Timber;
+
 /**
  * Created by kwatts on 7/14/17.
  */
-
+// TODO: Migrate to AndroidX preference PreferenceFragmentCompat
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
 
@@ -26,7 +28,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         if (key.equals(KEY_PREF_TEXTSIZE)) {
             Preference connectionPref = findPreference(key);
             // Set summary to be the user-description for the selected value
-            Timber.d("Setting text size: " + key);
+            Timber.d("Setting text size: %s", key);
             connectionPref.setSummary(sharedPreferences.getString(key, ""));
         }
 

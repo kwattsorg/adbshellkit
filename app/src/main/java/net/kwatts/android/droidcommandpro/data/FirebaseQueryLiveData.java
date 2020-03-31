@@ -1,8 +1,8 @@
 package net.kwatts.android.droidcommandpro.data;
 
-import android.arch.lifecycle.LiveData;
 import android.os.Handler;
-import android.util.Log;
+
+import androidx.lifecycle.LiveData;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -13,6 +13,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 // https://firebase.googleblog.com/2017/12/using-android-architecture-components.html
 // https://firebase.googleblog.com/2017/12/using-android-architecture-components_20.html\
@@ -25,11 +27,9 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
     private final Query query;
     private final ValueEventListener valueListener = new mValueEventListener();
     //private final ChildEventListener childListener = new MyEventListener();
-
-    private List<Command> mQueryValuesList = new ArrayList<>();
-
-    private boolean listenerRemovePending = false;
     private final Handler handler = new Handler();
+    private List<Command> mQueryValuesList = new ArrayList<>();
+    private boolean listenerRemovePending = false;
     private final Runnable removeListener = new Runnable() {
         @Override
         public void run() {
@@ -42,7 +42,7 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
         this.query = query;
     }
 
-    public FirebaseQueryLiveData(DatabaseReference dbReference){
+    public FirebaseQueryLiveData(DatabaseReference dbReference) {
         this.query = dbReference;
     }
 
@@ -50,8 +50,7 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
     protected void onActive() {
         if (listenerRemovePending) {
             handler.removeCallbacks(removeListener);
-        }
-        else {
+        } else {
             query.addValueEventListener(valueListener);
         }
         listenerRemovePending = false;
@@ -66,7 +65,7 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
     }
 
 
-    private class mValueEventListener implements ValueEventListener{
+    private class mValueEventListener implements ValueEventListener {
 
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -75,25 +74,24 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-            Log.e(LOG_TAG,  "Cannot listen to query " + query, databaseError.toException());
+            Timber.tag(LOG_TAG).e(databaseError.toException(), "Cannot listen to query %s", query);
         }
     }
-
 
 
     private class MyEventListener implements ChildEventListener {
 
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            if(dataSnapshot != null){
-                Log.d(LOG_TAG, "onChildAdded(): previous child name = " + s);
+            if (dataSnapshot != null) {
+                Timber.tag(LOG_TAG).d("onChildAdded(): previous child name = %s", s);
                 setValue(dataSnapshot);
-                for(DataSnapshot snap : dataSnapshot.getChildren()){
+                for (DataSnapshot snap : dataSnapshot.getChildren()) {
                     Command msg = snap.getValue(Command.class);
                     mQueryValuesList.add(msg);
                 }
             } else {
-                Log.w(LOG_TAG, "onChildAdded(): data snapshot is NULL");
+                Timber.tag(LOG_TAG).w("onChildAdded(): data snapshot is NULL");
             }
         }
 
@@ -111,7 +109,7 @@ public class FirebaseQueryLiveData extends LiveData<DataSnapshot> {
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-            Log.e(LOG_TAG,  "Cannot listen to query " + query, databaseError.toException());
+            Timber.tag(LOG_TAG).e(databaseError.toException(), "Cannot listen to query %s", query);
         }
 
     }

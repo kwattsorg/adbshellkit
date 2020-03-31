@@ -18,20 +18,18 @@ public class GoogleUser {
     public long expirationTime;
 
 
-    public Map<String, String> vars = new HashMap<String, String>();
+    public Map<String, String> vars = new HashMap<>();
 
     public GoogleUser() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
 
-
-
     public String getVarValue(String key) {
-        //for (Map.Entry<String,String> entry : vars.entrySet())
-        //    System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+        //for (Map.Entry<String, String> entry : vars.entrySet())
+        //System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
         for (String name : vars.keySet()) {
-            if (key == name) {
+            if (key.equals(name)) {
                 return vars.get(key);
             }
         }

@@ -5,7 +5,7 @@ android {
     //compileSdkVersion 22
     //buildToolsVersion "23.0.0 rc2"
     compileSdkVersion 28
-    buildToolsVersion '28.0.2'
+    //buildToolsVersion '28.0.2'
     //buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
     resourcePrefix "obsez_fc__"
 
@@ -41,15 +41,13 @@ android {
         disable 'deprecation'
         checkReleaseBuilds false
     }
-
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    //ext.googleSupportVersion = "28.0.0"
-    ext.googleSupportVersion = "27.1.1"
-    implementation "com.android.support:appcompat-v7:$googleSupportVersion"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.60"
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.50"
     def libsuVersion = '2.2.0'
     implementation "com.github.topjohnwu.libsu:core:${libsuVersion}"
     implementation "com.github.topjohnwu.libsu:io:${libsuVersion}"

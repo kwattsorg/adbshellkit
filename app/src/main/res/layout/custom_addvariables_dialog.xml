@@ -2,51 +2,54 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingLeft="5dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingStart="5dp">
 
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add variables to commands, use with '$' prefix, e.g., $APP_PACKAGE. Note that global environmental variables may overwrite these."
-        android:textSize="10dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textSize="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:textAllCaps="true"
-        android:text="APP_PACKAGE"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:paddingTop="10dp"
+        android:text="APP_PACKAGE"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark" />
+
     <Spinner
         android:id="@+id/spinnerAppPackageVar"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="15dp"
-        android:textAllCaps="true"
-        android:text="NETWORK_INTERFACE"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:paddingTop="15dp"
+        android:text="NETWORK_INTERFACE"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark" />
+
     <TextView
         android:id="@+id/tvNetworkInterfaceVarDetails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAllCaps="false"
         android:text=""
-        android:textSize="10dp"
-        android:textColor="@color/colorAccentDark"
+        android:textAllCaps="false"
         android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark"
+        android:textSize="10dp"
         android:textStyle="normal|italic" />
+
     <Spinner
         android:id="@+id/spinnerNetworkInterfaceVar"
         android:layout_width="wrap_content"
@@ -55,46 +58,47 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="15dp"
-        android:textAllCaps="true"
-        android:text="FILE_CHOOSER"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:paddingTop="15dp"
+        android:text="FILE_CHOOSER"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark" />
+
     <Button
         android:id="@+id/buttonFileSelectedVariables"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="100dp"
         android:layout_height="20dp"
         android:background="@color/colorAccentDark"
-        android:textColor="@color/white"
-        android:text="BROWSE" />
+        android:text="BROWSE"
+        android:textColor="@color/white" />
 
     <EditText
         android:id="@+id/dialogFileSelectedVars"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textNoSuggestions"
         android:hint="Edit directly or browse for selected file..."
+        android:inputType="textNoSuggestions"
         android:textSize="@dimen/text_size_small" />
 
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAllCaps="true"
+        android:fontFamily="sans-serif-condensed"
         android:paddingTop="15dp"
         android:text="OTHER VARIABLES..."
-        android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/colorAccentDark"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/colorAccentDark" />
 
     <EditText
         android:id="@+id/dialogEditUserVars"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textNoSuggestions"
         android:hint="VAR1=x,VAR2=y, etc..."
+        android:inputType="textNoSuggestions"
         android:textSize="@dimen/text_size_small" />
 
     <ToggleButton

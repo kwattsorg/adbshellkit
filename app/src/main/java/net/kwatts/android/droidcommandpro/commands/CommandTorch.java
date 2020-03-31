@@ -3,41 +3,35 @@ package net.kwatts.android.droidcommandpro.commands;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraManager.TorchCallback;
-import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Build;
 import android.util.JsonWriter;
-import android.widget.Toast;
 import android.util.Size;
 import android.util.SizeF;
-import java.io.StringWriter;
+import android.widget.Toast;
 
 import net.kwatts.android.droidcommandpro.ApiReceiver;
 
-
-import org.json.JSONObject;
-
 import java.io.IOException;
-
+import java.io.StringWriter;
 
 import timber.log.Timber;
 
 public class CommandTorch {
-    private static Camera legacyCamera;
-
     public static String cmd = "torch";
     public static String descr = "Turns the camera flash on/off by default";
     public static String args = "--ez camerainfo [true|false] --ez enabled [true|false]";
-    public static String[] permissions = { "Manifest.permission.CAMERA" };
-
+    public static String[] permissions = {"Manifest.permission.CAMERA"};
     public static boolean flashState;
     public static boolean camerainfo;
+    private static Camera legacyCamera;
 
     @TargetApi(Build.VERSION_CODES.M)
     public static void onReceive(ApiReceiver apiReceiver, final Context context, final Intent intent) {
@@ -148,7 +142,7 @@ public class CommandTorch {
 
 
     public static String getTorchCameraId(CameraManager cameraManager) throws CameraAccessException {
-        String[] cameraIdList =  cameraManager.getCameraIdList();
+        String[] cameraIdList = cameraManager.getCameraIdList();
         String result = null;
 
         for (String id : cameraIdList) {

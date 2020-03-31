@@ -1,4 +1,5 @@
 package net.kwatts.android.droidcommandpro;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;

@@ -1,4 +1,5 @@
 package net.kwatts.android.droidcommandpro.commands;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -13,10 +14,7 @@ import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.util.JsonWriter;
-import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
@@ -35,7 +33,6 @@ public class CommandTelephony {
     public static String descr = "Telephony information";
     public static String args = "";
     public static String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CALL_PHONE};
-
 
 
     //public static String google_maps_key="AIzaSyB7rPpk3hzX5_IekScolHQNtpgxjwFFFOo";
@@ -122,7 +119,6 @@ public class CommandTelephony {
                         out.name("basestation_address").value(getAddressFromGeo(cellLatitude, cellLongitude));
                         out.name("basestation_latitude").value(cellLatitude);
                         out.name("basestation_longitude").value(cellLongitude);
-
 
 
                         out.name("network").value(cdmaInfo.getCellIdentity().getNetworkId());
@@ -353,7 +349,7 @@ public class CommandTelephony {
         try {
             context.startActivity(callIntent);
         } catch (SecurityException e) {
-            Timber.e( "Exception in phone call");
+            Timber.e("Exception in phone call");
         }
 
         ResultReturner.noteDone(apiReceiver, intent);

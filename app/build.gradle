@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
-
+apply plugin: 'com.google.android.gms.strict-version-matcher-plugin'
 
 configurations {
     all {
@@ -33,13 +33,15 @@ android {
         }
     }
     compileSdkVersion 28
-    buildToolsVersion '28.0.2'
+    buildToolsVersion "29.0.2"
+
     defaultConfig {
         applicationId "net.kwatts.android.droidcommandpro"
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 108
         versionName "10.8"
+
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
@@ -47,14 +49,11 @@ android {
             }
         }
     }
-    lintOptions {
-        checkReleaseBuilds false
-        abortOnError false
-    }
+
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }
@@ -84,7 +83,9 @@ android {
         implementation "com.android.support:preference-v7:$googleSupportVersion"
         implementation "com.android.support:support-compat:$googleSupportVersion"
         implementation "com.android.support:design:$googleSupportVersion"
+        //noinspection GradleCompatible
         implementation "com.android.support:customtabs:$googleSupportVersion"
+        //noinspection GradleCompatible
         implementation "com.android.support:cardview-v7:$googleSupportVersion"
         implementation 'com.android.support.constraint:constraint-layout:1.1.3'
         ext.gmsFirebaseVersionCore = "16.0.7"
@@ -146,11 +147,132 @@ android {
         //implementation 'com.box:box-android-browse-sdk:2.0.0'
         //implementation 'com.box:box-android-sdk:3.0.2'
         //implementation 'com.google.cloud:google-cloud-dlp:0.32.0-beta'
+
+    packagingOptions {
+        exclude 'project.properties'
+        exclude 'META-INF/*'
     }
+
     compileOptions {
+        encoding = 'UTF-8'
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+        disable 'GoogleAppIndexingWarning'
+    }
+}
+
+dependencies {
+/** File chooser */
+    //implementation 'com.obsez.android.lib.filechooser:filechooser:1.1.10'
+    implementation project(":android-file-chooser")
+
+
+/** Kotlin */
+    //https://github.com/JetBrains/kotlin/blob/master/ChangeLog.md
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.50"
+
+
+/** Support */
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.core:core:1.1.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.1.0'
+    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'com.google.android.material:material:1.0.0'
+
+
+/** Firebase */
+//https://firebase.google.com/support/release-notes/android
+//https://developers.google.com/android/guides/releases
+
+    //https://developers.google.com/admob/android/rel-notes
+    implementation 'com.google.firebase:firebase-ads:18.3.0'
+    implementation 'com.google.firebase:firebase-auth:19.2.0'
+    implementation 'com.google.firebase:firebase-analytics:17.2.1'
+    implementation 'com.google.firebase:firebase-database:19.2.0'
+    //implementation 'com.google.firebase:firebase-perf:x.x.x'
+    implementation 'com.google.firebase:firebase-storage:19.1.0'
+
+    //https://firebaseopensource.com/projects/firebase/firebaseui-android/
+    //implementation 'com.firebaseui:firebase-ui-database:x.x.x'
+
+
+/** GMS */
+    //https://developers.google.com/android/guides/releases
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+
+
+/** Third-party */
+    //https://github.com/google/gson/blob/master/CHANGELOG.md
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    //https://github.com/afollestad/material-dialogs/releases
+    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
+    implementation 'com.afollestad.material-dialogs:commons:0.9.6.0'
+
+    //https://github.com/json-path/JsonPath/releases
+    implementation 'com.jayway.jsonpath:json-path:2.4.0'
+
+    //https://github.com/DexPatcher/multidexlib2/releases
+    implementation 'com.github.lanchon.dexpatcher:multidexlib2:2.2.4'
+    //https://github.com/JesusFreke/smali/wiki
+    implementation 'org.smali:dexlib2:2.2.4'
+
+    //https://github.com/JakeWharton/timber/blob/master/CHANGELOG.md
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
+    //https://github.com/flipagram/android-assetcopier
+    implementation 'com.github.flipagram:android-assetcopier:0.1.1'
+
+    //https://square.github.io/okhttp/changelog_3x/
+    //https://github.com/square/okhttp/blob/master/CHANGELOG.md
+    //implementation 'com.squareup.okhttp3:okhttp:x.x.x'
+
+    //https://github.com/bumptech/glide/releases
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
+
+    //https://github.com/topjohnwu/libsu/blob/master/CHANGELOG.md
+    def libsuVersion = '2.5.1'
+    implementation "com.github.topjohnwu.libsu:core:$libsuVersion"
+    implementation "com.github.topjohnwu.libsu:io:$libsuVersion"
+
+    //https://github.com/eggheadgames/android-about-box/releases
+    implementation 'com.github.eggheadgames:android-about-box:1.3.2'
+
+    //https://docs.fabric.io/android/changelog.html#crashlytics
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+
+    //https://github.com/kevalpatel2106/android-hidden-camera/releases
+    implementation 'com.kevalpatel2106:hiddencamera:1.3.5'
+
+    //https://github.com/googlemaps/google-maps-services-java/blob/master/CHANGELOG.md
+    implementation 'com.google.maps:google-maps-services:0.10.2'
+
+    //http://www.slf4j.org/news.html
+    //implementation 'org.slf4j:slf4j-simple:x.x.x'
+
+    //https://commons.apache.org/proper/commons-io/changes-report.html
+    implementation 'commons-io:commons-io:2.6'
+
+    // Cloud
+    //https://mvnrepository.com/artifact/com.google.cloud/
+    //implementation 'com.google.cloud:google-cloud-xxx:x.x.x'
+    //https://cloud.google.com/dlp/docs/release-notes
+    //implementation 'com.google.cloud:google-cloud-dlp:x.x.x'
+    //https://github.com/box/box-java-sdk/blob/master/CHANGELOG.md
+    //implementation 'com.box:box-java-sdk:x.x.x'
+    //https://mvnrepository.com/artifact/com.box/box-android-browse-sdk
+    //implementation 'com.box:box-android-browse-sdk:x.x.x'
+    //https://mvnrepository.com/artifact/com.box/box-android-sdk
+    //implementation 'com.box:box-android-sdk:x.x.x'
 }
 
 apply plugin: 'com.google.gms.google-services'

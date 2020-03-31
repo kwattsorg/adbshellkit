@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Vibrator;
+
 import net.kwatts.android.droidcommandpro.ApiReceiver;
 
 
@@ -14,10 +15,12 @@ public class CommandVibrate {
     public static String descr = "Vibrates the phone for a duration of time";
     public static String args = "--ei duration_ms <time to vibrate, 2000 for 2 seconds>, --ez force <true|false>";
     public static String[] permissions = {""};
+
     public static String usage() {
         return "{\"cmd\":\"" + cmd + "\"," +
                 "\"args\":\"duration_ms (int), force (bool)\"}";
     }
+
     public static void onReceive(ApiReceiver apiReceiver, Context context, Intent intent) {
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         int milliseconds = intent.getIntExtra("duration_ms", 1000);
