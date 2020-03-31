@@ -13,6 +13,9 @@ import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
 
+
+import net.kwatts.android.droidcommandpro.commands.CommandAppRiskReport;
+import net.kwatts.android.droidcommandpro.commands.CommandDiscovery;
 import net.kwatts.android.droidcommandpro.commands.CommandCamera;
 import net.kwatts.android.droidcommandpro.commands.CommandDeviceDump;
 import net.kwatts.android.droidcommandpro.commands.CommandDialog;

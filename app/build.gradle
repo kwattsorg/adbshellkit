@@ -57,96 +57,7 @@ android {
             signingConfig signingConfigs.release
         }
     }
-    //New app bundles
-    //TODO: split based on assets arch - https://stackoverflow.com/questions/54562928/how-to-create-app-bundle-with-different-assets-in-different-language
-    bundle {
-        language {
-            enableSplit = true
-        }
-        density {
-            enableSplit = true
-        }
-        abi {
-            enableSplit = true
-        }
-    }
-    packagingOptions {
-        exclude 'project.properties'
-        exclude 'META-INF/io.netty.versions.properties'
-        exclude 'META-INF/INDEX.LIST'
-        exclude 'META-INF/DEPENDENCIES'
-    }
-    dependencies {
-        ext.googleSupportVersion = "27.1.1"
-        //ext.googleSupportVersion = "28.0.0"
-        implementation "com.android.support:appcompat-v7:$googleSupportVersion"
-        implementation "com.android.support:preference-v7:$googleSupportVersion"
-        implementation "com.android.support:support-compat:$googleSupportVersion"
-        implementation "com.android.support:design:$googleSupportVersion"
-        //noinspection GradleCompatible
-        implementation "com.android.support:customtabs:$googleSupportVersion"
-        //noinspection GradleCompatible
-        implementation "com.android.support:cardview-v7:$googleSupportVersion"
-        implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-        ext.gmsFirebaseVersionCore = "16.0.7"
-        ext.gmsFirebaseVersionAds = "17.1.3"
-        ext.gmsFirebaseVersionAuth = "16.1.0"
-        ext.gmsFirebaseVersionPerf = "16.2.3"
-        ext.gmsFirebaseVersionDatabase = "16.0.6"
-        ext.gmsFirebaseVersionStorage = "16.0.5"
-        implementation "com.google.firebase:firebase-core:$gmsFirebaseVersionCore"
-        implementation "com.google.firebase:firebase-ads:$gmsFirebaseVersionAds"
-        implementation "com.google.firebase:firebase-auth:$gmsFirebaseVersionAuth"
-        implementation "com.google.firebase:firebase-database:$gmsFirebaseVersionDatabase"
-        implementation "com.google.firebase:firebase-storage:$gmsFirebaseVersionStorage"
-        implementation 'com.firebaseui:firebase-ui-database:3.3.1'
 
-        ext.gmsGoogleVersion = "15.0.1"
-        implementation "com.google.android.gms:play-services-auth:$gmsGoogleVersion"
-        implementation "com.google.android.gms:play-services-location:$gmsGoogleVersion"
-
-
-        implementation 'com.google.code.gson:gson:2.8.1'
-        implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
-        implementation 'com.afollestad.material-dialogs:commons:0.9.6.0'
-        implementation 'com.jayway.jsonpath:json-path:2.4.0'
-        implementation('com.google.cloud:google-cloud:0.32.0-alpha') {
-            exclude module: 'guava-jdk5'
-        }
-        implementation 'com.github.lanchon.dexpatcher:multidexlib2:2.2.4'
-        implementation 'org.smali:dexlib2:2.2.4'
-        implementation project(":android-file-chooser")
-        implementation 'com.jakewharton.timber:timber:4.7.1'
-        implementation 'com.github.flipagram:android-assetcopier:0.1.1'
-        implementation 'com.squareup.okhttp3:okhttp:3.9.1'
-        implementation 'com.github.bumptech.glide:glide:4.7.1'
-        annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
-
-        //ext.libsuVersion = '2.2.0'
-        ext.libsuVersion = '2.5.1'
-        implementation "com.github.topjohnwu.libsu:core:$libsuVersion"
-        implementation "com.github.topjohnwu.libsu:io:$libsuVersion"
-
-        implementation 'com.github.eggheadgames:android-about-box:1.3.2'
-        implementation 'com.crashlytics.sdk.android:crashlytics:2.9.8'
-
-        implementation 'com.kevalpatel2106:hiddencamera:1.3.5'
-
-        implementation 'com.google.maps:google-maps-services:0.9.3'
-        implementation 'org.slf4j:slf4j-simple:1.7.25'
-
-
-        def lifecycle_version = "1.1.1"
-        implementation    "android.arch.lifecycle:extensions:$lifecycle_version"
-        implementation    "android.arch.lifecycle:compiler:$lifecycle_version"
-        implementation    "org.jetbrains.kotlin:kotlin-stdlib:1.2.60"
-        implementation "com.github.andriydruk:rx2dnssd:0.9.13"
-        implementation 'com.squareup.okhttp3:okhttp:3.11.0'
-        //implementation 'com.android.volley:volley:1.1.0'
-        //implementation 'com.box:box-java-sdk:2.31.0'
-        //implementation 'com.box:box-android-browse-sdk:2.0.0'
-        //implementation 'com.box:box-android-sdk:3.0.2'
-        //implementation 'com.google.cloud:google-cloud-dlp:0.32.0-beta'
 
     packagingOptions {
         exclude 'project.properties'
@@ -262,6 +173,8 @@ dependencies {
     //https://commons.apache.org/proper/commons-io/changes-report.html
     implementation 'commons-io:commons-io:2.6'
 
+
+
     // Cloud
     //https://mvnrepository.com/artifact/com.google.cloud/
     //implementation 'com.google.cloud:google-cloud-xxx:x.x.x'
@@ -273,6 +186,9 @@ dependencies {
     //implementation 'com.box:box-android-browse-sdk:x.x.x'
     //https://mvnrepository.com/artifact/com.box/box-android-sdk
     //implementation 'com.box:box-android-sdk:x.x.x'
+
+    // Discovery command: mDNS
+    implementation 'com.github.andriydruk:rxdnssd:0.9.13'
 }
 
 apply plugin: 'com.google.gms.google-services'
