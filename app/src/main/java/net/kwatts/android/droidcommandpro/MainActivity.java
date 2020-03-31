@@ -99,6 +99,7 @@ import net.kwatts.android.droidcommandpro.commands.CommandAppRiskReport;
 import net.kwatts.android.droidcommandpro.data.Command;
 import net.kwatts.android.droidcommandpro.data.GoogleUser;
 import net.kwatts.android.droidcommandpro.data.User;
+import net.kwatts.android.droidcommandpro.databinding.MainBinding;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -236,6 +237,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
     private EditText dialogEditCommand;
     private CheckBox tagSuperUserCheckBox;
     private CheckBox tagPinnedCheckBox;
+
+    private MainBinding mBinding;
 
     public static boolean isUserAdmin() {
         return isAdminUserClaim;
@@ -414,7 +417,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
         try {
-            setContentView(R.layout.main);
+            mBinding = MainBinding.inflate(getLayoutInflater());
+            View view = mBinding.getRoot();
+            setContentView(view);
+            //setContentView(R.layout.main);
 
 
             LinearLayout topLinearLayout = findViewById(R.id.topLinearLayout);
