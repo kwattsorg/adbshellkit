@@ -39,6 +39,8 @@ public class App extends Application {
     public static final String FILES_PATH = "/data/data/net.kwatts.android.droidcommandpro/files";
     public static final String GOOGLE_GEOCODE_API_KEY = "AIzaSyCzr5mPCjrmxtor-RpEPWJLCuZ4P-xhqEs";
     public static final String APP_NAME = "ADB Shellkit";
+    //public static final String APP_VERSION_NAME = BuildConfig.VERSION_NAME;
+    //public static final int    APP_VERSION_CODE = BuildConfig.VERSION_CODE;
     public static final String APP_DESCRIPTION_HTML = "Welcome to <b>" + APP_NAME + "!</b><br><br><b>" + APP_NAME + "</b>" +
             "The journey to discover the hidden commands that came with your phone starts now! <br><br>" +
             "<b> Hints to help guide you along the path:</b><br>" +

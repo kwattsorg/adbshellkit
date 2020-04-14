@@ -28,7 +28,7 @@ import timber.log.Timber;
  * Exposing {@link android.telephony.TelephonyManager}.
  */
 public class CommandTelephony {
-
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "telephony";
     public static String descr = "Telephony information";
     public static String args = "";

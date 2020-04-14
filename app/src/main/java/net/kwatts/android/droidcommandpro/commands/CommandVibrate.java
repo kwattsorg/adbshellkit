@@ -11,6 +11,7 @@ import net.kwatts.android.droidcommandpro.ApiReceiver;
 // Painfully lifted from https://github.com/termux/termux-api-package/blob/master/scripts/termux-vibrate
 // adbshellkit-api cmd_vibrate --ei duration_ms 2000 --ez force true
 public class CommandVibrate {
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "vibrate";
     public static String descr = "Vibrates the phone for a duration of time";
     public static String args = "--ei duration_ms <time to vibrate, 2000 for 2 seconds>, --ez force <true|false>";

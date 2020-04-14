@@ -197,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         }
     };
     public LinearLayout addCommandLinearLayoutAdmin;
+    EditText mDialogEditTextAdminMinVersionCode;
     public CheckBox tagAdminIsPublicCheckBox;
     public CheckBox tagAdminOnboardingCheckBox;
     //public View updateAction;
@@ -990,7 +991,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 
 
                         mCustomCmdsAdapter.addAllCommands(allCommands,
-                                mSharedPref.getBoolean("hideSuperUserCommands", false));
+                                mSharedPref.getBoolean("hideSuperUserCommands", false),
+                                mSharedPref.getBoolean("hideVersionMismatchCommands", true));
                         mCustomCmdsAdapter.notifyDataSetChanged();
                         mSpinnerCommands.setSelection(0);
                     }
@@ -1051,12 +1053,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         mGlobalCommands.add(cmd);
                     }
                 }
+                //TODO: hack to order by latest in list, should use rank order
+                Collections.reverse(mGlobalCommands);
 
                 List<Command> allCommands = new ArrayList<>();
                 allCommands.addAll(mUserCommands);
                 allCommands.addAll(mGlobalCommands);
                 mCustomCmdsAdapter.addAllCommands(allCommands,
-                        mSharedPref.getBoolean("hideSuperUserCommands", false));
+                        mSharedPref.getBoolean("hideSuperUserCommands", false),
+                        mSharedPref.getBoolean("hideVersionMismatchCommands", true));
                 mCustomCmdsAdapter.notifyDataSetChanged();
 
                 onBoarding();
@@ -1540,6 +1545,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                 tvRemoveCommandDetails.setText("key: " + c.key +
                         "\nuid: " + c.getUid() +
                         "\nuser: " + c.getEmail() +
+                        "\nappversion:" + c.getAppversion() +
                         "\nisAdmin: " + isUserAdmin() +
                         "\nisPublic: " + c.isPublic +
                         "\nisPinned: " + c.isPinned() +
@@ -1579,25 +1585,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                     if (user != null) {
 
                         List<String> tags = new ArrayList<>();
-                        if (isUserAdmin()) {
-                            try {
-                                String addPermissionSelected = spinnerAddPermission.getSelectedItem().toString();
-                                String removePermissionSelected = spinnerRemovePermission.getSelectedItem().toString();
-                                if (!addPermissionSelected.equals("-")) {
-                                    c.addPermission(addPermissionSelected);
-                                }
-                                if (!removePermissionSelected.equals("-")) {
-                                    c.removePermission(removePermissionSelected);
-                                }
-                            } catch (Exception e) {
-                                Timber.e(e);
-                            }
-
-                            c.isPublic = tagAdminIsPublicCheckBox.isChecked();
-                            if (tagAdminOnboardingCheckBox.isChecked()) {
-                                tags.add("onboarding");
-                            }
-                        }
 
                         if (tagSuperUserCheckBox.isChecked()) {
                             tags.add("superuser");
@@ -1612,27 +1599,63 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         c.setCommand(dialogEditCommand.getText().toString());
                         c.setLastused(System.currentTimeMillis());
 
+
+                        if (isUserAdmin()) {
+                            try {
+                                String addPermissionSelected = spinnerAddPermission.getSelectedItem().toString();
+                                String removePermissionSelected = spinnerRemovePermission.getSelectedItem().toString();
+                                if (!addPermissionSelected.equals("-")) {
+                                    c.addPermission(addPermissionSelected);
+                                }
+                                if (!removePermissionSelected.equals("-")) {
+                                    c.removePermission(removePermissionSelected);
+                                }
+                            } catch (Exception e) {
+                                Timber.e(e);
+                            }
+                            try {
+                                int minVersion = Integer.parseInt(mDialogEditTextAdminMinVersionCode.getText().toString());
+                                c.setAppversion(minVersion);
+                            } catch (Exception e) {
+                                Timber.e(e);
+                            }
+
+                            c.isPublic = tagAdminIsPublicCheckBox.isChecked();
+                            if (c.isPublic) {
+                                // not applicable to public commands & impacts display order
+                                c.setRuncounts(0L);
+                                c.mLastused = null;
+                            }
+
+                            if (tagAdminOnboardingCheckBox.isChecked()) {
+                                tags.add("onboarding");
+                            }
+
+                        }
+
                         try {
                             writeCommand(c);
                         } catch (Exception e) {
                             Timber.e(e);
                         }
 
-
-                        Toast.makeText(getApplicationContext(), "Command saved for " + user.getEmail()
-                                + ", isNewCommand=" + isNewCommand, Toast.LENGTH_SHORT).show();
+                        if (isNewCommand) {
+                            Toast.makeText(getApplicationContext(), "New command saved for " + user.getEmail(), Toast.LENGTH_SHORT).show();
+                        } else { Toast.makeText(getApplicationContext(), "Command updated for " + user.getEmail(), Toast.LENGTH_SHORT).show(); }
 
                     } else {
                         Toast.makeText(getApplicationContext(), "Please Login to create commands!", Toast.LENGTH_SHORT).show();
                     }
 
 
-                })
-                .build();
+                }).build();
 
         // Custom options only available for admins
         if (isUserAdmin()) {
             addCommandLinearLayoutAdmin = dialog.getCustomView().findViewById(R.id.addCommandLinearLayoutAdmin);
+
+            mDialogEditTextAdminMinVersionCode = dialog.getCustomView().findViewById(R.id.dialogAdminMinVersionCode);
+            mDialogEditTextAdminMinVersionCode.setText(String.valueOf(BuildConfig.VERSION_CODE));
 
             tagAdminIsPublicCheckBox = dialog.getCustomView().findViewById(R.id.tagAdminIsPublicCheckBox);
             tagAdminIsPublicCheckBox.setChecked(c.isPublic);
@@ -1680,6 +1703,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
         } else {
             tvAddCommandAttributes.setText("key: " + c.key +
                     "\nuser: " + c.getEmail() +
+                    "\nappversion:" + c.getAppversion() +
                     "\nisAdmin:" + isUserAdmin() +
                     "\nruncounts: " + c.getRuncounts() +
                     "\nisPublic=" + c.isPublic +

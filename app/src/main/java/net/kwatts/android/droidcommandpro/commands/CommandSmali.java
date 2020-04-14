@@ -51,6 +51,7 @@ am broadcast --user 0 -n net.kwatts.android.droidcommandpro/.AdbshellkitApiRecei
 // crypto: https://github.com/xingkong123600/findcrypt-yara
 
 public class CommandSmali  {
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "smali";
     public static String descr = "Disassembles an application, outputs a json to home directory";
     public static String args = "--es application_name <package name> --ez savetofile <true or false>";

@@ -30,7 +30,7 @@ import java.util.List;
 import timber.log.Timber;
 
 public class CommandDeviceDump {
-
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "device_dump";
     public static String descr = "Dumps device information";
     public static String args = "";

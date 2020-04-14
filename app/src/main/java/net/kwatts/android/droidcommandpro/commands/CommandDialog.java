@@ -59,7 +59,7 @@ import java.util.Objects;
 
 // https://alvinalexander.com/android/how-to-show-html-webview-in-alertdialog-android
 public class CommandDialog extends AppCompatActivity {
-
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "dialog";
     public static String descr = "Displays a dialog with inputs and views";
     public static String args = "--es input_method=[text|webview|confirm|checkbox|date|radio|sheet] \n" +

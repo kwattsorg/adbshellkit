@@ -1,6 +1,10 @@
 package net.kwatts.android.droidcommandpro.data;
 
+import android.os.Build;
+
 import com.google.gson.annotations.SerializedName;
+
+import net.kwatts.android.droidcommandpro.BuildConfig;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +18,8 @@ import java.util.Map;
 
 //public class Command implements net.kwatts.android.droidcommandpro.commands.Command {
 public class Command {
+    /* NOTE! The names and character cases matter & won't be processed by firebase if it doesn't match!
+             This includes the getters and setters! */
     public String key;
     @SerializedName("public")
     public boolean isPublic;
@@ -23,8 +29,8 @@ public class Command {
     public String mLocalBinary;
     @SerializedName("remotebinary")
     public String mRemoteBinary;
-    @SerializedName("minappversion")
-    public Long mMinAppVersion;
+    @SerializedName("appversion")
+    public Long mAppversion;
     @SerializedName("runcounts")
     public Long mRuncounts;
     @SerializedName("lastused")
@@ -40,6 +46,8 @@ public class Command {
     @SerializedName("description")
     private String mDescription;
 
+    //@SerializedName("sortRank")
+    //public Long mSortRank;
 
     public Command() {
     }
@@ -138,12 +146,29 @@ public class Command {
         }
     }
 
-    public Long getMinAppVersion() {
-        return mMinAppVersion;
+    /*
+    public Long getSortRank() {
+        if (mSortRank == null) {
+            return 0L;
+        } else {
+            return mSortRank;
+        }
     }
 
-    public void setMinAppVersion(Long appversion) {
-        mMinAppVersion = appversion;
+    public void setSortRank(Long sortRank) {
+          mSortRank = sortRank;
+    } */
+
+    public int getAppversion() {
+        if (mAppversion == null) {
+            return 0;
+        } else {
+            return mAppversion.intValue();
+        }
+    }
+
+    public void setAppversion(int appversion) {
+        mAppversion = new Long(appversion);
     }
 
 
@@ -196,6 +221,19 @@ public class Command {
         }
     }
 
+    public boolean versionCodeSupport(int currentAppVersionCode) {
+        int minVersionCodeSupported = getAppversion();
+
+        if (minVersionCodeSupported == 0) { return true; } //XXX for cmds w/out appversion
+
+        if (minVersionCodeSupported > currentAppVersionCode) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
     public boolean isPinned() {
         if (mTagList != null) {
             return mTagList.contains("pinned");
@@ -230,6 +268,7 @@ public class Command {
         result.put("tagList", mTagList);
         result.put("permissionList", mPermissionlist);
         result.put("command", mCommand);
+        result.put("appversion", mAppversion);
         result.put("runcounts", mRuncounts);
         result.put("lastused", mLastused);
         return result;
@@ -249,6 +288,7 @@ public class Command {
                 "\nuser: " + this.mEmail +
                 "\nisPublic: " + this.isPublic +
                 "\nisPinned: " + isPinned() +
+                "\nappversion: " + this.mAppversion +
                 "\nruncounts: " + this.mRuncounts +
                 "\nlastused: " + this.mLastused +
                 "\ndescription: " + this.mDescription +

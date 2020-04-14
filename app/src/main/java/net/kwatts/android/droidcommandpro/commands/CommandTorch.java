@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import timber.log.Timber;
 
 public class CommandTorch {
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "torch";
     public static String descr = "Turns the camera flash on/off by default";
     public static String args = "--ez camerainfo [true|false] --ez enabled [true|false]";

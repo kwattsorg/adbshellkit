@@ -12,6 +12,7 @@ import java.io.IOException;
 
 
 public class CommandVolume {
+    public static int MINIMUM_APP_VERSION = 100;
     private static final int STREAM_UNKNOWN = -1;
     public static String cmd = "cmd_volume";
     public static String[] permissions = {""};

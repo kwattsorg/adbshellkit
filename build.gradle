@@ -13,7 +13,7 @@ buildscript {
         // in the individual module build.gradle files
 
         //https://developer.android.com/studio/releases/gradle-plugin
-        classpath 'com.android.tools.build:gradle:3.6.1'
+        classpath 'com.android.tools.build:gradle:3.6.2'
 
         //https://firebase.google.com/support/release-notes/android
         classpath 'com.google.gms:google-services:4.3.3'

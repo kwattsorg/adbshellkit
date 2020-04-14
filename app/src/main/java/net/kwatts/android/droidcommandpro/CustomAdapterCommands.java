@@ -118,20 +118,28 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
         this.spinnerCmds.add(c);
     }
 
-    public void addAllCommands(List<Command> cmds, boolean hideSuperUser) {
+    public void addAllCommands(List<Command> cmds, boolean hideSuperUser, boolean hideVersionMismatch) {
         super.addAll(cmds);
         // For now, just clear
         spinnerCmds.clear();
 
         boolean haveRoot = Shell.rootAccess();
         for (Command c : cmds) {
-            if (c.isSuperUser() && hideSuperUser) {
-                if (haveRoot) {
-                    spinnerCmds.add(c);
-                }
-            } else {
-                spinnerCmds.add(c);
+            if (!c.versionCodeSupport(BuildConfig.VERSION_CODE) && hideVersionMismatch) {
+                continue;
             }
+
+            if (c.isSuperUser() && hideSuperUser) {
+                if (!haveRoot) {
+                    continue;
+                    // spinnerCmds.add(c);
+                }
+            }
+
+            spinnerCmds.add(c);
+
+
+
         }
         notifyDataSetChanged();
 
@@ -164,7 +172,9 @@ public class CustomAdapterCommands extends ArrayAdapter<Command> {
 
         this.setNotifyOnChange(false);
 
-        //TODO: replace with last time used order
+        //TODO: right now getLastused is null for public so private rolls to top - it's ugly.
+        // for public this means it's in the order we get off the server
+        // use command.getSortRank() for public commands to set order from top (returns -1, 1, or 0)
         Collections.sort(spinnerCmds, (c1, c2) -> {
             Date c1Date = new Date(c1.getLastused());
             Date c2Date = new Date(c2.getLastused());

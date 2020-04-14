@@ -32,6 +32,11 @@
             android:summary="Hide commands requiring superuser if superuser isn't detected."
             android:title="Hide SuperUser Commands" />
         <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="hideVersionMismatchCommands"
+            android:summary="Hide commands created with newer versions of this app."
+            android:title="Hide Version Mismatch Commands" />
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="disableAds"
             android:summary="This option removes the only payment I got for working on this app :)."

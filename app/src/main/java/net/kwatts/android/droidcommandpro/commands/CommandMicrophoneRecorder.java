@@ -78,7 +78,7 @@ to read as user, you need to setenforce 0 - 'ls -Z ./trace' shows "u:object_r:de
  */
 
 public class CommandMicrophoneRecorder {
-
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "cmd_microphone_recorder";
     public static String[] permissions = {android.Manifest.permission.READ_CONTACTS};
 

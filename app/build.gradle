@@ -43,9 +43,9 @@ android {
     defaultConfig {
         applicationId "net.kwatts.android.droidcommandpro"
         minSdkVersion 21
-        targetSdkVersion 27
-        versionCode 108
-        versionName "10.8"
+        targetSdkVersion 28
+        versionCode 110
+        versionName "11.0"
 
         multiDexEnabled true
         javaCompileOptions {
@@ -177,20 +177,6 @@ dependencies {
 
     //https://commons.apache.org/proper/commons-io/changes-report.html
     implementation 'commons-io:commons-io:2.6'
-
-
-
-    // Cloud
-    //https://mvnrepository.com/artifact/com.google.cloud/
-    //implementation 'com.google.cloud:google-cloud-xxx:x.x.x'
-    //https://cloud.google.com/dlp/docs/release-notes
-    //implementation 'com.google.cloud:google-cloud-dlp:x.x.x'
-    //https://github.com/box/box-java-sdk/blob/master/CHANGELOG.md
-    //implementation 'com.box:box-java-sdk:x.x.x'
-    //https://mvnrepository.com/artifact/com.box/box-android-browse-sdk
-    //implementation 'com.box:box-android-browse-sdk:x.x.x'
-    //https://mvnrepository.com/artifact/com.box/box-android-sdk
-    //implementation 'com.box:box-android-sdk:x.x.x'
 
     // Discovery command: mDNS
     implementation 'com.github.andriydruk:rxdnssd:0.9.13'

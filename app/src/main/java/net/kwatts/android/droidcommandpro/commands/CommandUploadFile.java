@@ -20,8 +20,7 @@ import timber.log.Timber;
 //TODO: this should sync the users files/home directory
 // https://github.com/firebase/snippets-android/blob/7d03e65500cd63a26e5bf9b8b6e4d3ab9479806a/storage/app/src/main/java/com/google/firebase/referencecode/storage/StorageActivity.java#L194-L208
 public class CommandUploadFile {
-
-
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "upload_file";
     public static String descr = "Sets or Retrieves a file from remote storage";
     public static String args = "--es input_method=[text|webview|confirm|checkbox|date|radio|sheet] \n" +

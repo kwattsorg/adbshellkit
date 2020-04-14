@@ -35,6 +35,7 @@ import timber.log.Timber;
 
 //input text "adbshellkit app_risk_report --es application_name net.kwatts.android.things"
 public class CommandAppRiskReport {
+    public static int MINIMUM_APP_VERSION = 109;
     public static String cmd = "app_risk_report";
     public static String descr = "Runs a risk report for specified app";
     public static String args = "--es application_name <package name> --ez savetofile <true or false>";

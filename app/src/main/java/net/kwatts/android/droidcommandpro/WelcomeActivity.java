@@ -29,9 +29,6 @@ public class WelcomeActivity extends AppCompatActivity //implements ActivityComp
             }
             setContentView(R.layout.welcome_activity);
 
-            //ImageView image = findViewById(R.id.welcome_netscanner_logo);
-            //image.setImageResource(R.drawable.antenna_blue_48x48);
-
             mWebView = findViewById(R.id.welcome_webview);
             String outXML = "<html><head><style type=\"text/css\">" +
                     "body { font-size: 1em; }</style></head><body>" +

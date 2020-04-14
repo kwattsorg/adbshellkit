@@ -19,7 +19,7 @@ import java.util.List;
 //import net.kwatts.android.droidcommandpro.Manifest;
 
 public class CommandGetContacts {
-
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "cmd_get_contacts";
     public static String[] permissions = {Manifest.permission.READ_CONTACTS};
 

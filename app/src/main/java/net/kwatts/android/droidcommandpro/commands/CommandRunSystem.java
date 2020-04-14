@@ -10,7 +10,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 public class CommandRunSystem {
-
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "cmd_run_system";
     public static String[] permissions = {""};
 

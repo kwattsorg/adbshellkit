@@ -50,7 +50,7 @@ import timber.log.Timber;
 //            CameraCommandHandler handler = getCameraCommandHandler(intent.getAction());
 //            /CameraCommandResult result1 = handler.handle(context, intent);
 public class CommandCamera {
-
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "camera";
     public static String descr = "Silent camera storing pictures in gallery by default";
     public static String args = "--ei camerafacing [0 back, 1 for front]\n" +

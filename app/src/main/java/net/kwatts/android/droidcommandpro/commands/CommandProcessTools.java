@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import timber.log.Timber;
 
 public class CommandProcessTools {
-
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "cmd_package_tools";
 
     public static String usage() {

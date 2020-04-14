@@ -29,6 +29,7 @@ import timber.log.Timber;
 
 // https://github.com/andriydruk/RxDNSSD
 public class CommandDiscovery {
+    public static int MINIMUM_APP_VERSION = 100;
     public static String cmd = "discovery";
     public static String descr = "Discovers local components on the network";
     public static String args = "";
