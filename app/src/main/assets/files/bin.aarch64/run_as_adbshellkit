@@ -6,9 +6,9 @@
 # On host computer run:
 # PKGUID=`adb shell stat -c %U /data/data/net.kwatts.android.droidcommandpro`
 # adb shell "su -l $PKGUID -c /data/data/net.kwatts.android.droidcommandpro/files/bin/adbshell"
-# adbshellkit-api cmd_device_dump | jq -r '(map(keys_unsorted) | add | unique) as $cols | $cols, map(. as $row | $cols | map($row[.]))[] | @csv'
-# adbshellkit-api cmd_device_dump | jq '.. | keys? | flatten[] | strings'
+# adbshellkit cmd_device_dump | jq -r '(map(keys_unsorted) | add | unique) as $cols | $cols, map(. as $row | $cols | map($row[.]))[] | @csv'
+# adbshellkit cmd_device_dump | jq '.. | keys? | flatten[] | strings'
 
-source /data/data/net.kwatts.android.droidcommandpro/files/home/files/global/bashrc
+source /data/data/net.kwatts.android.droidcommandpro/files/home/bashrc
 cd "$HOME"
 exec "$SHELL" -l

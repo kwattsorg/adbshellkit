@@ -1064,7 +1064,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
                         mSharedPref.getBoolean("hideVersionMismatchCommands", true));
                 mCustomCmdsAdapter.notifyDataSetChanged();
 
-                onBoarding();
+                //onBoarding();
 
             }
 
