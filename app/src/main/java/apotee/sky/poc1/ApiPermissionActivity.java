@@ -1,0 +1,78 @@
+package apotee.sky.poc1;
+
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.text.TextUtils;
+import android.util.JsonWriter;
+
+import apotee.sky.poc1.commands.ResultReturner;
+
+import java.util.ArrayList;
+
+public class ApiPermissionActivity extends Activity {
+    /**
+     * Intent extra containing the permissions to request.
+     */
+    public static final String PERMISSIONS_EXTRA = "apotee.sky.poc1.api.permission_extra";
+
+    /**
+     * Check for and request permissions if necessary.
+     *
+     * @return if all permissions were already granted
+     */
+    public static boolean checkAndRequestPermissions(Context context, Intent intent, String... permissions) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            final ArrayList<String> permissionsToRequest = new ArrayList<>();
+            for (String permission : permissions) {
+                if (context.checkSelfPermission(permission) == PackageManager.PERMISSION_DENIED) {
+                    permissionsToRequest.add(permission);
+                }
+            }
+
+            if (permissionsToRequest.isEmpty()) {
+                return true;
+            } else {
+                ResultReturner.returnData(context, intent, new ResultReturner.ResultJsonWriter() {
+                    @Override
+                    public void writeJson(JsonWriter out) throws Exception {
+                        String errorMessage = "Please grant the following permission"
+                                + (permissionsToRequest.size() > 1 ? "s" : "")
+                                + " to use this command and run it again: "
+                                + TextUtils.join(" ,", permissionsToRequest);
+                        out.beginObject().name("error").value(errorMessage).endObject();
+                    }
+                });
+
+                Intent startIntent = new Intent(context, ApiPermissionActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .putStringArrayListExtra(ApiPermissionActivity.PERMISSIONS_EXTRA, permissionsToRequest);
+                ResultReturner.copyIntentExtras(intent, startIntent);
+                context.startActivity(startIntent);
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ArrayList<String> permissionValues = getIntent().getStringArrayListExtra(PERMISSIONS_EXTRA);
+        requestPermissions(permissionValues.toArray(new String[0]), 123);
+        finish();
+    }
+
+
+}

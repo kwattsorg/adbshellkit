@@ -7,7 +7,7 @@
 #   app_database [--app=package_name]
 
 base_dir="/data/data"
-app_package="net.kwatts.android.droidcommandpro"
+app_package="apotee.sky.poc1"
 
 for i in "$@"
 do
@@ -31,7 +31,7 @@ case "$PLATFORM" in
     SQLITE3="/system/xbin/sqlite3"
     ;;
   *)
-    SQLITE3="/data/data/net.kwatts.android.droidcommandpro/files/bin/sqlite3"
+    SQLITE3="/data/data/apotee.sky.poc1/files/bin/sqlite3"
     ;;
 esac
 

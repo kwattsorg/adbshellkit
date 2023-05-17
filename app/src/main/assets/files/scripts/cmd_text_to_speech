@@ -39,10 +39,10 @@ do
 done
 shift $(($OPTIND-1))
 
-CMD="/data/data/net.kwatts.android.droidcommandpro/files/bin/adbshellkit-api cmd_text_to_speech $PARAMS"
+CMD="/data/data/apotee.sky.poc1/files/bin/adbshellkit-api cmd_text_to_speech $PARAMS"
 if [ $# = 0 ]; then
     #echo "listing available engines..."
-    #/data/data/net.kwatts.android.droidcommandpro/files/bin/adbshellkit-api cmd_text_to_speech --es engine LIST_AVAILABLE
+    #/data/data/apotee.sky.poc1/files/bin/adbshellkit-api cmd_text_to_speech --es engine LIST_AVAILABLE
     $CMD
 else
     echo $@ | $CMD

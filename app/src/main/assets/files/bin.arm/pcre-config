@@ -1,6 +1,6 @@
-#!/data/data/net.kwatts.android.droidcommandpro/files/usr/bin/sh
+#!/data/data/apotee.sky.poc1/files/usr/bin/sh
 
-prefix=/data/data/net.kwatts.android.droidcommandpro/files/usr
+prefix=/data/data/apotee.sky.poc1/files/usr
 exec_prefix=${prefix}
 exec_prefix_set=no
 
@@ -35,16 +35,16 @@ fi
 libR=
 case `uname -s` in
   *SunOS*)
-  libR=" -R/data/data/net.kwatts.android.droidcommandpro/files/usr/lib"
+  libR=" -R/data/data/apotee.sky.poc1/files/usr/lib"
   ;;
   *BSD*)
-  libR=" -Wl,-R/data/data/net.kwatts.android.droidcommandpro/files/usr/lib"
+  libR=" -Wl,-R/data/data/apotee.sky.poc1/files/usr/lib"
   ;;
 esac
 
 libS=
-if test /data/data/net.kwatts.android.droidcommandpro/files/usr/lib != /usr/lib ; then
-  libS=-L/data/data/net.kwatts.android.droidcommandpro/files/usr/lib
+if test /data/data/apotee.sky.poc1/files/usr/lib != /usr/lib ; then
+  libS=-L/data/data/apotee.sky.poc1/files/usr/lib
 fi
 
 while test $# -gt 0; do
@@ -77,14 +77,14 @@ while test $# -gt 0; do
       if test ${prefix}/include != /usr/include ; then
         includes=-I${prefix}/include
       fi
-      echo $includes 
+      echo $includes
       ;;
     --cflags-posix)
       if test yes = yes ; then
         if test ${prefix}/include != /usr/include ; then
           includes=-I${prefix}/include
         fi
-        echo $includes 
+        echo $includes
       else
         echo "${usage}" 1>&2
       fi

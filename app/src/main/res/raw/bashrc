@@ -1,9 +1,9 @@
 #!/system/bin/sh
 
 
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/data/net.kwatts.android.droidcommandpro/files/lib
-#export PATH=$PATH:/data/data/net.kwatts.android.droidcommandpro/files/bin
-#export PATH=$PATH:/data/data/net.kwatts.android.droidcommandpro/files/scripts
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/data/apotee.sky.poc1/files/lib
+#export PATH=$PATH:/data/data/apotee.sky.poc1/files/bin
+#export PATH=$PATH:/data/data/apotee.sky.poc1/files/scripts
 
 grep_prop() {
   REGEX="s/^$1=//p"

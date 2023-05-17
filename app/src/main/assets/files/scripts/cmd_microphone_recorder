@@ -38,7 +38,7 @@ add_params() {
 }
 
 call_api () {
-    /data/data/net.kwatts.android.droidcommandpro/files/bin/adbshellkit-api cmd_microphone_recorder "$@"
+    /data/data/apotee.sky.poc1/files/bin/adbshellkit-api cmd_microphone_recorder "$@"
 }
 
 while getopts h,f:,l:,e:,b:,r:,c:,d,i,q option

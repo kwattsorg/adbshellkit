@@ -1,4 +1,4 @@
 PrintMotd no
 PasswordAuthentication yes
 PubkeyAcceptedKeyTypes +ssh-dss
-Subsystem sftp /data/data/net.kwatts.android.droidcommandpro/files/libexec/sftp-server
+Subsystem sftp /data/data/apotee.sky.poc1/files/libexec/sftp-server

@@ -1,7 +1,7 @@
 // blatently lifted from https://raw.githubusercontent.com/termux/termux-api-package/master/termux-api.c
 // Usage: adbshellkit-api ${API_METHOD} ${ADDITIONAL_FLAGS}
 //        This executes
-//          am broadcast net.kwatts.android.droidcommandpro/.AdbshellkitApiReceiver --es socket_input ${INPUT_SOCKET} 
+//          am broadcast apotee.sky.poc1/.AdbshellkitApiReceiver --es socket_input ${INPUT_SOCKET}
 //                                                        --es socket_output ${OUTPUT_SOCKET}
 //                                                        --es ${API_METHOD}
 //                                                        ${ADDITIONAL_FLAGS}
@@ -10,6 +10,8 @@
 // https://github.com/termux/termux-api
 // https://github.com/termux/termux-api-package
 // https://github.com/termux/termux-api-package/tree/master/scripts
+
+// /usr/local/share/android-sdk//ndk-bundle/ndk-build
 #define _POSIX_SOURCE
 #define _GNU_SOURCE
 #include <fcntl.h>
@@ -44,7 +46,7 @@ _Noreturn void exec_am_broadcast(int argc, char** argv, char* input_address_stri
     child_argv[2] = "--user";
     child_argv[3] = "0";
     child_argv[4] = "-n";
-    child_argv[5] = "net.kwatts.android.droidcommandpro/.ApiReceiver";
+    child_argv[5] = "apotee.sky.poc1/.ApiReceiver";
     child_argv[6] = "--es";
     // Input/output are reversed for the java process (our output is its input):
     child_argv[7] = "socket_input";
@@ -63,9 +65,9 @@ _Noreturn void exec_am_broadcast(int argc, char** argv, char* input_address_stri
     child_argv[argc + extra_args] = NULL;
 
     // Use an a executable taking care of PATH and LD_LIBRARY_PATH:
-    execv("/data/data/net.kwatts.android.droidcommandpro/files/bin/am", child_argv);
+    execv("/data/data/apotee.sky.poc1/files/bin/am", child_argv);
 
-    perror("execv(\"/data/data/net.kwatts.android.droidcommandpro/files/bin/am\")");
+    perror("execv(\"/data/data/apotee.sky.poc1/files/bin/am\")");
     exit(1);
 }
 

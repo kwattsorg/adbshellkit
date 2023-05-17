@@ -41,6 +41,7 @@ android {
         disable 'deprecation'
         checkReleaseBuilds false
     }
+    buildToolsVersion '29.0.2'
 }
 
 dependencies {

@@ -4,7 +4,7 @@
         android:key="general_settings"
         android:title="General Settings">
         <ListPreference
-            android:defaultValue="23"
+            android:defaultValue="40"
             android:dialogTitle="Select Text Size"
             android:entries="@array/outTextSize_array"
             android:entryValues="@array/outTextSize_array"
@@ -29,18 +29,28 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="hideSuperUserCommands"
-            android:summary="Hide commands requiring superuser if superuser isn't detected."
             android:title="Hide SuperUser Commands" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="hideVersionMismatchCommands"
-            android:summary="Hide commands created with newer versions of this app."
             android:title="Hide Version Mismatch Commands" />
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="disableAds"
             android:summary="This option removes the only payment I got for working on this app :)."
             android:title="Disable Ads" />
+        <CheckBoxPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="true"
+            android:key="disableFirebase"
+            android:title="Disable Firebase" />
+        <CheckBoxPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="true"
+            android:key="runCommandsAtStart"
+            android:title="Run Commands at Start" />
 
 
         <!--

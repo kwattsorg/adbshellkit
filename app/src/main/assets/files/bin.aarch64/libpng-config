@@ -1,4 +1,4 @@
-#!/data/data/net.kwatts.android.droidcommandpro/files/usr/bin/sh
+#!/data/data/apotee.sky.poc1/files/usr/bin/sh
 
 # libpng-config
 # provides configuration info for libpng.
@@ -12,9 +12,9 @@
 # Modeled after libxml-config.
 
 version="1.6.36"
-prefix="/data/data/net.kwatts.android.droidcommandpro/files/usr"
+prefix="/data/data/apotee.sky.poc1/files/usr"
 exec_prefix="${prefix}"
-libdir="/data/data/net.kwatts.android.droidcommandpro/files/usr/lib"
+libdir="/data/data/apotee.sky.poc1/files/usr/lib"
 includedir="${prefix}/include/libpng16"
 libs="-lpng16"
 all_libs="-lpng16 -lm -lz -lm "

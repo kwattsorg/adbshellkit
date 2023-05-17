@@ -1,4 +1,4 @@
-#!/data/data/net.kwatts.android.droidcommandpro/files/usr/bin/sh
+#!/data/data/apotee.sky.poc1/files/usr/bin/sh
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -21,7 +21,7 @@
 #
 ###########################################################################
 
-prefix=/data/data/net.kwatts.android.droidcommandpro/files/usr
+prefix=/data/data/apotee.sky.poc1/files/usr
 exec_prefix=${prefix}
 includedir=${prefix}/include
 cppflag_curl_staticlib=
@@ -72,7 +72,7 @@ while test $# -gt 0; do
         ;;
 
     --ca)
-        echo "/data/data/net.kwatts.android.droidcommandpro/files/usr/etc/tls/cert.pem"
+        echo "/data/data/apotee.sky.poc1/files/usr/etc/tls/cert.pem"
         ;;
 
     --cc)
@@ -155,8 +155,8 @@ while test $# -gt 0; do
         ;;
 
     --libs)
-        if test "X/data/data/net.kwatts.android.droidcommandpro/files/usr/lib" != "X/usr/lib" -a "X/data/data/net.kwatts.android.droidcommandpro/files/usr/lib" != "X/usr/lib64"; then
-           CURLLIBDIR="-L/data/data/net.kwatts.android.droidcommandpro/files/usr/lib "
+        if test "X/data/data/apotee.sky.poc1/files/usr/lib" != "X/usr/lib" -a "X/data/data/apotee.sky.poc1/files/usr/lib" != "X/usr/lib64"; then
+           CURLLIBDIR="-L/data/data/apotee.sky.poc1/files/usr/lib "
         else
            CURLLIBDIR=""
         fi
@@ -172,7 +172,7 @@ while test $# -gt 0; do
 
     --static-libs)
         if test "Xno" != "Xno" ; then
-          echo /data/data/net.kwatts.android.droidcommandpro/files/usr/lib/libcurl.a -L/data/data/net.kwatts.android.droidcommandpro/files/usr/lib -march=armv7-a -L/data/data/net.kwatts.android.droidcommandpro/files/usr/lib -lnghttp2 -lssl -lcrypto -lz
+          echo /data/data/apotee.sky.poc1/files/usr/lib/libcurl.a -L/data/data/apotee.sky.poc1/files/usr/lib -march=armv7-a -L/data/data/apotee.sky.poc1/files/usr/lib -lnghttp2 -lssl -lcrypto -lz
         else
           echo "curl was built with static libraries disabled" >&2
           exit 1
@@ -180,7 +180,7 @@ while test $# -gt 0; do
         ;;
 
     --configure)
-        echo " '--disable-dependency-tracking' '--prefix=/data/data/net.kwatts.android.droidcommandpro/files/usr' '--libdir=/data/data/net.kwatts.android.droidcommandpro/files/usr/lib' '--disable-rpath' '--disable-rpath-hack' '--host=arm-linux-androideabi' '--enable-ntlm-wb=/data/data/net.kwatts.android.droidcommandpro/files/usr/bin/ntlm_auth' '--with-ca-bundle=/data/data/net.kwatts.android.droidcommandpro/files/usr/etc/tls/cert.pem' '--with-nghttp2' '--without-libidn' '--without-libidn2' '--without-librtmp' '--without-brotli' '--with-ssl' '--disable-nls' '--enable-shared' '--disable-static' '--libexecdir=/data/data/net.kwatts.android.droidcommandpro/files/usr/libexec' 'host_alias=arm-linux-androideabi' 'CC=arm-linux-androideabi-clang' 'CFLAGS= -march=armv7-a -mfpu=neon -mfloat-abi=softfp -mthumb -Os' 'LDFLAGS=-L/data/data/net.kwatts.android.droidcommandpro/files/usr/lib -march=armv7-a' 'CPPFLAGS=-I/data/data/net.kwatts.android.droidcommandpro/files/usr/include' 'CPP=arm-linux-androideabi-cpp'"
+        echo " '--disable-dependency-tracking' '--prefix=/data/data/apotee.sky.poc1/files/usr' '--libdir=/data/data/apotee.sky.poc1/files/usr/lib' '--disable-rpath' '--disable-rpath-hack' '--host=arm-linux-androideabi' '--enable-ntlm-wb=/data/data/apotee.sky.poc1/files/usr/bin/ntlm_auth' '--with-ca-bundle=/data/data/apotee.sky.poc1/files/usr/etc/tls/cert.pem' '--with-nghttp2' '--without-libidn' '--without-libidn2' '--without-librtmp' '--without-brotli' '--with-ssl' '--disable-nls' '--enable-shared' '--disable-static' '--libexecdir=/data/data/apotee.sky.poc1/files/usr/libexec' 'host_alias=arm-linux-androideabi' 'CC=arm-linux-androideabi-clang' 'CFLAGS= -march=armv7-a -mfpu=neon -mfloat-abi=softfp -mthumb -Os' 'LDFLAGS=-L/data/data/apotee.sky.poc1/files/usr/lib -march=armv7-a' 'CPPFLAGS=-I/data/data/apotee.sky.poc1/files/usr/include' 'CPP=arm-linux-androideabi-cpp'"
         ;;
 
     *)

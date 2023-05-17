@@ -1,4 +1,4 @@
-# ADB Shellkit  <a style="margin-bottom: 0;" href='https://play.google.com/store/apps/details?id=net.kwatts.android.droidcommandpro'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="80px"/></a>
+# ADB Shellkit  <a style="margin-bottom: 0;" href='https://play.google.com/store/apps/details?id=apotee.sky.poc1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="80px"/></a>
 [![CircleCI](https://circleci.com/gh/kwattsorg/adbshellkit.svg?style=svg)](https://circleci.com/gh/kwattsorg/adbshellkit)
 
 This repository contains the source code for the ADB Shellkit app.
@@ -11,7 +11,7 @@ ADB Shellkit gives you access to the hidden system commands that came with your 
 - Easy way to access and run system commands such as top, logcat, disk usage, rooted commands, pretty colors and formatted display
 - Save output to numerous sharing options (files, mail, google drive, etc)
 - Run your own system commands or select one from my library
-- User saved commands with configured shell variables 
+- User saved commands with configured shell variables
 - A good and growing list of global system commands you can use
 
 > What's the plan?
@@ -25,5 +25,5 @@ We plan to get a new release with all the new features, bug fixes, etc on the Go
 
 [Github Issues]: https://github.com/android-nativecommander/issues
 [Contributors]: https://github.com/android-nativecommander/graphs/contributors
-[Google Play]: https://play.google.com/store/apps/details?id=net.kwatts.android.droidcommandpro
-[Google Play Beta]: https://play.google.com/apps/testing/net.kwatts.android.droidcommandpro
+[Google Play]: https://play.google.com/store/apps/details?id=apotee.sky.poc1
+[Google Play Beta]: https://play.google.com/apps/testing/apotee.sky.poc1

@@ -18,5 +18,5 @@ done
 shift $(($OPTIND-1))
 
 if [ $# != 0 ]; then echo "$SCRIPTNAME: too many arguments"; exit 1; fi
-/data/data/net.kwatts.android.droidcommandpro/files/bin/adbshellkit-api cmd_text_to_speech --es engine LIST_AVAILABLE
+/data/data/apotee.sky.poc1/files/bin/adbshellkit-api cmd_text_to_speech --es engine LIST_AVAILABLE
 
